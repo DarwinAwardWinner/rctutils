@@ -4,8 +4,7 @@ Title: Utility functions by Ryan C. Thompson
 Version: 0.1.0
 Author: Ryan C. Thompson
 Maintainer: Ryan C. Thompson <rct@thompsonclan.org>
-Description: More about what it does (maybe more than one line)
-    Use four spaces when indenting paragraphs within the Description.
+Description: A collection of utility functions generally relating to bioinformatics analysis.
 License: GPL3
 Encoding: UTF-8
 LazyData: true
