@@ -1,0 +1,16 @@
+## cairo_pdf
+## clamp_trans
+## discrete_gradient
+## doplot
+## is_dev
+## neglog_trans
+## power_trans
+## rasterpdf
+## with_dev
+## suppressPlot
+## ggplotly.printer
+## ggprint
+## get.ggplots.default
+## get.ggplots
+## get.ggplots.gg
+## get.ggplots.list

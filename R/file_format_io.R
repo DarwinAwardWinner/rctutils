@@ -1,0 +1,14 @@
+## read.table.general
+## read.additional.gene.info
+## read.annotation.from.gff
+## read.annotation.from.rdata
+## read.annotation.from.saf
+## read.idr.table
+## read.motifmap
+## read.narrowPeak
+## read.regions
+## read.saf
+## read.tx2gene.from.genemap
+## write.motifmap
+## write.narrowPeak
+## get.txdb

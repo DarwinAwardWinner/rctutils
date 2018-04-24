@@ -21,3 +21,5 @@ first_accessible <- function(paths, mode=0) {
     }
     return(NA_character_)
 }
+
+# getScriptPath # Replace with get_Rscript_filename?
