@@ -20,15 +20,6 @@ tsmsg <- function(...) {
     message(date(), ": ", ...)
 }
 
-first.accessible <- function(paths, mode=0) {
-    for (path in paths) {
-        if (file.access(path, mode) == 0) {
-            return(path)
-        }
-    }
-    return(NA_character_)
-}
-
 sra_con <- {
     sqlfile <- file.path("saved_data", "SRAmetadb.sqlite")
     if(!file.exists(sqlfile)) {
