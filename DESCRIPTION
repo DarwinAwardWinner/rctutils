@@ -8,6 +8,7 @@ Description: A collection of utility functions generally relating to bioinformat
 License: GPL3
 Encoding: UTF-8
 LazyData: true
+RoxygenNote: 6.0.1
 # Local Variables:
 # mode: yaml
 # End:
