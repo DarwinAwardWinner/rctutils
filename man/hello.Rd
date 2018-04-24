@@ -20,8 +20,8 @@ http://r-pkgs.had.co.nz/
 Some useful keyboard shortcuts for package authoring:
 
 Build and Reload Package:  'Ctrl + Shift + B'
-  Check Package:             'Ctrl + Shift + E'
-  Test Package:              'Ctrl + Shift + T'
+Check Package:             'Ctrl + Shift + E'
+Test Package:              'Ctrl + Shift + T'
 }
 \examples{
 hello()
