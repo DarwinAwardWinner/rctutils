@@ -254,14 +254,6 @@ is.empty <- function(x) {
     x %>% unlist %>% na.omit %>% length %>% equals(0)
 }
 
-make.lazy <- function(func, ...) {
-    lazymaker <- function(expr)
-        lazy(expr, ...)
-    function(...) {
-        lazymaker(func(...))
-    }
-}
-
 ## Get column names that are always the same for all elements of a
 ## gene. Used for extracting only the gene metadata from exon
 ## metadata.
