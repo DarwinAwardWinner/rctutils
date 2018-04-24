@@ -8,3 +8,6 @@ Description: A collection of utility functions generally relating to bioinformat
 License: GPL3
 Encoding: UTF-8
 LazyData: true
+# Local Variables:
+# mode: yaml
+# End:
