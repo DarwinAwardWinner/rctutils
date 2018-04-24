@@ -2,7 +2,7 @@ Package: rctutils
 Type: Package
 Title: Utility functions by Ryan C. Thompson
 Version: 0.1.0
-Author: Ryan C. Thompson
+Authors@R: person("Ryan C.", "Thompson", email="rct@thompsonclan.org", role=c("aut", "cre"))
 Maintainer: Ryan C. Thompson <rct@thompsonclan.org>
 Description: A collection of utility functions generally relating to bioinformatics analysis.
 License: GPL3
