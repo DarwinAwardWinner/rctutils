@@ -11,9 +11,9 @@
 #'     accessible, NA is returned.
 #' @examples
 #' exec_paths <- strsplit(Sys.getenv("PATH"), ":")[[1]]
-#' first_accessible(exec_paths)
+#' first_accessible_path(exec_paths)
 #' @export
-first_accessible <- function(paths, mode=0) {
+first_accessible_path <- function(paths, mode=0) {
     for (path in paths) {
         if (file.access(path, mode) == 0) {
             return(path)
@@ -21,5 +21,3 @@ first_accessible <- function(paths, mode=0) {
     }
     return(NA_character_)
 }
-
-# getScriptPath # Replace with get_Rscript_filename?

@@ -100,8 +100,63 @@ read.saf <- function(filename, ...) {
 
 ## TODO: Give the below functions better names
 
-## read.tx2gene.from.genemap
-## read.additional.gene.info
-## read.annotation.from.gff
-## read.annotation.from.rdata
-## read.annotation.from.saf
+read.tx2gene.from.genemap <- function(fname) {
+    df <- read.table.general(fname)
+    df %<>% .[1:2]
+    df[] %<>% lapply(as.character)
+    names(df) <- c("TXNAME", "GENEID")
+    df
+}
+
+read.annotation.from.gff <- function(filename, format="GFF3", ...) {
+    gff <- NULL
+    ## Allow the file to be an RDS file containing the GRanges
+    ## resulting from import()
+    gff <- tryCatch({
+        read.RDS.or.RDA(filename, "GRanges")
+    }, error=function(...) {
+        import(filename, format=format)
+    })
+    assert_that(is(gff, "GRanges"))
+    grl <- gff.to.grl(gff, ...)
+    return(grl)
+}
+
+read.annotation.from.saf <- function(filename, ...) {
+    saf <- read.table.general(filename, ...)
+    assert_that("GeneID" %in% names(saf))
+    gr <- as(saf, "GRanges")
+    grl <- split(gr, gr$GeneID) %>% promote.common.mcols
+    return(grl)
+}
+
+read.annotation.from.rdata <- function(filename) {
+    read.RDS.or.RDA(filename, "GRangesList")
+}
+
+read.additional.gene.info <- function(filename, gff_format="GFF3", geneFeatureType="gene",
+ ...) {
+    df <- tryCatch({
+        gff <- tryCatch({
+            read.RDS.or.RDA(filename, "GRanges")
+        }, error=function(...) {
+            import(filename, format=gff_format)
+        })
+        assert_that(is(gff, "GRanges"))
+        if (!is.null(geneFeatureType)) {
+            gff %<>% .[.$type %in% geneFeatureType]
+        }
+        gff %<>% .[!is.na(.$ID) & !duplicated(.$ID)]
+        gff %>% mcols %>% cleanup.mcols(mcols_df=.)
+    }, error=function(...) {
+        tab <- read.table.general(filename, ..., dataframe.class="DataFrame")
+        ## Nonexistent or automatic row names
+        if (.row_names_info(tab) <= 0) {
+            row.names(tab) <- tab[[1]]
+        }
+        tab
+    })
+    df %<>% DataFrame
+    assert_that(is(df, "DataFrame"))
+    return(df)
+}

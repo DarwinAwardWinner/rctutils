@@ -121,5 +121,25 @@ load.filtered <- function(file, envir = parent.frame(), ..., exclude=NULL) {
     }
 }
 
-## read.single.object.from.rda
-## read.RDS.or.RDA
+## Read a single R object from an RDA file. If run on an RDA
+## file containing more than one object, throws an error.
+read.single.object.from.rda <- function(filename) {
+    objects <- within(list(), suppressWarnings(load(filename)))
+    if (length(objects) != 1) {
+        stop("RDA file should contain exactly one object")
+    }
+    return(objects[[1]])
+}
+
+## Read a single object from RDS or RDA file
+read.RDS.or.RDA <- function(filename, expected.class="ANY") {
+    object <- suppressWarnings(tryCatch({
+        readRDS(filename)
+    }, error=function(...) {
+        read.single.object.from.rda(filename)
+    }))
+    if (!any(sapply(expected.class, is, object=object))) {
+        object <- as(object, expected.class)
+    }
+    return(object)
+}

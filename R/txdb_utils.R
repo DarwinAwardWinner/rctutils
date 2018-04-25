@@ -1,3 +1,4 @@
+## Get a TxDb from either a package name or file name
 get.txdb <- function(txdbname) {
     tryCatch({
         library(txdbname, character.only=TRUE)
