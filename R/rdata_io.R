@@ -15,8 +15,9 @@
 #' save.image.filtered(datafile, exclude="x")
 #' @seealso [save.image()]
 #' @export
-save.image.filtered <- function (file = ".RData", version = NULL, ascii = FALSE, compress = !ascii,
-                                 safe = TRUE, exclude = NULL)
+save.image.filtered <-
+    function (file = ".RData", version = NULL, ascii = FALSE,
+              compress = !ascii, safe = TRUE, exclude = NULL)
 {
     if (!is.character(file) || file == "")
         stop("'file' must be non-empty string")

@@ -1,12 +1,11 @@
-#' Inverse of sitools::f2si
+#' Inverse of [sitools::f2si()]
 #'
 #' @param string A character vector representing numbers along with SI
 #'     prefixes and possibly a unit.
 #' @param unit The unit to expect after the SI prefix, if any.
 #' @return A numeric vector containing the values parsed from
-#'     \code{string}.
+#'     `string`.
 #' @examples
-#'
 #' # convert single number
 #' si2f("10k")
 #'
@@ -16,10 +15,8 @@
 #' # convert list of numbers
 #' si_strings <- c("100 k", "35 E", "4 m")
 #' si2f(si_strings)
-#'
 #' @importFrom rex rex
 #' @export
-
 si2f <- function(string, unit="") {
     if (length(string) == 0) {
         return(numeric(0))

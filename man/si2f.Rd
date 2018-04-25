@@ -2,7 +2,7 @@
 % Please edit documentation in R/si2f.R
 \name{si2f}
 \alias{si2f}
-\title{Inverse of sitools::f2si}
+\title{Inverse of \code{\link[sitools:f2si]{sitools::f2si()}}}
 \usage{
 si2f(string, unit = "")
 }
@@ -17,10 +17,9 @@ A numeric vector containing the values parsed from
 \code{string}.
 }
 \description{
-Inverse of sitools::f2si
+Inverse of \code{\link[sitools:f2si]{sitools::f2si()}}
 }
 \examples{
-
 # convert single number
 si2f("10k")
 
@@ -30,5 +29,4 @@ si2f("23 mV", unit="V")
 # convert list of numbers
 si_strings <- c("100 k", "35 E", "4 m")
 si2f(si_strings)
-
 }
