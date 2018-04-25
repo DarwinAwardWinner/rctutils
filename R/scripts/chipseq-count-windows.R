@@ -142,35 +142,6 @@ read.RDS.or.RDA <- function(filename, expected.class="ANY") {
     return(object)
 }
 
-## Read a table from a R data file, csv, or xlsx file. Returns a data
-## frame or thorws an error.
-read.table.general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
-                               dataframe.class="data.frame") {
-    suppressWarnings({
-        read.table.args %<>% as.list
-        read.table.args$file <- filename
-        read.table.args$header <- TRUE
-        read.xlsx.args %<>% as.list
-        read.xlsx.args$xlsxFile <- filename
-        lazy.results <- list(
-            rdata=lazy(read.RDS.or.RDA(filename, dataframe.class)),
-            table=lazy(do.call(read.table, read.table.args)),
-            csv=lazy(do.call(read.csv, read.table.args)),
-            xlsx=lazy(do.call(read.xlsx, read.xlsx.args)))
-        for (lzresult in lazy.results) {
-            result <- tryCatch({
-                x <- as(value(lzresult), dataframe.class)
-                assert_that(is(x, dataframe.class))
-                x
-            }, error=function(...) NULL)
-            if (!is.null(result)) {
-                return(result)
-            }
-        }
-        stop(glue("Could not read a data frame from {deparse{filename}} as R data, csv, or xlsx"))
-    })
-}
-
 read.saf <- function(filename, ...) {
     saf <- read.table.general(filename, ...)
     assert_that("GeneID" %in% names(saf))

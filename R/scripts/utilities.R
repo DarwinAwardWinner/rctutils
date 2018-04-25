@@ -615,22 +615,6 @@ add.fdrtool <- function(ttab, verbose=FALSE, plot=TRUE, convert.to.zscores, cuto
     ttab
 }
 
-# Functions for reading and writing narrowPeak files
-read.narrowPeak <- function(file, ...) {
-    peaks.df <- read.table(file, sep="\t", row.names=NULL, ...)
-    names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
-    peaks.df$name <- as.character(peaks.df$name)
-    peaks.df
-}
-
-write.narrowPeak <- function(x, file, ...) {
-    x <- as(x, "data.frame")
-    if("seqnames" %in% names(x))
-        names(x)[names(x) == "seqnames"] <- "chr"
-    x <- x[c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")]
-    write.table(x, file, sep="\t", row.names=FALSE, col.names=FALSE, ...)
-}
-
 # Like lapply, but returns future objects. The results can be fetched all at
 # once with values().
 future.lapply <- function(X, FUN, ...) {
@@ -864,19 +848,6 @@ getOffsetNormCurveData <- function(dge, s1, s2, n=1000) {
     f <- approxfun(x$A, x$Offset)
     data.frame(A=seq(from=min(x$A), to=max(x$A), length.out = n)) %>%
         mutate(M=f(A))
-}
-
-## Read MotifMap-provided BED file into a GRanges object. We can't use
-## rtracklayer::import.bed because it chokes on spaces in fields,
-## which MotifMap contains.
-read.motifmap <- function(x, parse_name=TRUE) {
-    tab <- read_tsv(x, col_names=c("chr", "start", "end", "name", "score", "strand"),
-                    col_types="ciicdc", progress=FALSE)
-    if (parse_name) {
-        tab %<>% separate(name, into=c("motif_ID", "TF_name"), sep="=")
-    }
-    gr <- makeGRangesFromDataFrame(tab, starts.in.df.are.0based=TRUE)
-    gr
 }
 
 write.motifmap <- function(x, file) {

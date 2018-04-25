@@ -164,35 +164,6 @@ save.RDS.or.RDA <-
 
 ## TODO: Move to utils package
 
-## Read a table from a R data file, csv, or xlsx file. Returns a data
-## frame or thorws an error.
-read.table.general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
-                               dataframe.class="data.frame") {
-    suppressWarnings({
-        read.table.args %<>% as.list
-        read.table.args$file <- filename
-        read.table.args$header <- TRUE
-        read.xlsx.args %<>% as.list
-        read.xlsx.args$xlsxFile <- filename
-        lazy.results <- list(
-            rdata=future(read.RDS.or.RDA(filename, dataframe.class), lazy=TRUE),
-            table=futureCall(read.table, read.table.args, lazy=TRUE),
-            csv=futureCall(read.csv, read.table.args, lazy=TRUE),
-            xlsx=futureCall(read.xlsx, read.xlsx.args, lazy=TRUE))
-        for (lzresult in lazy.results) {
-            result <- tryCatch({
-                x <- as(value(lzresult), dataframe.class)
-                assert_that(is(x, dataframe.class))
-                x
-            }, error=function(...) NULL)
-            if (!is.null(result)) {
-                return(result)
-            }
-        }
-        stop(glue("Could not read a data frame from {deparse{filename}} as R data, csv, or xlsx"))
-    })
-}
-
 cleanup.mcols <- function(object, mcols_df=mcols(object)) {
     nonempty <- !sapply(mcols_df, is.empty)
     mcols_df %<>% .[nonempty]
@@ -272,23 +243,6 @@ gff.to.grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFea
         }
     }
     return(grl)
-}
-
-get.txdb <- function(txdbname) {
-    tryCatch({
-        library(txdbname, character.only=TRUE)
-        pos <- str_c("package:", txdbname)
-        get(txdbname, pos)
-    }, error=function(...) {
-        library(GenomicFeatures)
-        loadDb(txdbname)
-    })
-}
-
-get.tx2gene.from.txdb <- function(txdb) {
-    k <- keys(txdb, keytype = "GENEID")
-    suppressMessages(AnnotationDbi::select(txdb, keys = k, keytype = "GENEID", columns = "TXNAME")) %>%
-        .[c("TXNAME", "GENEID")]
 }
 
 read.tx2gene.from.genemap <- function(fname) {

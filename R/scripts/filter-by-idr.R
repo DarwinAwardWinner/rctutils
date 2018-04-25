@@ -70,28 +70,6 @@ print.var.vector <- function(v) {
     invisible(v)
 }
 
-read.idr.table <- function(file) {
-    idrcols <- c("chr", "start", "end", "name", "score", "strand",
-                 "LocalIDR", "GlobalIDR", "startA", "endA", "scoreA", "startB", "endB", "scoreB")
-    read.table(file, header=FALSE, sep="\t", col.names=idrcols) %>%
-        mutate(LocalIDR=10^-LocalIDR, GlobalIDR=10^-GlobalIDR)
-}
-
-read.narrowPeak <- function(file, ...) {
-    peaks.df <- read.table(file, sep="\t", row.names=NULL, ...)
-    names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
-    peaks.df$name <- as.character(peaks.df$name)
-    ## havenames <- !any(peaks.df$name == ".")
-    ## res <- data.frame2GRanges(peaks.df, keepColumns=TRUE, startOffset=1, endOffset=0)
-    ## ## Eliminate the dummy row names from the data
-    ## if (havenames)
-    ##     names(res) <- res$name
-    ## else
-    ##     names(res) <- NULL
-    ## res
-    peaks.df
-}
-
 write.narrowPeak <- function(x, file, ...) {
     x <- as(x, "data.frame")
     if("seqnames" %in% names(x))

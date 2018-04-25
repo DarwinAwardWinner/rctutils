@@ -67,13 +67,6 @@ print.var.vector <- function(v) {
     invisible(v)
 }
 
-read.idr.table <- function(file) {
-    idrcols <- c("chr", "start", "end", "name", "score", "strand",
-                 "LocalIDR", "GlobalIDR", "startA", "endA", "scoreA", "startB", "endB", "scoreB")
-    read.table(file, header=FALSE, sep="\t", col.names=idrcols) %>%
-        mutate(LocalIDR=10^-LocalIDR, GlobalIDR=10^-GlobalIDR)
-}
-
 cutIDR <- function(x, thresholds=c(0.01, 0.05, 0.1)) {
     fullbreaks <- c(0, thresholds, 1)
     labels <- c(glue("<={thresholds}"), glue(">{tail(thresholds, 1)}"))

@@ -130,51 +130,6 @@ read.RDS.or.RDA <- function(filename, expected.class="ANY") {
     return(object)
 }
 
-## Read a table from a R data file, csv, or xlsx file. Returns a data
-## frame or throws an error.
-read.table.general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
-                               dataframe.class="data.frame") {
-    suppressWarnings({
-        read.table.args %<>% as.list
-        read.table.args$file <- filename
-        read.table.args$header <- TRUE
-        read.xlsx.args %<>% as.list
-        read.xlsx.args$xlsxFile <- filename
-        lazy.results <- list(
-            rdata=future(read.RDS.or.RDA(filename, dataframe.class), lazy=TRUE),
-            table=future(do.call(read.table, read.table.args), lazy=TRUE),
-            csv=future(do.call(read.csv, read.table.args), lazy=TRUE),
-            xlsx=future(do.call(read.xlsx, read.xlsx.args), lazy=TRUE))
-        for (lzresult in lazy.results) {
-            result <- tryCatch({
-                x <- as(value(lzresult), dataframe.class)
-                assert_that(is(x, dataframe.class))
-                x
-            }, error=function(...) NULL)
-            if (!is.null(result)) {
-                return(result)
-            }
-        }
-        stop(glue("Could not read a data frame from {deparse{filename}} as R data, csv, or xlsx"))
-    })
-}
-
-read.saf <- function(filename, ...) {
-    saf <- read.table.general(filename, ...)
-    assert_that("GeneID" %in% names(saf))
-    gr <- as(saf, "GRanges")
-    grl <- split(gr, gr$GeneID) %>% promote.common.mcols
-    return(grl)
-}
-
-# Functions for reading and writing narrowPeak files
-read.narrowPeak <- function(file, ...) {
-    peaks.df <- read.table(file, sep="\t", row.names=NULL, ...)
-    names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
-    peaks.df$name <- as.character(peaks.df$name)
-    peaks.df
-}
-
 write.narrowPeak <- function(x, file, ...) {
     x <- as(x, "data.frame")
     if("seqnames" %in% names(x))
@@ -183,31 +138,6 @@ write.narrowPeak <- function(x, file, ...) {
     write.table(x, file, sep="\t", row.names=FALSE, col.names=FALSE, ...)
 }
 
-read.regions <- function(filename) {
-    suppressWarnings({
-        lazy.results <- list(
-            rdata=future(read.RDS.or.RDA(filename), lazy=TRUE),
-            narrowPeak=future(read.narrowPeak(filename), lazy=TRUE),
-            bed=future(import(filename, format="bed"), lazy=TRUE),
-            gff=future(import(filename, format="gff"), lazy=TRUE),
-            saf=future(read.saf(filename), lazy=TRUE),
-            table=future(read.table.general(filename), lazy=TRUE))
-        for (lzresult in lazy.results) {
-            result <- tryCatch({
-                x <- value(lzresult)
-                if (is(x, "List")) {
-                    x <- unlist(x)
-                }
-                x <- as(x, "GRanges")
-                x
-            }, error=function(...) NULL)
-            if (!is.null(result)) {
-                return(result)
-            }
-        }
-        stop(glue("Could not read genomic regions from {deparse(filename)} as R data, narrowPeak, bed, gff, SAF, or csv"))
-    })
-}
 
 print.var.vector <- function(v) {
     for (i in names(v)) {

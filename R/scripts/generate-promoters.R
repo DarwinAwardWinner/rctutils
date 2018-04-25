@@ -196,44 +196,6 @@ promote.common.mcols <- function(grl, delete.from.source=FALSE, ...) {
     grl
 }
 
-get.txdb <- function(txdbname) {
-    tryCatch({
-        library(txdbname, character.only=TRUE)
-        pos <- str_c("package:", txdbname)
-        get(txdbname, pos)
-    }, error=function(...) {
-        library(GenomicFeatures)
-        loadDb(txdbname)
-    })
-}
-
-read.table.general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
-                               dataframe.class="data.frame") {
-    suppressWarnings({
-        read.table.args %<>% as.list
-        read.table.args$file <- filename
-        read.table.args$header <- TRUE
-        read.xlsx.args %<>% as.list
-        read.xlsx.args$xlsxFile <- filename
-        lazy.results <- list(
-            rdata=future(read.RDS.or.RDA(filename, dataframe.class), lazy=TRUE),
-            table=future(do.call(read.table, read.table.args), lazy=TRUE),
-            csv=future(do.call(read.csv, read.table.args), lazy=TRUE),
-            xlsx=future(do.call(read.xlsx, read.xlsx.args), lazy=TRUE))
-        for (lzresult in lazy.results) {
-            result <- tryCatch({
-                x <- as(value(lzresult), dataframe.class)
-                assert_that(is(x, dataframe.class))
-                x
-            }, error=function(...) NULL)
-            if (!is.null(result)) {
-                return(result)
-            }
-        }
-        stop(glue("Could not read a data frame from {deparse{filename}} as R data, csv, or xlsx"))
-    })
-}
-
 read.additional.gene.info <- function(filename, gff_format="GFF3", geneFeatureType="gene", ...) {
     df <- tryCatch({
         gff <- tryCatch({
