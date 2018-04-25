@@ -13,8 +13,8 @@ first_accessible(paths, mode = 0)
 }
 \value{
 The first element of \code{paths} for which
-    \code{file.access()} returns TRUE. If none of \code{paths} is
-    accessible, NA is returned.
+\code{file.access()} returns TRUE. If none of \code{paths} is
+accessible, NA is returned.
 }
 \description{
 This function is useful for finding a file that may be in one of

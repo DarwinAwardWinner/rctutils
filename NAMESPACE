@@ -2,5 +2,8 @@
 
 export(first_accessible)
 export(hello)
+export(load.filtered)
+export(load.in.new.env)
+export(save.image.filtered)
 export(si2f)
 importFrom(rex,rex)

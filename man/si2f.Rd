@@ -14,7 +14,7 @@ prefixes and possibly a unit.}
 }
 \value{
 A numeric vector containing the values parsed from
-    \code{string}.
+\code{string}.
 }
 \description{
 Inverse of sitools::f2si
