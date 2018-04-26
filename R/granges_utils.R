@@ -19,7 +19,7 @@
 #' This should really be an S4 method, but writing S4 methods is a
 #' pain.
 #'
-#' @include internal.R
+#' @importFrom methods as is new
 #' @importFrom magrittr %>% %<>%
 #' @export
 readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FALSE) {
@@ -35,10 +35,10 @@ readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FA
                 ## Extend smaller single reads to fraglen, but don't
                 ## shrink longer reads
                 GenomicRanges::resize(
-                    width=pmax(fraglen, width(.)),
+                    width=pmax(fraglen, GenomicRanges::width(.)),
                     fix=ifelse(extend_fragment_upstream, "end", "start"))
         } else {
-            single.frags <- GRanges()
+            single.frags <- GenomicRanges::GRanges()
         }
         frags <- c(mated.frags, single.frags)
     } else if (is(reads, "GAlignmentPairs")) {
@@ -72,7 +72,8 @@ readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FA
 ## Convert strand to -1, 0, or 1
 #' @export
 strand_sign <- function(x, allow.unstranded=FALSE) {
-    s <- strand(x)
+    req_ns("GenomicRanges")
+    s <- GenomicRanges::strand(x)
     ss <- (s == "+") - (s == "-")
     if (allow.unstranded) {
         ss[ss == 0] <- NA
@@ -84,21 +85,23 @@ strand_sign <- function(x, allow.unstranded=FALSE) {
 
 ## This merges exons into genes (GRanges to GRangesList)
 #' @export
-gff.to.grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFeatureType="gene") {
+gff_to_grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFeatureType="gene") {
+    req_ns("S4Vectors")
     exon.gr <- gr[gr$type %in% exonFeatureType]
-    exon.gr %<>% cleanup.mcols
-    grl <- split(exon.gr, as.character(mcols(exon.gr)[[geneIdAttr]])) %>%
-        promote.common.mcols
+    exon.gr %<>% cleanup_mcols
+    grl <- split(exon.gr, as.character(S4Vectors::mcols(exon.gr)[[geneIdAttr]])) %>%
+        promote_common_mcols
     if (!is.null(geneFeatureType)) {
         gene.meta <- gr[gr$type %in% geneFeatureType] %>%
-            mcols %>% cleanup.mcols(mcols_df=.) %>% .[match(names(grl), .[[geneIdAttr]]),]
+            S4Vectors::mcols %>% cleanup_mcols(mcols_df=.) %>%
+            .[match(names(grl), .[[geneIdAttr]]),]
         for (i in names(gene.meta)) {
-            if (i %in% names(mcols(grl))) {
-                value <- ifelse(is.na(gene.meta[[i]]), mcols(grl)[[i]], gene.meta[[i]])
+            if (i %in% names(S4Vectors::mcols(grl))) {
+                value <- ifelse(is.na(gene.meta[[i]]), S4Vectors::mcols(grl)[[i]], gene.meta[[i]])
             } else {
                 value <- gene.meta[[i]]
             }
-            mcols(grl)[[i]] <- value
+            S4Vectors::mcols(grl)[[i]] <- value
         }
     }
     return(grl)
@@ -107,19 +110,23 @@ gff.to.grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFea
 ## This converts a GRangesList into the SAF ("Simplified annotation
 ## format")
 #' @export
-grl.to.saf <- function(grl) {
+grl_to_saf <- function(grl) {
+    req_ns("GenomicRanges")
     gr <- unlist(grl)
-    data.frame(Chr=as.vector(seqnames(gr)),
-               Start=start(gr),
-               End=end(gr),
-               Strand=as.vector(strand(gr)),
+    data.frame(Chr=as.vector(GenomicRanges::seqnames(gr)),
+               Start=GenomicRanges::start(gr),
+               End=GenomicRanges::end(gr),
+               Strand=as.vector(GenomicRanges::strand(gr)),
                GeneID=rep(names(grl), lengths(grl)))
 }
 
 ## Get column names that are always the same for all elements of a
 ## gene. Used for extracting only the gene metadata from exon
 ## metadata.
-get.gene.common.colnames <- function(df, geneids, blacklist=c("type", "Parent")) {
+
+#' @importFrom magrittr is_weakly_less_than
+get_gene_common_colnames <- function(df, geneids, blacklist=c("type", "Parent")) {
+    req_ns("S4Vectors")
     if (nrow(df) < 1) {
         return(character(0))
     }
@@ -137,14 +144,14 @@ get.gene.common.colnames <- function(df, geneids, blacklist=c("type", "Parent"))
     ## Forget list columns
     df <- df[sapply(df, . %>% lengths %>% max) == 1]
     ## Forget empty columns
-    df <- df[!sapply(df, is.empty)]
+    df <- df[!sapply(df, is_valueless)]
     if (ncol(df) < 1) {
         return(character(0))
     }
     ## Convert to Rle
-    df <- DataFrame(lapply(df, . %>% unlist %>% Rle))
-    geneids %<>% Rle
-    genecols <- sapply(df, . %>% split(geneids) %>% runLength %>% lengths %>% max %>% is_weakly_less_than(1))
+    df <- S4Vectors::DataFrame(lapply(df, . %>% unlist %>% S4Vectors::Rle))
+    geneids %<>% S4Vectors::Rle
+    genecols <- sapply(df, . %>% split(geneids) %>% S4Vectors::runLength %>% lengths %>% max %>% is_weakly_less_than(1))
     names(which(genecols))
 }
 
@@ -157,15 +164,15 @@ get.gene.common.colnames <- function(df, geneids, blacklist=c("type", "Parent"))
 #' with gene IDs, then the gene ID column will be promoted to the
 #' GRangesList object itself.
 #'
-#' @include internal.R
 #' @importFrom magrittr %<>%
 #' @export
-promote.common.mcols <- function(grl, delete.from.source=FALSE, ...) {
+promote_common_mcols <- function(grl, delete.from.source=FALSE, ...) {
     req_ns("S4Vectors", "GenomicRanges")
-    colnames.to.promote <- get.gene.common.colnames(S4Vectors::mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
+    colnames.to.promote <- get_gene_common_colnames(S4Vectors::mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
     promoted.df <- S4Vectors::mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop=FALSE]
     if (delete.from.source) {
-        mcols(grl@unlistData) %<>% .[setdiff(names(.), colnames.to.promote)]
+        S4Vectors::mcols(grl@unlistData) %<>%
+            .[setdiff(names(.), colnames.to.promote)]
     }
     S4Vectors::mcols(grl) %<>% cbind(promoted.df)
     grl
@@ -178,15 +185,14 @@ promote.common.mcols <- function(grl, delete.from.source=FALSE, ...) {
 #' @param allow.gap Maximum gap size to "fill in". If set to zero,
 #'     this is equivalent to [rtracklayer::liftOver()].
 #'
-#' @include internal.R
 #' @export
 liftOverLax <- function(x, chain, ..., allow.gap=0) {
-    req_ns("rtracklayer", "S4Vectors")
-
+    req_ns("rtracklayer", "S4Vectors", "GenomicRanges")
     newx <- rtracklayer::liftOver(x, chain)
     if (allow.gap > 0) {
         gapped <- which(lengths(newx) > 1)
-        newx.gapped.reduced <- reduce(newx[gapped], min.gapwidth = allow.gap + 1, with.revmap=TRUE)
+        newx.gapped.reduced <- GenomicRanges::reduce(
+            newx[gapped], min.gapwidth = allow.gap + 1, with.revmap=TRUE)
         S4Vectors::mcols(newx.gapped.reduced@unlistData) <-
             rep(S4Vectors::mcols(x[gapped]), lengths(newx.gapped.reduced))
         newx[gapped] <- newx.gapped.reduced
@@ -196,13 +202,12 @@ liftOverLax <- function(x, chain, ..., allow.gap=0) {
 
 #' Convenience function for running liftOver on a MotifMap BED file
 #'
-#' @include internal.R file_format_io.R
 #' @export
 liftOver_motifMap <- function(infile, chainfile, outfile, allow.gap=2) {
     req_ns("rtracklayer")
-    gr <- read.motifmap(infile, parse_name=TRUE)
+    gr <- read_motifmap(infile, parse_name=TRUE)
     chain <- rtracklayer::import.chain(chainfile)
     gr2 <- rtracklayer::liftOverLax(gr, chain, allow.gap=allow.gap)
     gr2 <- unlist(gr2[lengths(gr2) == 1])
-    write.motifmap(gr2, outfile)
+    write_motifmap(gr2, outfile)
 }

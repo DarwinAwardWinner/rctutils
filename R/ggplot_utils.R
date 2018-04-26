@@ -2,19 +2,25 @@
 
 # Utilities for ggplot2 corrdinate transformation
 
+#' @importFrom glue glue
 #' @export
 power_trans <- function(pow) {
+    req_ns("scales")
     name <- glue("^{pow}")
-    trans_new(name,
+    scales::trans_new(
+        name,
         transform=function(x) x ^ pow,
         inverse=function(x) x ^ (1/pow),
         domain =c(0,Inf))
 }
 
+#' @importFrom glue glue
 #' @export
 clamp_trans <- function(lower_threshold=0, upper_threshold=1) {
+    req_ns("scales")
     name <- glue("Clamp values outside of [{lower_threshold}, {upper_threshold}]")
-    trans_new(name,
+    scales::trans_new(
+        name,
         transform=function(x) pmin(upper_threshold, pmax(lower_threshold, x)),
         # transform is only invertible for part of the range
         inverse=identity)
@@ -22,16 +28,19 @@ clamp_trans <- function(lower_threshold=0, upper_threshold=1) {
 
 #' @export
 neglog_trans <- function(base = exp(1)) {
+    req_ns("scales")
     trans <- function(x) -log(x, base)
     inv <- function(x) base^(-x)
-    trans_new(paste0("negativelog-", format(base)), trans, inv,
-              log_breaks(base = base),
-              domain = c(1e-100, Inf))
+    scales::trans_new(
+        paste0("negativelog-", format(base)), trans, inv,
+        scales::log_breaks(base = base),
+        domain = c(1e-100, Inf))
 }
 
 #' @export
 discrete_gradient <- function(n) {
-    seq_gradient_pal(low = "#132B43", high = "#56B1F7")(seq(0,1, length.out=n))
+    req_ns("scales")
+    scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7")(seq(0,1, length.out=n))
 }
 
 # Always returns a list of ggplot objects. Flattens nested lists,
@@ -58,6 +67,7 @@ get.ggplots.list <- function(plots) {
 
 #' @export
 ggprint <- function(plots, device=dev.cur(), closedev, printfun=print) {
+    req_ns("withr")
     p <- get.ggplots(plots)
     with_dev(device, lapply(p, printfun), closedev)
     invisible(p)
@@ -66,7 +76,6 @@ ggprint <- function(plots, device=dev.cur(), closedev, printfun=print) {
 # Printer function for ggplotly, to be passed as the prinfun for
 # ggprint. TODO: Make plotly an optional dependency.
 
-#' @include internal.R
 #' @export
 ggplotly.printer <- function(...) {
     req_ns("plotly")

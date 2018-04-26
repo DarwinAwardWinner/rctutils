@@ -4,7 +4,7 @@
 \alias{match_arg}
 \title{Improved match.arg with automatic detection of the argument name}
 \usage{
-match_arg(arg, choices, several.ok = FALSE, arg.name = substitute(arg),
+match_arg(arg, choices, several.ok = FALSE, arg_name = substitute(arg),
   ignore.case = FALSE)
 }
 \description{

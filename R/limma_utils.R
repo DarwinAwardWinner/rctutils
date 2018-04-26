@@ -11,10 +11,12 @@ subtractCoefs <- function(x, design, coefsToSubtract, ...) {
 
 #' @importFrom graphics abline barplot lines par title
 #' @export
-voomWithOffset <- function (dge, design = NULL, offset=expandAsMatrix(getOffset(dge), dim(dge)),
-                            normalize.method = "none", plot = FALSE, span = 0.5, ...) {
-    req_ns("limma")
-    req_ns("BiocGenerics")
+voomWithOffset <-
+    function (dge, design = NULL,
+              offset=edgeR::expandAsMatrix(edgeR::getOffset(dge), dim(dge)),
+              normalize.method = "none", plot = FALSE, span = 0.5, ...)
+{
+    req_ns("limma", "edgeR", "BiocGenerics")
     out <- list()
     out$genes <- dge$genes
     out$targets <- dge$samples
@@ -76,15 +78,17 @@ voomWithOffset <- function (dge, design = NULL, offset=expandAsMatrix(getOffset(
 
 #' Version of voom that uses an offset matrix instead of lib sizes
 #'
+#' @importFrom graphics abline barplot lines par title
 #' @export
 voomWithQualityWeightsAndOffset <-
     function (dge, design = NULL,
-              offset=expandAsMatrix(getOffset(dge), dim(dge)),
+              offset=edgeR::expandAsMatrix(edgeR::getOffset(dge), dim(dge)),
               normalize.method = "none",
               plot = FALSE, span = 0.5, var.design = NULL, method = "genebygene",
               maxiter = 50, tol = 1e-10, trace = FALSE, replace.weights = TRUE,
               col = NULL, ...)
 {
+    req_ns("limma", "edgeR", "BiocGenerics")
     counts <- dge$counts
     if (plot) {
         oldpar <- par(mfrow = c(1, 2))
@@ -92,14 +96,14 @@ voomWithQualityWeightsAndOffset <-
     }
     v <- voomWithOffset(dge, design = design, offset = offset, normalize.method = normalize.method,
         plot = FALSE, span = span, ...)
-    aw <- arrayWeights(v, design = design, method = method, maxiter = maxiter,
+    aw <- limma::arrayWeights(v, design = design, method = method, maxiter = maxiter,
         tol = tol, var.design = var.design)
     v <- voomWithOffset(dge, design = design, weights = aw, offset = offset,
         normalize.method = normalize.method, plot = plot, span = span,
         ...)
-    aw <- arrayWeights(v, design = design, method = method, maxiter = maxiter,
+    aw <- limma::arrayWeights(v, design = design, method = method, maxiter = maxiter,
         tol = tol, trace = trace, var.design = var.design)
-    wts <- asMatrixWeights(aw, dim(v)) * v$weights
+    wts <- limma::asMatrixWeights(aw, dim(v)) * v$weights
     attr(wts, "arrayweights") <- NULL
     if (plot) {
         barplot(aw, names = 1:length(aw), main = "Sample-specific weights",
@@ -117,12 +121,15 @@ voomWithQualityWeightsAndOffset <-
 
 #' Convenience function for alternating dupCor and voom until convergence
 #'
+#' @importFrom graphics abline barplot lines par title
+#' @importFrom assertthat assert_that
 #' @export
-voomWithDuplicateCorrelation <-
-    function(counts, design = NULL, plot = FALSE, block = NULL, trim = 0.15,
-             voom.fun=voom, dupCor.fun=duplicateCorrelation, initial.correlation=0,
-             niter=5, tol=1e-6, verbose=TRUE, ...)
-{
+voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, block = NULL, trim = 0.15,
+                                         voom.fun=limma::voom,
+                                         dupCor.fun=limma::duplicateCorrelation,
+                                         initial.correlation=0,
+                                         niter=5, tol=1e-6, verbose=TRUE, ...) {
+    req_ns("limma")
     assert_that(niter >= 1)
     assert_that(is.finite(niter))
 
@@ -170,4 +177,18 @@ voomWithDuplicateCorrelation <-
         elist[[i]] <- dupcor[[i]]
     }
     return(elist)
+}
+
+#' Variant of eBayes that sets the proportion argument automatically.
+#'
+#' @export
+eBayes_auto_proportion <- function(..., prop.method="lfdr") {
+    req_ns("limma")
+    eb <- limma::eBayes(...)
+    if (is.function(prop.method)) {
+        ptn <- prop.method(eb$p.value)
+    } else {
+        ptn <- limma::propTrueNull(eb$p.value, method=prop.method)
+    }
+    limma::eBayes(..., proportion=1-ptn)
 }

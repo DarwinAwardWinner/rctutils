@@ -4,7 +4,7 @@
 \alias{get_mds}
 \title{Returns mds values, with proper colnames.}
 \usage{
-get_mds(x, k)
+get_mds(y, k)
 }
 \description{
 Returns mds values, with proper colnames.

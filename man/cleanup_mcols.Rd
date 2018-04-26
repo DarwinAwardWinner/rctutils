@@ -4,7 +4,7 @@
 \alias{cleanup_mcols}
 \title{Remove valueless mcols from an object}
 \usage{
-cleanup_mcols(object, mcols_df = mcols(object))
+cleanup_mcols(object, mcols_df)
 }
 \description{
 Emptiness is defined as in \code{\link[=is_valueless]{is_valueless()}}.

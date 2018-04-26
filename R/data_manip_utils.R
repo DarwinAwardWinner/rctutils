@@ -53,11 +53,15 @@ auto_factorize_columns <- function(df) {
 #' Emptiness is defined as in [is_valueless()].
 #'
 #' @export
-cleanup_mcols <- function(object, mcols_df=mcols(object)) {
-    nonempty <- !sapply(mcols_df, is_empty)
+cleanup_mcols <- function(object, mcols_df) {
+    req_ns("S4Vectors")
+    if (missing(mcols_df)) {
+        mcols_df <- S4Vectors::mcols(object)
+    }
+    nonempty <- !sapply(mcols_df, is_valueless)
     mcols_df <- mcols_df[nonempty]
     if (!missing(object)) {
-        mcols(object) <- mcols_df
+        S4Vectors::mcols(object) <- mcols_df
         return(object)
     } else {
         return(mcols_df)
@@ -66,7 +70,6 @@ cleanup_mcols <- function(object, mcols_df=mcols(object)) {
 
 #' Variant of code_control that generates more verbose column names
 #'
-#' @include internal.R
 #' @export
 code_control_named <- function (n, contrasts = TRUE, sparse = FALSE) {
     req_ns("codingMatrices")
@@ -83,14 +86,14 @@ code_control_named <- function (n, contrasts = TRUE, sparse = FALSE) {
     dimnames(B) <- list(1:n, levels)
     if (!contrasts) {
         if (sparse)
-            B <- .asSparse(B)
+            B <- codingMatrices:::.asSparse(B)
         return(B)
     }
     B <- B - 1/n
     B <- B[, -1, drop=FALSE]
     colnames(B) <- paste(levels[1], levels[-1], sep = ".vs.")
     if (sparse) {
-        .asSparse(B)
+        codingMatrices:::.asSparse(B)
     }
     else {
         B
@@ -144,7 +147,6 @@ fac2char <- function(df) {
 #' @examples
 #' parse_bp(c("100", "100bp", "100 kbp", "1Mbp"))
 #'
-#' @include si2f.R
 #' @importFrom assertthat assert_that
 #' @export
 parse_bp <- function(size) {
@@ -161,7 +163,6 @@ parse_bp <- function(size) {
 
 #' Format a number of base pairs using the most appropriate unit.
 #'
-#' @include internal.R
 #' @importFrom magrittr %>%
 #' @importFrom stringr str_replace_all
 #' @export
@@ -214,12 +215,15 @@ quotemeta <- function (string) {
   str_replace_all(string, "(\\W)", "\\\\\\1")
 }
 
+#' @importFrom rlang is_named
+#' @importFrom assertthat assert_that
 #' @export
 relevel_columns <- function(df, ...) {
+    req_ns("forcats")
     relevel_specs <- list(...)
     assert_that(is_named(relevel_specs))
     for (i in names(relevel_specs)) {
-        df[[i]] %<>% fct_relevel(relevel_specs[[i]])
+        df[[i]] %<>% forcats::fct_relevel(relevel_specs[[i]])
     }
     df
 }
@@ -233,8 +237,9 @@ sprintf.single.value <- function(fmt, value) {
 
 #' @export
 strip_design_factor_names <- function(design, prefixes=names(attr(design, "contrasts"))) {
+    req_ns("rex")
     if (!is.null(prefixes)) {
-        regex.to.delete <- rex(or(prefixes) %if_prev_is% or(start, ":") %if_next_isnt% end)
+        regex.to.delete <- res::rex(or(prefixes) %if_prev_is% or(start, ":") %if_next_isnt% end)
         colnames(design) %<>% str_replace_all(regex.to.delete, "")
         if (anyDuplicated(colnames(design))) {
             warning("Stripping design names resulted in non-unique names")

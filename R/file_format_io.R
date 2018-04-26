@@ -1,21 +1,25 @@
 ## Read a table from a R data file, csv, or xlsx file. Returns a data
 ## frame or throws an error.
-read.table.general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
+
+#' @importFrom methods as is
+#' @export
+read_table_general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
                                dataframe.class="data.frame") {
+    req_ns("future", "openxlsx")
     suppressWarnings({
         read.table.args %<>% as.list
         read.table.args$file <- filename
         read.table.args$header <- TRUE
         read.xlsx.args %<>% as.list
         read.xlsx.args$xlsxFile <- filename
-        lazy.results <- list(
-            rdata=future(read.RDS.or.RDA(filename, dataframe.class), lazy=TRUE),
-            table=future(do.call(read.table, read.table.args), lazy=TRUE),
-            csv=future(do.call(read.csv, read.table.args), lazy=TRUE),
-            xlsx=future(do.call(read.xlsx, read.xlsx.args), lazy=TRUE))
-        for (lzresult in lazy.results) {
+        lazy_results <- list(
+            rdata=future::future(read_RDS_or_RDA(filename, dataframe.class), lazy=TRUE),
+            table=future::future(do.call(read.table, read.table.args), lazy=TRUE),
+            csv=future::future(do.call(read.csv, read.table.args), lazy=TRUE),
+            xlsx=future::future(do.call(openxlsx::read.xlsx, read.xlsx.args), lazy=TRUE))
+        for (lzresult in lazy_results) {
             result <- tryCatch({
-                x <- as(value(lzresult), dataframe.class)
+                x <- as(future::value(lzresult), dataframe.class)
                 assert_that(is(x, dataframe.class))
                 x
             }, error=function(...) NULL)
@@ -27,11 +31,14 @@ read.table.general <- function(filename, read.table.args=NULL, read.xlsx.args=NU
     })
 }
 
-read.idr.table <- function(file) {
+#' @importFrom magrittr %>%
+#' @importFrom dplyr mutate_
+#' @export
+read_idr_table <- function(file) {
     idrcols <- c("chr", "start", "end", "name", "score", "strand",
                  "LocalIDR", "GlobalIDR", "startA", "endA", "scoreA", "startB", "endB", "scoreB")
     read.table(file, header=FALSE, sep="\t", col.names=idrcols) %>%
-        mutate(LocalIDR=10^-LocalIDR, GlobalIDR=10^-GlobalIDR)
+        mutate_(LocalIDR=~10^-LocalIDR, GlobalIDR=~10^-GlobalIDR)
 }
 
 #' Read MotifMap-provided BED file into a GRanges object.
@@ -40,20 +47,33 @@ read.idr.table <- function(file) {
 #' fields, which MotifMap contains.
 #'
 #' @export
-read.motifmap <- function(x, parse_name=TRUE) {
-    tab <- read_tsv(x, col_names=c("chr", "start", "end", "name", "score", "strand"),
+read_motifmap <- function(x, parse_name=TRUE) {
+    req_ns("tidyr", "GenomicRanges", "readr")
+    tab <- readr::read_tsv(x, col_names=c("chr", "start", "end", "name", "score", "strand"),
                     col_types="ciicdc", progress=FALSE)
     if (parse_name) {
-        tab %<>% separate(name, into=c("motif_ID", "TF_name"), sep="=")
+        tab %<>% tidyr::separate_(~name, into=c("motif_ID", "TF_name"), sep="=")
     }
-    gr <- makeGRangesFromDataFrame(tab, starts.in.df.are.0based=TRUE)
+    gr <- GenomicRanges::makeGRangesFromDataFrame(tab, starts.in.df.are.0based=TRUE)
     gr
 }
 
-## write.motifmap
+#' @importFrom assertthat assert_that
+#' @export
+write_motifmap <- function(x, file) {
+    req_ns("S4Vectors", "rtracklayer", "tidyr")
+    assert_that(is(x, "GRanges"))
+    if (! "name" %in% names(S4Vectors::mcols(x))) {
+        assert_that(all(c("motif_ID", "TF_name") %in% names(S4Vectors::mcols(x))))
+        S4Vectors::mcols(x) %<>% as.data.frame %>%
+            tidyr::unite_(~name, ~c(motif_ID, TF_name), sep="=") %>%
+            as("DataFrame")
+    }
+    rtracklayer::export(x, file, format="BED")
+}
 
 #' @export
-read.narrowPeak <- function(file, ...) {
+read_narrowPeak <- function(file, ...) {
     peaks.df <- read.table(file, sep="\t", row.names=NULL, ...)
     names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
     peaks.df$name <- as.character(peaks.df$name)
@@ -61,7 +81,7 @@ read.narrowPeak <- function(file, ...) {
 }
 
 #' @export
-write.narrowPeak <- function(x, file, ...) {
+write_narrowPeak <- function(x, file, ...) {
     x <- as(x, "data.frame")
     if("seqnames" %in% names(x))
         names(x)[names(x) == "seqnames"] <- "chr"
@@ -70,18 +90,19 @@ write.narrowPeak <- function(x, file, ...) {
 }
 
 #' @export
-read.regions <- function(filename) {
+read_regions <- function(filename) {
+    req_ns("rtracklayer", "future")
     suppressWarnings({
-        lazy.results <- list(
-            rdata=future(read.RDS.or.RDA(filename), lazy=TRUE),
-            narrowPeak=future(read.narrowPeak(filename), lazy=TRUE),
-            bed=future(import(filename, format="bed"), lazy=TRUE),
-            gff=future(import(filename, format="gff"), lazy=TRUE),
-            saf=future(read.saf(filename), lazy=TRUE),
-            table=future(read.table.general(filename), lazy=TRUE))
-        for (lzresult in lazy.results) {
+        lazy_results <- list(
+            rdata=future::future(read_RDS_or_RDA(filename), lazy=TRUE),
+            narrowPeak=future::future(read_narrowPeak(filename), lazy=TRUE),
+            bed=future::future(rtracklayer::import(filename, format="bed"), lazy=TRUE),
+            gff=future::future(rtracklayer::import(filename, format="gff"), lazy=TRUE),
+            saf=future::future(read_saf(filename), lazy=TRUE),
+            table=future::future(read_table_general(filename), lazy=TRUE))
+        for (lzresult in lazy_results) {
             result <- tryCatch({
-                x <- value(lzresult)
+                x <- future::value(lzresult)
                 if (is(x, "List")) {
                     x <- unlist(x)
                 }
@@ -97,19 +118,19 @@ read.regions <- function(filename) {
 }
 
 #' @export
-read.saf <- function(filename, ...) {
-    saf <- read.table.general(filename, ...)
+read_saf <- function(filename, ...) {
+    saf <- read_table_general(filename, ...)
     assert_that("GeneID" %in% names(saf))
     gr <- as(saf, "GRanges")
-    grl <- split(gr, gr$GeneID) %>% promote.common.mcols
+    grl <- split(gr, gr$GeneID) %>% promote_common_mcols
     return(grl)
 }
 
 ## TODO: Give the below functions better names
 
 #' @export
-read.tx2gene.from.genemap <- function(fname) {
-    df <- read.table.general(fname)
+read_tx2gene_from_genemap <- function(fname) {
+    df <- read_table_general(fname)
     df %<>% .[1:2]
     df[] %<>% lapply(as.character)
     names(df) <- c("TXNAME", "GENEID")
@@ -117,58 +138,66 @@ read.tx2gene.from.genemap <- function(fname) {
 }
 
 #' @export
-read.annotation.from.gff <- function(filename, format="GFF3", ...) {
+read_annotation_from_gff <- function(filename, format="GFF3", ...) {
     gff <- NULL
     ## Allow the file to be an RDS file containing the GRanges
     ## resulting from import()
     gff <- tryCatch({
-        read.RDS.or.RDA(filename, "GRanges")
+        read_RDS_or_RDA(filename, "GRanges")
     }, error=function(...) {
-        import(filename, format=format)
+        req_ns("rtracklayer")
+        rtracklayer::import(filename, format=format)
     })
     assert_that(is(gff, "GRanges"))
-    grl <- gff.to.grl(gff, ...)
+    grl <- gff_to_grl(gff, ...)
     return(grl)
 }
 
+#' @importFrom methods as
+#' @importFrom magrittr %>%
+#' @importFrom assertthat assert_that
 #' @export
-read.annotation.from.saf <- function(filename, ...) {
-    saf <- read.table.general(filename, ...)
+read_annotation_from_saf <- function(filename, ...) {
+    saf <- read_table_general(filename, ...)
     assert_that("GeneID" %in% names(saf))
     gr <- as(saf, "GRanges")
-    grl <- split(gr, gr$GeneID) %>% promote.common.mcols
+    grl <- split(gr, gr$GeneID) %>% promote_common_mcols
     return(grl)
 }
 
 #' @export
-read.annotation.from.rdata <- function(filename) {
-    read.RDS.or.RDA(filename, "GRangesList")
+read_annotation_from_rdata <- function(filename) {
+    read_RDS_or_RDA(filename, "GRangesList")
 }
 
+#' @importFrom methods is
+#' @importFrom assertthat assert_that
 #' @export
-read.additional.gene.info <- function(filename, gff_format="GFF3", geneFeatureType="gene",
- ...) {
+read_additional_gene_info <- function(filename, gff_format="GFF3",
+                                      geneFeatureType="gene", ...) {
+    req_ns("S4Vectors")
     df <- tryCatch({
         gff <- tryCatch({
-            read.RDS.or.RDA(filename, "GRanges")
+            read_RDS_or_RDA(filename, "GRanges")
         }, error=function(...) {
-            import(filename, format=gff_format)
+            req_ns("rtracklayer")
+            rtracklayer::import(filename, format=gff_format)
         })
         assert_that(is(gff, "GRanges"))
         if (!is.null(geneFeatureType)) {
             gff %<>% .[.$type %in% geneFeatureType]
         }
         gff %<>% .[!is.na(.$ID) & !duplicated(.$ID)]
-        gff %>% mcols %>% cleanup.mcols(mcols_df=.)
+        gff %>% S4Vectors::mcols %>% cleanup_mcols(mcols_df=.)
     }, error=function(...) {
-        tab <- read.table.general(filename, ..., dataframe.class="DataFrame")
+        tab <- read_table_general(filename, ..., dataframe.class="DataFrame")
         ## Nonexistent or automatic row names
         if (.row_names_info(tab) <= 0) {
             row.names(tab) <- tab[[1]]
         }
         tab
     })
-    df %<>% DataFrame
+    df %<>% S4Vectors::DataFrame
     assert_that(is(df, "DataFrame"))
     return(df)
 }

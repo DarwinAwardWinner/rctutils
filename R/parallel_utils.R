@@ -1,14 +1,10 @@
 #' Parallelized version of [limma::selectModel()]
 #'
-#' @include internal.R
 #' @export
 BPselectModel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.prior = NULL,
-                           s2.true = NULL, ..., BPPARAM)
+                           s2.true = NULL, ..., BPPARAM = BiocParallel::bpparam())
 {
     req_ns("BiocParallel", "limma")
-    if (missing(BPPARAM)) {
-        BPPARAM <- BiocParallel::bpparam()
-    }
     ym <- as.matrix(y)
     if (any(is.na(ym)))
         stop("NAs not allowed")
@@ -84,7 +80,6 @@ combineFCResults <- function(fcreslist) {
     res
 }
 
-#' @include internal.R
 featureCountsQuiet <- function(...) {
     req_ns("withr", "Rsubread")
     withr::with_output_sink("/dev/null", Rsubread::featureCounts(...))
@@ -92,7 +87,6 @@ featureCountsQuiet <- function(...) {
 
 #' Parallel version of [Rsubread::featureCounts()]
 #'
-#' @include internal.R
 #' @export
 featureCountsParallel <- function(files, ...) {
     req_ns("Rsubread", "BiocParallel")
@@ -108,17 +102,14 @@ featureCountsParallel <- function(files, ...) {
 
 #' Parallel version of [csaw::windowCounts()]
 #'
-#' @include internal.R
 #' @export
-windowCountsParallel <- function(bam.files, ..., filter=10, BPPARAM) {
-    req_ns("BiocParallel", "csaw", "BiocGenerics")
-    if (missing(BPPARAM)) {
-        BPPARAM <- BiocParallel::bpparam()
-    }
+windowCountsParallel <- function(bam.files, ..., filter=10,
+                                 BPPARAM = BiocParallel::bpparam()) {
+    req_ns("BiocParallel", "csaw", "BiocGenerics", "SummarizedExperiment")
     reslist <- BiocParallel::bplapply(X=bam.files, FUN=csaw::windowCounts, ..., filter=0, BPPARAM=BPPARAM)
     res <- do.call(cbind, reslist)
     rm(reslist)
-    keep <- rowSums(assay(res)) >= filter
+    keep <- rowSums(SummarizedExperiment::assay(res)) >= filter
     res[keep,]
 }
 
@@ -126,7 +117,6 @@ windowCountsParallel <- function(bam.files, ..., filter=10, BPPARAM) {
 #'
 #' The results can be fetched all at once with [future::values()].
 #'
-#' @include internal.R
 #' @export
 future.lapply <- function(X, FUN, ...) {
     req_ns("future")

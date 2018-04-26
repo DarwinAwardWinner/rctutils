@@ -4,7 +4,8 @@
 \alias{windowCountsParallel}
 \title{Parallel version of \code{\link[csaw:windowCounts]{csaw::windowCounts()}}}
 \usage{
-windowCountsParallel(bam.files, ..., filter = 10, BPPARAM)
+windowCountsParallel(bam.files, ..., filter = 10,
+  BPPARAM = BiocParallel::bpparam())
 }
 \description{
 Parallel version of \code{\link[csaw:windowCounts]{csaw::windowCounts()}}

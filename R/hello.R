@@ -9,6 +9,7 @@
 #'
 #' http://r-pkgs.had.co.nz/
 #'
+#'
 #' Some useful keyboard shortcuts for package authoring:
 #'
 #' Build and Reload Package:  'Ctrl + Shift + B'

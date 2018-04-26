@@ -5,9 +5,9 @@
 \title{Convenience function for alternating dupCor and voom until convergence}
 \usage{
 voomWithDuplicateCorrelation(counts, design = NULL, plot = FALSE,
-  block = NULL, trim = 0.15, voom.fun = voom,
-  dupCor.fun = duplicateCorrelation, initial.correlation = 0, niter = 5,
-  tol = 1e-06, verbose = TRUE, ...)
+  block = NULL, trim = 0.15, voom.fun = limma::voom,
+  dupCor.fun = limma::duplicateCorrelation, initial.correlation = 0,
+  niter = 5, tol = 1e-06, verbose = TRUE, ...)
 }
 \description{
 Convenience function for alternating dupCor and voom until convergence

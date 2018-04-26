@@ -5,7 +5,7 @@
 \title{Version of voom that uses an offset matrix instead of lib sizes}
 \usage{
 voomWithQualityWeightsAndOffset(dge, design = NULL,
-  offset = expandAsMatrix(getOffset(dge), dim(dge)),
+  offset = edgeR::expandAsMatrix(edgeR::getOffset(dge), dim(dge)),
   normalize.method = "none", plot = FALSE, span = 0.5,
   var.design = NULL, method = "genebygene", maxiter = 50, tol = 1e-10,
   trace = FALSE, replace.weights = TRUE, col = NULL, ...)

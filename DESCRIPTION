@@ -19,7 +19,9 @@ Imports:
     magrittr,
     stringr,
     withr,
-    methods
+    methods,
+    ggplot2,
+    rlang
 Suggests:
     BiocGenerics,
     GenomicRanges,
@@ -31,24 +33,12 @@ Suggests:
     rex,
     sitools,
     plotly,
-    GGally
-Collate:
-    'base_imports.R'
-    'internal.R'
-    'si2f.R'
-    'data_manip_utils.R'
-    'edgeR_utils.R'
-    'fdr_utils.R'
-    'file_format_io.R'
-    'fixes_for_builtins.R'
-    'ggplot_utils.R'
-    'granges_utils.R'
-    'hello.R'
-    'limma_utils.R'
-    'parallel_utils.R'
-    'path_utils.R'
-    'plot_utils.R'
-    'prog_utils.R'
-    'rdata_io.R'
-    'specific_plots.R'
-    'txdb_utils.R'
+    GGally,
+    edgeR,
+    AnnotationDbi,
+    GenomicFeatures,
+    reshape2,
+    forcats,
+    openxlsx,
+    tidyr,
+    SummarizedExperiment

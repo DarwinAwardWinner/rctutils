@@ -21,7 +21,6 @@ get_pval_colname <- function(ttab) {
 
 #' Add a q-value column to any table with a p-value column
 #'
-#' @include internal.R
 #' @export
 add_qvalue <- function(ttab, ...) {
     req_ns("qvalue")
@@ -82,19 +81,4 @@ propTrueNullByLocalFDR_unrestricted <- function (p) {
     q <- n/i * p
     n1 <- n + 1L
     sum(i * q)/n/n1 * 2
-}
-
-#' Variant of eBayes that sets the proportion argument automatically.
-#'
-#' @include internal.R
-#' @export
-eBayes_auto_proportion <- function(..., prop.method="lfdr") {
-    req_ns("limma")
-    eb <- limma::eBayes(...)
-    if (is.function(prop.method)) {
-        ptn <- prop.method(eb$p.value)
-    } else {
-        ptn <- limma::propTrueNull(eb$p.value, method=prop.method)
-    }
-    eBayes(..., proportion=1-ptn)
 }

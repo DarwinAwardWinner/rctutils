@@ -1,5 +1,7 @@
 ## This is just here to tell roxygen2 about all base package imports,
-## which were recommended by R CMD check.
+## which were recommended by R CMD check. Adding these to every
+## individual function that uses these common functions is too
+## tedious, so I've just added them all here.
 
 #' @importFrom grDevices dev.cur dev.list dev.off dev.set png
 #' @importFrom graphics abline barplot lines par title

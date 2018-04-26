@@ -5,7 +5,7 @@
 \title{Parallelized version of \code{\link[limma:selectModel]{limma::selectModel()}}}
 \usage{
 BPselectModel(y, designlist, criterion = "aic", df.prior = 0,
-  s2.prior = NULL, s2.true = NULL, ..., BPPARAM)
+  s2.prior = NULL, s2.true = NULL, ..., BPPARAM = BiocParallel::bpparam())
 }
 \description{
 Parallelized version of \code{\link[limma:selectModel]{limma::selectModel()}}

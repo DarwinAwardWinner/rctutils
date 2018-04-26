@@ -13,7 +13,7 @@ tsmsg <- function(...) {
 assign_into <- function(x, expr, value) {
     req_ns("lazyeval")
     expr <- lazyeval::lazy(expr)$expr
-    f_eval(f_interp(~ x %>% { lazyeval::uq(expr) <- lazyeval::uq(value); . }))
+    lazyeval::f_eval(lazyeval::f_interp(~ x %>% { lazyeval::uq(expr) <- lazyeval::uq(value); . }))
 }
 
 #' @export

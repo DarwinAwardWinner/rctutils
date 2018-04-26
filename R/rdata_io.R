@@ -12,10 +12,10 @@
 #' y <- 3
 #' datafile <- tempfile(fileext=".rda")
 #' # Only saves y, not x
-#' save.image.filtered(datafile, exclude="x")
+#' save_image_filtered(datafile, exclude="x")
 #' @seealso [save.image()]
 #' @export
-save.image.filtered <-
+save_image_filtered <-
     function (file = ".RData", version = NULL, ascii = FALSE,
               compress = !ascii, safe = TRUE, exclude = NULL)
 {
@@ -77,11 +77,11 @@ save.image.filtered <-
 #' datafile <- tempfile(fileext=".rda")
 #' save(file=datafile, list=c("x", "y"))
 #' rm(x,y)
-#' loaded_vars <- load.in.new.env(datafile)
+#' loaded_vars <- load_in_new_env(datafile)
 #' as.list(loaded_vars)
 #' @seealso [save.image()]
 #' @export
-load.in.new.env <- function(file, envir=new.env(), ...) {
+load_in_new_env <- function(file, envir=new.env(), ...) {
     load(file, envir, ...)
     return(envir)
 }
@@ -104,16 +104,16 @@ load.in.new.env <- function(file, envir=new.env(), ...) {
 #' # Set new values which can be overridden by loading the old ones.
 #' x <- 10
 #' y <- 10
-#' load.filtered(datafile, exclude="x")
+#' load_filtered(datafile, exclude="x")
 #' # x is still 10, but y is now 3 again
 #' mget(c("x", "y"))
 #' @seealso [load()]
 #' @export
-load.filtered <- function(file, envir = parent.frame(), ..., exclude=NULL) {
+load_filtered <- function(file, envir = parent.frame(), ..., exclude=NULL) {
     if (!length(exclude)) {
         return(load(file, envir, ...))
     }
-    tempenv <- load.in.new.env(file=file, ...)
+    tempenv <- load_in_new_env(file=file, ...)
     for (i in setdiff(names(tempenv), exclude)) {
         envir[[i]] <- tempenv[[i]]
     }
@@ -125,7 +125,7 @@ load.filtered <- function(file, envir = parent.frame(), ..., exclude=NULL) {
 #' error.
 #'
 #' @export
-read.single.object.from.rda <- function(filename) {
+read_single_object_from_rda <- function(filename) {
     objects <- within(list(), suppressWarnings(load(filename)))
     if (length(objects) != 1) {
         stop("RDA file should contain exactly one object")
@@ -135,12 +135,13 @@ read.single.object.from.rda <- function(filename) {
 
 #' Read a single object from RDS or RDA file
 #'
+#' @importFrom methods as
 #' @export
-read.RDS.or.RDA <- function(filename, expected.class="ANY") {
+read_RDS_or_RDA <- function(filename, expected.class="ANY") {
     object <- suppressWarnings(tryCatch({
         readRDS(filename)
     }, error=function(...) {
-        read.single.object.from.rda(filename)
+        read_single_object_from_rda(filename)
     }))
     if (!any(sapply(expected.class, is, object=object))) {
         object <- as(object, expected.class)

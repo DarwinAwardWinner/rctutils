@@ -4,7 +4,7 @@
 \alias{plotpvals}
 \title{Create an annotatied p-value histogram plot}
 \usage{
-plotpvals(pvals, ptn = propTrueNull(pvals))
+plotpvals(pvals, ptn)
 }
 \description{
 Create an annotatied p-value histogram plot
