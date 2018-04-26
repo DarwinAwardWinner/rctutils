@@ -16,7 +16,6 @@
 #' si_strings <- c("100 k", "35 E", "4 m")
 #' si2f(si_strings)
 #'
-#' @importFrom stringr str_match
 #' @export
 si2f <- function(string, unit="") {
     req_ns("rex")

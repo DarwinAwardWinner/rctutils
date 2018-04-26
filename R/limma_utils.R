@@ -9,7 +9,6 @@ subtractCoefs <- function(x, design, coefsToSubtract, ...) {
     limma::removeBatchEffect(x, design=keep.design, covariates=subtract.design, ...)
 }
 
-#' @importFrom graphics abline barplot lines par title
 #' @export
 voomWithOffset <-
     function (dge, design = NULL,
@@ -78,7 +77,6 @@ voomWithOffset <-
 
 #' Version of voom that uses an offset matrix instead of lib sizes
 #'
-#' @importFrom graphics abline barplot lines par title
 #' @export
 voomWithQualityWeightsAndOffset <-
     function (dge, design = NULL,
@@ -121,8 +119,6 @@ voomWithQualityWeightsAndOffset <-
 
 #' Convenience function for alternating dupCor and voom until convergence
 #'
-#' @importFrom graphics abline barplot lines par title
-#' @importFrom assertthat assert_that
 #' @export
 voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, block = NULL, trim = 0.15,
                                          voom.fun=limma::voom,

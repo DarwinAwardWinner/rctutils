@@ -1,7 +1,6 @@
 ## Read a table from a R data file, csv, or xlsx file. Returns a data
 ## frame or throws an error.
 
-#' @importFrom methods as is
 #' @export
 read_table_general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
                                dataframe.class="data.frame") {
@@ -31,8 +30,6 @@ read_table_general <- function(filename, read.table.args=NULL, read.xlsx.args=NU
     })
 }
 
-#' @importFrom magrittr %>%
-#' @importFrom dplyr mutate_
 #' @export
 read_idr_table <- function(file) {
     idrcols <- c("chr", "start", "end", "name", "score", "strand",
@@ -58,7 +55,6 @@ read_motifmap <- function(x, parse_name=TRUE) {
     gr
 }
 
-#' @importFrom assertthat assert_that
 #' @export
 write_motifmap <- function(x, file) {
     req_ns("S4Vectors", "rtracklayer", "tidyr")
@@ -153,9 +149,6 @@ read_annotation_from_gff <- function(filename, format="GFF3", ...) {
     return(grl)
 }
 
-#' @importFrom methods as
-#' @importFrom magrittr %>%
-#' @importFrom assertthat assert_that
 #' @export
 read_annotation_from_saf <- function(filename, ...) {
     saf <- read_table_general(filename, ...)
@@ -170,8 +163,6 @@ read_annotation_from_rdata <- function(filename) {
     read_RDS_or_RDA(filename, "GRangesList")
 }
 
-#' @importFrom methods is
-#' @importFrom assertthat assert_that
 #' @export
 read_additional_gene_info <- function(filename, gff_format="GFF3",
                                       geneFeatureType="gene", ...) {

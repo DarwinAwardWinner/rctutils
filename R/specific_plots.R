@@ -2,7 +2,6 @@
 
 #' Create an annotatied p-value histogram plot
 #'
-#' @import ggplot2
 #' @export
 plotpvals <- function(pvals, ptn) {
     req_ns("limma")
@@ -41,8 +40,6 @@ ggduo.dataXY <- function(dataX, dataY, extraData=NULL, ...) {
 #'
 #' Additional arguments passed to [getBCVTable()].
 #'
-#' @import dplyr
-#' @import ggplot2
 #' @export
 ggplotBCV <- function(y, xlab="Average log CPM", ylab="Biological coefficient of variation", rawdisp=NULL, ...) {
     req_ns("reshape2")

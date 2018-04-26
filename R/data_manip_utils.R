@@ -13,7 +13,6 @@
 #'     common value to use is `""`, the empty string.
 #'
 #' @seealso [rlang::is_empty()], which only checks for zero length.
-#' @importFrom magrittr %>% equals
 #' @export
 is_valueless <- function(x, empty_values = NA) {
     x %>% unlist %>% na.omit %>% length %>% equals(0)
@@ -24,7 +23,6 @@ is_valueless <- function(x, empty_values = NA) {
 #' @examples
 #' # TODO: PCA example
 #' @importFrom glue glue
-#' @importFrom magrittr set_colnames %>%
 #' @export
 add_numbered_colnames <- function(x, prefix="C") {
     x %>% set_colnames(glue("{prefix}{num}", num=seq(from=1, length.out=ncol(x))))
@@ -104,8 +102,6 @@ code_control_named <- function (n, contrasts = TRUE, sparse = FALSE) {
 #'
 #' TODO: If sep is NA, throw an error for lists.
 #'
-#' @importFrom assertthat assert_that
-#' @importFrom stringr str_c
 #' @export
 collapseToAtomic <- function(x, sep=",") {
     if (is.atomic(x)) {
@@ -135,7 +131,6 @@ ensureAtomicColumns <- function(df, sep=",") {
 
 #' Convert all factors to character in a data frame
 #'
-#' @importFrom magrittr %<>%
 #' @export
 fac2char <- function(df) {
     df[sapply(df, class) == "factor"] %<>% lapply(as.character)
@@ -147,7 +142,6 @@ fac2char <- function(df) {
 #' @examples
 #' parse_bp(c("100", "100bp", "100 kbp", "1Mbp"))
 #'
-#' @importFrom assertthat assert_that
 #' @export
 parse_bp <- function(size) {
     suppressWarnings({
@@ -163,8 +157,6 @@ parse_bp <- function(size) {
 
 #' Format a number of base pairs using the most appropriate unit.
 #'
-#' @importFrom magrittr %>%
-#' @importFrom stringr str_replace_all
 #' @export
 format_bp <- function(x) {
     req_ns("sitools", "rex")
@@ -199,7 +191,6 @@ print_var_vector <- function(v) {
 #'     [dplyr::mutate_if()], which mutates columns that match a
 #'     specific filter criteria.
 #'
-#' @importFrom dplyr mutate quos
 #' @export
 mutate_if_present <- function(.data, names, ...) {
     if (all(names %in% base::names(.data))) {
@@ -209,14 +200,12 @@ mutate_if_present <- function(.data, names, ...) {
     }
 }
 
-#' @importFrom stringr str_replace_all
 #' @export
 quotemeta <- function (string) {
   str_replace_all(string, "(\\W)", "\\\\\\1")
 }
 
 #' @importFrom rlang is_named
-#' @importFrom assertthat assert_that
 #' @export
 relevel_columns <- function(df, ...) {
     req_ns("forcats")

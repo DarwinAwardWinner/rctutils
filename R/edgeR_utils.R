@@ -37,7 +37,6 @@ cpmWithOffset <- function(dge, offset = edgeR::expandAsMatrix(edgeR::getOffset(d
     edgeR::cpm(dge$counts, lib.size=exp(edgeR::getOffset(dge)), log=log, prior.count=prior.count, ...)
 }
 
-#' @importFrom magrittr is_greater_than
 #' @export
 estimateDispByGroup <- function(dge, group=as.factor(dge$samples$group), batch, ...) {
     req_ns("edgeR", "BiocParallel", "magrittr")
@@ -64,7 +63,6 @@ estimateDispByGroup <- function(dge, group=as.factor(dge$samples$group), batch, 
     })
 }
 
-#' @importFrom magrittr %>% %$% %<>%
 #' @export
 getBCVTable <- function(y, design, ..., rawdisp) {
     req_ns("edgeR")
@@ -124,7 +122,6 @@ getBCVTable <- function(y, design, ..., rawdisp) {
 
 #' Returns mds values, with proper colnames.
 #'
-#' @importFrom magrittr %>%
 #' @export
 get_mds <- function(y, k) {
     req_ns("limma")

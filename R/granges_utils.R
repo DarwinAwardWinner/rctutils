@@ -19,8 +19,6 @@
 #' This should really be an S4 method, but writing S4 methods is a
 #' pain.
 #'
-#' @importFrom methods as is new
-#' @importFrom magrittr %>% %<>%
 #' @export
 readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FALSE) {
     req_ns("GenomicRanges")
@@ -124,7 +122,6 @@ grl_to_saf <- function(grl) {
 ## gene. Used for extracting only the gene metadata from exon
 ## metadata.
 
-#' @importFrom magrittr is_weakly_less_than
 get_gene_common_colnames <- function(df, geneids, blacklist=c("type", "Parent")) {
     req_ns("S4Vectors")
     if (nrow(df) < 1) {
@@ -164,7 +161,6 @@ get_gene_common_colnames <- function(df, geneids, blacklist=c("type", "Parent"))
 #' with gene IDs, then the gene ID column will be promoted to the
 #' GRangesList object itself.
 #'
-#' @importFrom magrittr %<>%
 #' @export
 promote_common_mcols <- function(grl, delete.from.source=FALSE, ...) {
     req_ns("S4Vectors", "GenomicRanges")

@@ -135,7 +135,6 @@ read_single_object_from_rda <- function(filename) {
 
 #' Read a single object from RDS or RDA file
 #'
-#' @importFrom methods as
 #' @export
 read_RDS_or_RDA <- function(filename, expected.class="ANY") {
     object <- suppressWarnings(tryCatch({

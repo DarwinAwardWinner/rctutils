@@ -3,7 +3,6 @@
 
 #' Same as `cairo_pdf()` but with a default of `onefile=TRUE`
 #'
-#' @importFrom grDevices cairo_pdf
 #' @export
 cairo_pdf_onefile <- function(..., onefile=TRUE) {
     cairo_pdf(..., onefile = onefile)
@@ -30,14 +29,12 @@ rasterpdf <- function(pdffile, outfile=pdffile, resolution=600) {
 
 ## Returns TRUE if x refers to the device number of a currently active
 ## graphics device.
-#' @importFrom grDevices dev.list
 #' @importFrom rlang is_scalar_integer
 #' @export
 is_dev <- function(x) {
     is_scalar_integer(x) && x %in% dev.list()
 }
 
-#' @importFrom grDevices dev.cur dev.off dev.set
 #' @export
 with_dev <- function(dev, code, closedev) {
     orig.device <- dev.cur()
@@ -65,7 +62,6 @@ with_dev <- function(dev, code, closedev) {
 
 # Useful to wrap functions that both produce a plot and return a
 # useful value, when you only want the return value and not the plot.
-#' @importFrom grDevices dev.off png
 #' @export
 suppressPlot <- function(arg) {
     png("/dev/null")

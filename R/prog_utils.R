@@ -64,7 +64,6 @@ tsmsg <- function(...) {
 #'
 #' @seealso \code{\%\>\%} from the magrittr package.
 #'
-#' @importFrom magrittr %>%
 #' @export
 assign_into <- function(x, expr, value) {
     req_ns("lazyeval")

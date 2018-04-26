@@ -39,3 +39,26 @@ utils::globalVariables(".")
 
 ## Tell check not to worry about rex internal functions
 globalVariables(c("one_or_more", "space", "zero_or_more", "capture", "maybe", "digit", "%if_prev_is%", "%if_next_isnt%", "or"))
+
+#' This is just here to tell roxygen2 about all base package imports,
+#' which were recommended by R CMD check. Adding these to every
+#' individual function that uses these common functions is too
+#' tedious, so I've just added them all here.
+#'
+#' @importFrom grDevices dev.cur dev.list dev.off dev.set png
+#' @importFrom graphics abline barplot lines par title
+#' @importFrom methods as is new
+#' @importFrom stats approx approxfun as.dist as.formula cmdscale end lowess model.matrix na.omit start
+#' @importFrom utils read.csv read.table write.table
+NULL
+
+#' This is here to tell roxygen2 about some common imports that are
+#' used in many functions. Listing them in each of the individual
+#' function's roxygen2 chunks would be overly tedious.
+#'
+#' @importFrom magrittr %<>% %>% %$%
+#' @import dplyr
+#' @import stringr
+#' @import ggplot2
+#' @importFrom assertthat assert_that
+NULL

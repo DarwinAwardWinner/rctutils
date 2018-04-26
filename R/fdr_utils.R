@@ -38,7 +38,6 @@ add_qvalue <- function(ttab, ...) {
 
 #' Compute Bayesian FDR values from limma's B statistics
 #'
-#' @importFrom dplyr cummean
 #' @export
 bfdr <- function(B) {
     o <- order(B, decreasing = TRUE)
