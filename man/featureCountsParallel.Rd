@@ -2,10 +2,26 @@
 % Please edit documentation in R/parallel_utils.R
 \name{featureCountsParallel}
 \alias{featureCountsParallel}
-\title{Parallel version of \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}}
+\title{Parallel version of \code{Rsubread::featureCounts()}}
 \usage{
-featureCountsParallel(files, ...)
+featureCountsParallel(files, ..., BPPARAM = BiocParallel::bpparam())
+}
+\arguments{
+\item{files}{This has the same meaning as in
+\code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}}
+
+\item{...}{Other arguments are passed to
+\code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}}
+
+\item{BPPARAM}{A BiocParallelParam instance that determines how to
+parallelize the operation}
+}
+\value{
+See \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}.
 }
 \description{
-Parallel version of \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}
+Parallel version of \code{Rsubread::featureCounts()}
+}
+\seealso{
+\code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}, \code{\link[BiocParallel:bplapply]{BiocParallel::bplapply()}}
 }

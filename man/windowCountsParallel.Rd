@@ -2,11 +2,26 @@
 % Please edit documentation in R/parallel_utils.R
 \name{windowCountsParallel}
 \alias{windowCountsParallel}
-\title{Parallel version of \code{\link[csaw:windowCounts]{csaw::windowCounts()}}}
+\title{Parallel version of \code{csaw::windowCounts()}}
 \usage{
 windowCountsParallel(bam.files, ..., filter = 10,
   BPPARAM = BiocParallel::bpparam())
 }
+\arguments{
+\item{bam.files, filter}{These arguments have the same meaning
+as in \code{\link[csaw:windowCounts]{csaw::windowCounts()}}}
+
+\item{...}{Other arguments are passed to \code{\link[csaw:windowCounts]{csaw::windowCounts()}}}
+
+\item{BPPARAM}{A BiocParallelParam instance that determines how to
+parallelize the operation}
+}
+\value{
+See \code{\link[csaw:windowCounts]{csaw::windowCounts()}}.
+}
 \description{
-Parallel version of \code{\link[csaw:windowCounts]{csaw::windowCounts()}}
+Parallel version of \code{csaw::windowCounts()}
+}
+\seealso{
+\code{\link[csaw:windowCounts]{csaw::windowCounts()}}, \code{\link[BiocParallel:bplapply]{BiocParallel::bplapply()}}
 }

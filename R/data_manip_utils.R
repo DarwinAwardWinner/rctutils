@@ -170,7 +170,7 @@ collapse_to_atomic <- function(x, sep=",") {
 #'
 #' @export
 ensure_atomic_columns <- function(df, sep=",") {
-    df[] %<>% lapply(collapseToAtomic, sep=sep)
+    df[] %<>% lapply(collapse_to_atomic, sep=sep)
     df
 }
 
@@ -202,25 +202,19 @@ parse_bp <- function(size) {
 
 #' Format a number of base pairs using the most appropriate unit.
 #'
+#' @param x A numeric vector representing numbers of base pairs.
+#'
+#' @return A character vector containing string representations of the
+#'     number of base pairs, using appropriate SI prefixes.
+#'
+#' @examples
+#'
+#' format_bp(c(100, 1000, 1e6))
+#'
 #' @export
 format_bp <- function(x) {
     req_ns("sitools", "rex")
     x %>% round %>% sitools::f2si("bp") %>% str_replace_all(rex::rex(one_or_more(space)), "")
-}
-
-#' Print a readable summary of a list of values.
-#'
-#' This is useful for printing out a list of the parsed command-line
-#' arguments for a script.
-#'
-#' TODO: Find a better home for this?
-#'
-#' @export
-print_var_vector <- function(v) {
-    for (i in names(v)) {
-        cat(i, ": ", deparse(v[[i]]), "\n", sep="")
-    }
-    invisible(v)
 }
 
 #' Perform mutations only if specific column names are present

@@ -1,8 +1,18 @@
 #' Parallelized version of [limma::selectModel()]
 #'
+#' @param y,designlist,criterion,df.prior,s2.prior,s2.true,... These
+#'     arguments all have the same meaning as in
+#'     [limma::selectModel()].
+#' @param BPPARAM A BiocParallelParam instance that determines how to
+#'     parallelize the operation
+#'
+#' @return See [limma::selectModel()].
+#'
+#' @seealso [limma::selectModel()], [BiocParallel::bplapply()]
+#'
 #' @export
-BPselectModel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.prior = NULL,
-                           s2.true = NULL, ..., BPPARAM = BiocParallel::bpparam())
+selectModelParallel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.prior = NULL,
+                                 s2.true = NULL, ..., BPPARAM = BiocParallel::bpparam())
 {
     req_ns("BiocParallel", "limma")
     ym <- as.matrix(y)
@@ -57,6 +67,8 @@ BPselectModel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.pr
 }
 
 #' Combine multiple featureCounts results
+#'
+#' This is a helper function for `featureCountsParallel()`.
 combineFCResults <- function(fcreslist) {
     combfuncs <- list(
         counts=cbind,
@@ -80,15 +92,33 @@ combineFCResults <- function(fcreslist) {
     res
 }
 
+#' `Rsubread::featureCounts()` with output suppressed
+#'
+#' This is a helper function for `featureCountsParallel()`.
+#'
+#' This redirects the output to `/dev/null`, so it assumes a UNIX-like
+#' system.
 featureCountsQuiet <- function(...) {
     req_ns("withr", "Rsubread")
     withr::with_output_sink("/dev/null", Rsubread::featureCounts(...))
 }
 
-#' Parallel version of [Rsubread::featureCounts()]
+#' Parallel version of `Rsubread::featureCounts()`
+#'
+#' @param files This has the same meaning as in
+#'     [Rsubread::featureCounts()]
+#' @param ... Other arguments are passed to
+#'     [Rsubread::featureCounts()]
+#' @param BPPARAM A BiocParallelParam instance that determines how to
+#'     parallelize the operation
+#'
+#' @return See [Rsubread::featureCounts()].
+#'
+#' @seealso [Rsubread::featureCounts()], [BiocParallel::bplapply()]
 #'
 #' @export
-featureCountsParallel <- function(files, ...) {
+featureCountsParallel <- function(files, ...,
+                                  BPPARAM = BiocParallel::bpparam()) {
     req_ns("Rsubread", "BiocParallel")
     # Let featureCounts handle the degenerate case itself
     if (length(files) == 0) {
@@ -96,16 +126,25 @@ featureCountsParallel <- function(files, ...) {
     }
     ## We pass nthreads=1 to tell featureCounts not to parallelize
     ## itself, since we are already handling parallelization.
-    BiocParallel::bplapply(files, featureCountsQuiet, ..., nthreads=1) %>%
+    BiocParallel::bplapply(files, featureCountsQuiet, ..., nthreads=1, BPPARAM = BPPARAM) %>%
         combineFCResults
 }
 
-#' Parallel version of [csaw::windowCounts()]
+#' Parallel version of `csaw::windowCounts()`
 #'
+#' @param bam.files,filter These arguments have the same meaning
+#'     as in [csaw::windowCounts()]
+#' @param ... Other arguments are passed to [csaw::windowCounts()]
+#' @param BPPARAM A BiocParallelParam instance that determines how to
+#'     parallelize the operation
+#'
+#' @return See [csaw::windowCounts()].
+#'
+#' @seealso [csaw::windowCounts()], [BiocParallel::bplapply()]
 #' @export
 windowCountsParallel <- function(bam.files, ..., filter=10,
                                  BPPARAM = BiocParallel::bpparam()) {
-    req_ns("BiocParallel", "csaw", "BiocGenerics", "SummarizedExperiment")
+    req_ns("BiocParallel", "csaw", "SummarizedExperiment")
     reslist <- BiocParallel::bplapply(X=bam.files, FUN=csaw::windowCounts, ..., filter=0, BPPARAM=BPPARAM)
     res <- do.call(cbind, reslist)
     rm(reslist)
@@ -113,9 +152,14 @@ windowCountsParallel <- function(bam.files, ..., filter=10,
     res[keep,]
 }
 
-#' Like lapply, but returns future objects.
+#' Like lapply, but returns a list of future objects.
 #'
-#' The results can be fetched all at once with [future::values()].
+#' @param X,FUN,... See [lapply()].
+#'
+#' @return A list of futures. You can fetch all the results in a list
+#'     using [future::values()].
+#'
+#' @seealso [lapply()], [future::future()]
 #'
 #' @export
 future.lapply <- function(X, FUN, ...) {

@@ -6,7 +6,16 @@
 \usage{
 get_pval_colname(ttab)
 }
+\arguments{
+\item{ttab}{A table of results produced by \code{\link[limma:topTable]{limma::topTable()}},
+\code{\link[edgeR:topTags]{edgeR::topTags()}}, \code{\link[DESeq2:results]{DESeq2::results()}}, or any table with a
+p-value column in it.}
+}
+\value{
+The name of the column containing p-values. If no such
+column is found, an error is thrown.
+}
 \description{
-limma uses "P.Value", edgeR uses "PValue", so we need an
+limma uses "P.Value" while edgeR uses "PValue", so we need an
 abstraction.
 }

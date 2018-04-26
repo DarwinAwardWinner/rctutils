@@ -6,6 +6,18 @@
 \usage{
 format_bp(x)
 }
+\arguments{
+\item{x}{A numeric vector representing numbers of base pairs.}
+}
+\value{
+A character vector containing string representations of the
+number of base pairs, using appropriate SI prefixes.
+}
 \description{
 Format a number of base pairs using the most appropriate unit.
+}
+\examples{
+
+format_bp(c(100, 1000, 1e6))
+
 }

@@ -109,3 +109,28 @@ withGC <- function(expr, ...) {
     on.exit(gc(...))
     return(expr)
 }
+
+#' Print a readable summary of a list of values.
+#'
+#' This is useful for printing out a list of the parsed command-line
+#' arguments for a script. The output is generally more compact than
+#' [print()] or [str()].
+#'
+#' @param v A named list or vector
+#'
+#' @return Returns `v` invisibly.
+#'
+#' @examples
+#'
+#' x <- list(verbose=TRUE, infile="a.txt", outfile="b.txt", ncores=8)
+#' print_var_vector(x)
+#'
+#' @importFrom rlang is_named
+#' @export
+print_var_vector <- function(v) {
+    assert_that(is_named(v))
+    for (i in names(v)) {
+        cat(i, ": ", deparse(v[[i]]), "\n", sep="")
+    }
+    invisible(v)
+}

@@ -2,13 +2,73 @@
 % Please edit documentation in R/limma_utils.R
 \name{voomWithDuplicateCorrelation}
 \alias{voomWithDuplicateCorrelation}
-\title{Convenience function for alternating dupCor and voom until convergence}
+\title{Alternate \code{limma::duplicateCorrelation()} and \code{limma::voom()} until convergence}
 \usage{
 voomWithDuplicateCorrelation(counts, design = NULL, plot = FALSE,
-  block = NULL, trim = 0.15, voom.fun = limma::voom,
+  block = NULL, trim = 0.15, voom.fun = voomWithOffset,
   dupCor.fun = limma::duplicateCorrelation, initial.correlation = 0,
-  niter = 5, tol = 1e-06, verbose = TRUE, ...)
+  maxiter = 5, tol = 1e-06, verbose = TRUE, ...)
+}
+\arguments{
+\item{counts, design, plot, ...}{These are passed to \code{\link[limma:voom]{limma::voom()}}.}
+
+\item{block, trim}{These are passed to
+\code{\link[limma:duplicateCorrelation]{limma::duplicateCorrelation()}}.}
+
+\item{voom.fun}{Function to use in place of \code{limma::voom()}. For
+example, you could use \code{limma::voomWithQualityWeights}.
+Obvoiusly, this function should conform to the same interface
+as \code{limma::voom()}, accepting the same arguments and returning
+an EList.}
+
+\item{dupCor.fun}{Function to use in place of
+\code{limma::duplicateCorrelation()}. I don't currently know of any
+suitable values for this other than
+\code{limma::duplicateCorrelation()}.}
+
+\item{initial.correlation}{Initial correlation value to use for the
+first run of \code{limma::voom()}. There is no need to set this
+value, but setting it to a reasonable guess might allow the
+iteration to converge sooner.}
+
+\item{maxiter}{Maximum number of iterations. If convergence has not
+been achieved after this many iterations, the final result will
+be returned with a warning.}
+
+\item{tol}{Convergence tolerance. If a run of
+\code{limma::duplicateCorrelation()} yeilds a correlation value
+within \code{tol} of the previous correlation value, the result is
+considered converged, and iteration is stopped.}
+
+\item{verbose}{If TRUE, give messages indicating the progress of
+the iteration.}
+}
+\value{
+The EList object returned by the final iteration of
+\code{limma::voom()}.
+
+It has previously been recommended in the past to run voom and
+duplicateCorrelation twice each, with the implication that further
+iterations would see diminishing returns (see
+https://support.bioconductor.org/p/59700/#67620). However, rather
+than assume two iterations is always sufficient, this function
+instead keeps iterating until convergence is actually observed.
+
+Note that I am not aware of any proof that iterating to convergence
+is guaranteed to produce a unique solution. The optimization may
+well be non-convex, in which case this naive algorithm could
+converge to a local optimum rather than a global one. Empirically,
+differences between successive runs get very small after the second
+run, so it seems stable in practice.
 }
 \description{
-Convenience function for alternating dupCor and voom until convergence
+This function runs \code{\link[limma:voom]{limma::voom()}} and
+\code{\link[limma:duplicateCorrelation]{limma::duplicateCorrelation()}} repeatedly until two consecutive
+runs yield the same correlation value (within \code{tol} of each other),
+indicating that the iteration has converged.
+}
+\examples{
+
+# TODO: Steal from voom/dupcor examples
+
 }

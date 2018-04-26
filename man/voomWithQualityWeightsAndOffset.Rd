@@ -2,14 +2,41 @@
 % Please edit documentation in R/limma_utils.R
 \name{voomWithQualityWeightsAndOffset}
 \alias{voomWithQualityWeightsAndOffset}
-\title{Version of voom that uses an offset matrix instead of lib sizes}
+\title{Implementation of \code{limma::voomWithQualityWeights()} that uses an offset matrix}
 \usage{
-voomWithQualityWeightsAndOffset(dge, design = NULL,
+voomWithQualityWeightsAndOffset(counts, design = NULL,
   offset = edgeR::expandAsMatrix(edgeR::getOffset(dge), dim(dge)),
   normalize.method = "none", plot = FALSE, span = 0.5,
   var.design = NULL, method = "genebygene", maxiter = 50, tol = 1e-10,
   trace = FALSE, replace.weights = TRUE, col = NULL, ...)
 }
+\arguments{
+\item{counts, design, normalize.method, span, plot, var.design, method, maxiter, tol, trace, replace.weights, col, ...}{These arguments have the same meaning as in
+\code{limma::voomWithQualityWeights()}.}
+
+\item{offset}{An offset matrix to be used in computing log2 CPM
+values. This is optional only if \code{counts} is a
+\code{\link[edgeR:DGEList]{edgeR::DGEList()}}.}
+}
+\value{
+An EList object with weights, like that returned by
+\code{\link[limma:voomWithQualityWeights]{limma::voomWithQualityWeights()}}, but with log2 CPM values
+computed using the offset matrix.
+
+If \code{counts} is a DGEList object that does not contain an offset
+matrix, one will be generated from the normalized library sizes,
+yielding identical behavior to \code{limma::voom()}. Hence, this is
+generally usable as a drop-in replacement for \code{limma::voom()}.
+}
 \description{
-Version of voom that uses an offset matrix instead of lib sizes
+This is a combination of \code{\link[limma:voomWithQualityWeights]{limma::voomWithQualityWeights()}} and
+\code{\link[=voomWithOffset]{voomWithOffset()}}.
+}
+\examples{
+
+# TODO: Copy from voomWithQualityWeights
+
+}
+\seealso{
+\code{\link[edgeR:getOffset]{edgeR::getOffset()}}
 }

@@ -1,7 +1,14 @@
 #' Determine the column name of the p-value column in a table
 #'
-#' limma uses "P.Value", edgeR uses "PValue", so we need an
+#' limma uses "P.Value" while edgeR uses "PValue", so we need an
 #' abstraction.
+#'
+#' @param ttab A table of results produced by [limma::topTable()],
+#'     [edgeR::topTags()], [DESeq2::results()], or any table with a
+#'     p-value column in it.
+#'
+#' @return The name of the column containing p-values. If no such
+#'     column is found, an error is thrown.
 #'
 #' @export
 get_pval_colname <- function(ttab) {
@@ -10,7 +17,9 @@ get_pval_colname <- function(ttab) {
     } else {
         cnames <- colnames(ttab)
     }
-    pcol <- match(c("p.value", "pvalue", "pval", "p"),
+    ## Match case-insensitively, but return the name in its original
+    ## case.
+    pcol <- match(c("p.value", "pvalue", "pval", "p", "p value"),
         tolower(cnames)) %>%
         na.omit %>% .[1]
     pcolname <- cnames[pcol]
@@ -20,6 +29,26 @@ get_pval_colname <- function(ttab) {
 }
 
 #' Add a q-value column to any table with a p-value column
+#'
+#' This function takes a results table and augments it with columns
+#' containing q-values and local FDR values computed using
+#' [qvalue::qvalue()]
+#'
+#' If a p-value column cannot be found or if the q-value computation
+#' fails, `ttab` will be returned with no new columns added, with a
+#' warning. This might happen if the p-value distribution is highly
+#' atypical, such that it is impossible to meaningfully estimate
+#' `pi0`.
+#' @param ttab A table of results produced by [limma::topTable()],
+#'     [edgeR::topTags()], [DESeq2::results()], or any table with a
+#'     p-value column in it.
+#' @param ... Additional arguments are passed to [qvalue::qvalue()].
+#' @return `ttab` possibly with two new columns added, named "QValue"
+#'     and "LocFDR".
+#'
+#' @examples
+#'
+#' #TODO steal from topTable
 #'
 #' @export
 add_qvalue <- function(ttab, ...) {
@@ -54,7 +83,7 @@ bfdr <- function(B) {
 #' Add Bayesian FDR values to a limma top table
 #'
 #' @export
-add.bfdr <- function(ttab) {
+add_bfdr <- function(ttab) {
     B <- ttab[["B"]]
     if (is.null(B)) {
         warning("Cannot add BFDR to table with no B statistics")

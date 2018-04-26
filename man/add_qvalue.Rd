@@ -6,6 +6,31 @@
 \usage{
 add_qvalue(ttab, ...)
 }
+\arguments{
+\item{ttab}{A table of results produced by \code{\link[limma:topTable]{limma::topTable()}},
+\code{\link[edgeR:topTags]{edgeR::topTags()}}, \code{\link[DESeq2:results]{DESeq2::results()}}, or any table with a
+p-value column in it.}
+
+\item{...}{Additional arguments are passed to \code{\link[qvalue:qvalue]{qvalue::qvalue()}}.}
+}
+\value{
+\code{ttab} possibly with two new columns added, named "QValue"
+and "LocFDR".
+}
 \description{
-Add a q-value column to any table with a p-value column
+This function takes a results table and augments it with columns
+containing q-values and local FDR values computed using
+\code{\link[qvalue:qvalue]{qvalue::qvalue()}}
+}
+\details{
+If a p-value column cannot be found or if the q-value computation
+fails, \code{ttab} will be returned with no new columns added, with a
+warning. This might happen if the p-value distribution is highly
+atypical, such that it is impossible to meaningfully estimate
+\code{pi0}.
+}
+\examples{
+
+#TODO steal from topTable
+
 }

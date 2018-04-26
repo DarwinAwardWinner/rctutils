@@ -7,5 +7,5 @@
 combineFCResults(fcreslist)
 }
 \description{
-Combine multiple featureCounts results
+This is a helper function for \code{featureCountsParallel()}.
 }

@@ -2,10 +2,20 @@
 % Please edit documentation in R/parallel_utils.R
 \name{future.lapply}
 \alias{future.lapply}
-\title{Like lapply, but returns future objects.}
+\title{Like lapply, but returns a list of future objects.}
 \usage{
 future.lapply(X, FUN, ...)
 }
+\arguments{
+\item{X, FUN, ...}{See \code{\link[=lapply]{lapply()}}.}
+}
+\value{
+A list of futures. You can fetch all the results in a list
+using \code{\link[future:values]{future::values()}}.
+}
 \description{
-The results can be fetched all at once with \code{\link[future:values]{future::values()}}.
+Like lapply, but returns a list of future objects.
+}
+\seealso{
+\code{\link[=lapply]{lapply()}}, \code{\link[future:future]{future::future()}}
 }

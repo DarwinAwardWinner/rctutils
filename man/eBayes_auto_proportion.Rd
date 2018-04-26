@@ -2,10 +2,44 @@
 % Please edit documentation in R/limma_utils.R
 \name{eBayes_auto_proportion}
 \alias{eBayes_auto_proportion}
-\title{Variant of eBayes that sets the proportion argument automatically.}
+\title{Variant of \code{limma::eBayes()} that sets the \code{proportion} argument automatically.}
 \usage{
 eBayes_auto_proportion(..., prop.method = "lfdr")
 }
+\arguments{
+\item{...}{All other arguments are passed to \code{\link[=limma:eBayes]{limma:eBayes()}}.}
+
+\item{prop.method}{The method by which to calculate the proportion
+of true null hypotheses (i.e. non-differentially expressed
+genes). This can be a string to be used as the \code{method}
+argument to \code{\link[limma:propTrueNull]{limma::propTrueNull()}}, or a function that accepts
+a vector of p-values and returns a single value between 0 and
+1. This argument can only be passed by name.}
+}
+\value{
+See \code{\link[limma:eBayes]{limma::eBayes()}}.
+}
 \description{
-Variant of eBayes that sets the proportion argument automatically.
+Limma's \code{\link[limma:eBayes]{limma::eBayes()}} function can calculate log-odds scores
+(a.k.a. B statistics), which depend on an estimated proportion of
+differentially expressed genes that the user specifies \emph{a priori}.
+Limma also provides methods for calculating this proportion via
+\code{\link[limma:propTrueNull]{limma::propTrueNull()}}, and other packages also provide similar
+functions. This function combines the two in order to set the
+proportion automatically.
+}
+\details{
+The B statistics produced when running \code{limma::topTable()} on the
+value returned by this function should be directly interpretable as
+estimated log odds, as long as the distribituion of p-values is
+well-behaved.
+
+Note that if the p-value distribution is highly atypical, a
+proportion that is not between 0 and 1 could be estimated. If this
+happens, and error will be thrown.
+}
+\examples{
+
+#TODO Steal from eBayes
+
 }
