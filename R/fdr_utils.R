@@ -1,4 +1,9 @@
-# limma uses "P.Value", edgeR uses "PValue", so we need an abstraction
+#' Determine the column name of the p-value column in a table
+#'
+#' limma uses "P.Value", edgeR uses "PValue", so we need an
+#' abstraction.
+#'
+#' @export
 get_pval_colname <- function(ttab) {
     if (is.character(ttab)) {
         cnames <- ttab
@@ -14,11 +19,15 @@ get_pval_colname <- function(ttab) {
     return(pcolname)
 }
 
-# Add a q-value column to any table with a p-value column
-add.qvalue <- function(ttab, ...) {
+#' Add a q-value column to any table with a p-value column
+#'
+#' @include internal.R
+#' @export
+add_qvalue <- function(ttab, ...) {
+    req_ns("qvalue")
     tryCatch({
         P <- ttab[[get_pval_colname(ttab)]]
-        qobj <- qvalue(P, ...)
+        qobj <- qvalue::qvalue(P, ...)
         ttab$QValue <- qobj$qvalues
         ttab$LocFDR <- qobj$lfdr
         attr(ttab, "qvalue") <- qobj
@@ -28,23 +37,25 @@ add.qvalue <- function(ttab, ...) {
     ttab
 }
 
-# Compute posterior probabilities and Bayesian FDR values from limma's B
-# statistics
+#' Compute Bayesian FDR values from limma's B statistics
+#'
+#' @importFrom dplyr cummean
+#' @export
 bfdr <- function(B) {
     o <- order(B, decreasing = TRUE)
     ro <- order(o)
     B <- B[o]
-    ## TODO: Finish this function?
-    positive <- which(B > 0)
     PP <- exp(B)/(1+exp(B))
-    # Computing from 1-PP gives better numerical precision for the
-    # most significant genes (large B-values)
+    # Computing FDR from from 1-PP gives better numerical precision
+    # for the most significant genes (large B-values)
     oneMinusPP <- 1/(1+exp(B))
     BayesFDR <- cummean(oneMinusPP)
     data.frame(B, PP, BayesFDR)[ro,]
 }
 
-# Add Bayesian FDR to a limma top table
+#' Add Bayesian FDR values to a limma top table
+#'
+#' @export
 add.bfdr <- function(ttab) {
     B <- ttab[["B"]]
     if (is.null(B)) {
@@ -58,8 +69,12 @@ add.bfdr <- function(ttab) {
     ttab
 }
 
-# Variant that does not restrict to the range [0,1]. Useful for identifying
-# potential atypical p-value distributions (too many large p-values).
+#' Variant of propTrueNullByLocalFDR that does not restrict to the range [0,1]
+#'
+#' Useful for identifying potential atypical p-value distributions
+#' (e.g. too many large p-values).
+#'
+#' @export
 propTrueNullByLocalFDR_unrestricted <- function (p) {
     n <- length(p)
     i <- n:1L
@@ -69,55 +84,17 @@ propTrueNullByLocalFDR_unrestricted <- function (p) {
     sum(i * q)/n/n1 * 2
 }
 
-# Add corrected p-value, q-value, and locfdr columns to any table with a p-value
-# column. Works by the possibly questionable method of converting p-values to
-# equivalent z-scores and running fdrtool on the z-scores.
-add.fdrtool <- function(ttab, verbose=FALSE, plot=TRUE, convert.to.zscores, cutoff.method,
- ...) {
-    P <- ttab[[get_pval_colname(ttab)]]
-    assert_that(!is.null(P), length(P) > 0, !any(is.na(P)))
-    if (missing(convert.to.zscores)) {
-        # If pval dist is high-biased, use normal modelling instead.
-        ptn <- propTrueNullByLocalFDR_unrestricted(P)
-        convert.to.zscores <- ptn > 1
-    }
-    if (convert.to.zscores) {
-        # Try normal modelling instead
-        Zscore <- qnorm(1-(P/2))
-        if (missing(cutoff.method)) {
-            co <- fndr.cutoff(Zscore, statistic="normal")
-            if (co >= 0.3) {
-                cutoff.method <- "fndr"
-            } else {
-                cutoff.method <- "locfdr"
-            }
-        }
-        fdrmod <- fdrtool(Zscore, statistic="normal", verbose=verbose,
-            plot=plot, cutoff.method=cutoff.method, ...)
-
-    } else {
-        if (missing(cutoff.method)) {
-            cutoff.method <- "fndr"
-        }
-        fdrmod <- fdrtool(P, statistic="pvalue", verbose=verbose,
-            plot=plot, cutoff.method=cutoff.method,...)
-    }
-    fdrdf <- do.call(data.frame, fdrmod[c("pval", "qval", "lfdr")])
-    for (i in names(fdrdf)) {
-        ttab[[str_c("fdrtool.", i)]] <- fdrdf[[i]]
-    }
-    attr(ttab, "fdrtool") <- fdrmod
-    ttab
-}
-
-# Variant of eBayes that uses propTrueNull (or a custom function) to
-# set the proportion argument automatically
-eBayes_autoprop <- function(..., prop.method="lfdr") {
-    eb <- eBayes(...)
+#' Variant of eBayes that sets the proportion argument automatically.
+#'
+#' @include internal.R
+#' @export
+eBayes_auto_proportion <- function(..., prop.method="lfdr") {
+    req_ns("limma")
+    eb <- limma::eBayes(...)
     if (is.function(prop.method)) {
         ptn <- prop.method(eb$p.value)
     } else {
-        ptn <- propTrueNull(eb$p.value, method=prop.method)
+        ptn <- limma::propTrueNull(eb$p.value, method=prop.method)
     }
     eBayes(..., proportion=1-ptn)
 }

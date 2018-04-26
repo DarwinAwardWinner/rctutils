@@ -1,21 +1,61 @@
+#' Determine whether a list or vector has any non-missing values.
+#'
+#' A vector is "valueless" if it has zero length or contains only NA
+#' values. A list is empty if has zero length or contains only empty
+#' vectors.
+#'
+#' @param x The object to check for emptiness.
+#' @param empty_values A vector of values that should be considered
+#'     "empty", in addition to NA. Any vector containing only NA and
+#'     these values will be considered "valueless". For example, if
+#'     you want to know whether a numeric vector contains any non-NA,
+#'     non-zero values, you could use `empty_values = 0`. Another
+#'     common value to use is `""`, the empty string.
+#'
+#' @seealso [rlang::is_empty()], which only checks for zero length.
+#' @importFrom magrittr %>% equals
+#' @export
+is_valueless <- function(x, empty_values = NA) {
+    x %>% unlist %>% na.omit %>% length %>% equals(0)
+}
+
+#' Add numbered colnames with a commo prefix.
+#'
+#' @examples
+#' # TODO: PCA example
+#' @importFrom glue glue
+#' @importFrom magrittr set_colnames %>%
+#' @export
 add_numbered_colnames <- function(x, prefix="C") {
     x %>% set_colnames(glue("{prefix}{num}", num=seq(from=1, length.out=ncol(x))))
 }
 
-# For each column of a data frame, if it is a character vector with at least one
-# repeated value, convert that column to a factor
-auto_factorize <- function(df) {
+
+#' Intelligently convert character columns to factors in a data frame
+#'
+#' For each column of a data frame, if it is a character vector with
+#' at least one repeated value, convert that column to a factor.
+#' Character columns with all unique values (e.g. sample IDs) will not
+#' be modified.
+#'
+#' @export
+auto_factorize_columns <- function(df) {
     for (i in colnames(df)) {
         if (is.character(df[[i]]) && anyDuplicated(df[[i]])) {
-            df[[i]] %<>% factor
+            df[[i]] <- factor(df[[i]])
         }
     }
     df
 }
 
+#' Remove valueless mcols from an object
+#'
+#' Emptiness is defined as in [is_valueless()].
+#'
+#' @export
 cleanup_mcols <- function(object, mcols_df=mcols(object)) {
-    nonempty <- !sapply(mcols_df, is.empty)
-    mcols_df %<>% .[nonempty]
+    nonempty <- !sapply(mcols_df, is_empty)
+    mcols_df <- mcols_df[nonempty]
     if (!missing(object)) {
         mcols(object) <- mcols_df
         return(object)
@@ -24,14 +64,15 @@ cleanup_mcols <- function(object, mcols_df=mcols(object)) {
     }
 }
 
-## TODO: Figure out how to correctly reference internal functions from
-## another pkg
-library(codingMatrices)
-# Variant of code_control that generates more verbose column names
+#' Variant of code_control that generates more verbose column names
+#'
+#' @include internal.R
+#' @export
 code_control_named <- function (n, contrasts = TRUE, sparse = FALSE) {
+    req_ns("codingMatrices")
     if (is.numeric(n) && length(n) == 1L) {
         if (n > 1L)
-            levels <- .zf(seq_len(n))
+            levels <- codingMatrices:::.zf(seq_len(n))
         else stop("not enough degrees of freedom to define contrasts")
     }
     else {
@@ -55,9 +96,14 @@ code_control_named <- function (n, contrasts = TRUE, sparse = FALSE) {
         B
     }
 }
-environment(code_control_named) <- new.env(parent = environment(code_control))
 
-# Helper function for ensureAtomicColumns
+#' Convert a list to an atomic vector.
+#'
+#' TODO: If sep is NA, throw an error for lists.
+#'
+#' @importFrom assertthat assert_that
+#' @importFrom stringr str_c
+#' @export
 collapseToAtomic <- function(x, sep=",") {
     if (is.atomic(x)) {
         return(x)
@@ -71,39 +117,67 @@ collapseToAtomic <- function(x, sep=",") {
     }
 }
 
-# Function to ensure that all columns of a data frame are atomic
-# vectors. Columns that are lists have each of their elements
-# collapsed into strings using the sepcified separator. TODO: If sep
-# is NA, throw an error for lists.
+#' Ensure that all columns of a data frame are atomic vectors.
+#'
+#' Columns that are lists have each of their elements collapsed into
+#' strings using the sepcified separator. TODO: If sep is NA, throw an
+#' error for lists.
+#'
+#' @export
 ensureAtomicColumns <- function(df, sep=",") {
 
     df[] %<>% lapply(collapseToAtomic, sep=sep)
     df
 }
 
+#' Convert all factors to character in a data frame
+#'
+#' @importFrom magrittr %<>%
+#' @export
 fac2char <- function(df) {
     df[sapply(df, class) == "factor"] %<>% lapply(as.character)
     df
 }
 
-
+#' Parse a number of base pairs with optional units.
+#'
+#' @examples
+#' parse_bp(c("100", "100bp", "100 kbp", "1Mbp"))
+#'
 #' @include si2f.R
+#' @importFrom assertthat assert_that
+#' @export
 parse_bp <- function(size) {
     suppressWarnings({
         result <- si2f(size, "bp")
         ## Fall back to just parsing a number without the "bp" suffix
+        ## (which also includes bare numbers with no unit at all)
         result[is.na(result)] <- si2f(size[is.na(result)])
     })
+    ## Require everyting to parse successfully or throw an error
     assert_that(!any(is.na(result)))
     result
 }
 
-#' @importFrom sitools f2si
+#' Format a number of base pairs using the most appropriate unit.
+#'
+#' @include internal.R
+#' @importFrom magrittr %>%
+#' @importFrom stringr str_replace_all
+#' @export
 format_bp <- function(x) {
-    x %>% round %>% f2si("bp") %>% str_replace_all(rex(one_or_more(space)), "")
+    req_ns("sitools", "rex")
+    x %>% round %>% sitools::f2si("bp") %>% str_replace_all(rex::rex(one_or_more(space)), "")
 }
 
-## TODO: Find a better home for this?
+#' Print a readable summary of a list of values.
+#'
+#' This is useful for printing out a list of the parsed command-line
+#' arguments for a script.
+#'
+#' TODO: Find a better home for this?
+#'
+#' @export
 print_var_vector <- function(v) {
     for (i in names(v)) {
         cat(i, ": ", deparse(v[[i]]), "\n", sep="")
@@ -111,34 +185,21 @@ print_var_vector <- function(v) {
     invisible(v)
 }
 
-
-## Given a GRangesList whose underlying ranges have mcols, find mcols
-## of the ranges that are constant within each gene and promote them
-## to mcols of the GRangesList. For example, if exons are annotated with
-promote.common.mcols <- function(grl, delete.from.source=FALSE, ...) {
-    colnames.to.promote <- get.gene.common.colnames(mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
-    promoted.df <- mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop=FALSE]
-    if (delete.from.source) {
-        mcols(grl@unlistData) %<>% .[setdiff(names(.), colnames.to.promote)]
-    }
-    mcols(grl) %<>% cbind(promoted.df)
-    grl
-}
-
-## Given a GRangesList whose underlying ranges have mcols, find mcols
-## of the ranges that are constant within each gene and promote them
-## to mcols of the GRangesList. For example, if exons are annotated with
-promote.common.mcols <- function(grl, delete.from.source=FALSE, ...) {
-    colnames.to.promote <- get.gene.common.colnames(mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
-    promoted.df <- mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop=FALSE]
-    if (delete.from.source) {
-        mcols(grl@unlistData) %<>% .[setdiff(names(.), colnames.to.promote)]
-    }
-    mcols(grl) %<>% cbind(promoted.df)
-    grl
-}
-
-#' @importFrom dplyr mutate
+#' Perform mutations only if specific column names are present
+#'
+#' Note that columns required to be present need not be involved in the mutations.
+#'
+#' @param .data,... These have the same meaning as in
+#'     [dplyr::mutate()]
+#' @param names If `.data` does not contain all of these names as
+#'     columns, it will be returned unmodified.
+#'
+#' @seealso [dplyr::mutate()]. Not to be confused with
+#'     [dplyr::mutate_if()], which mutates columns that match a
+#'     specific filter criteria.
+#'
+#' @importFrom dplyr mutate quos
+#' @export
 mutate_if_present <- function(.data, names, ...) {
     if (all(names %in% base::names(.data))) {
         mutate(.data, !!!quos(...))
@@ -148,10 +209,12 @@ mutate_if_present <- function(.data, names, ...) {
 }
 
 #' @importFrom stringr str_replace_all
+#' @export
 quotemeta <- function (string) {
   str_replace_all(string, "(\\W)", "\\\\\\1")
 }
 
+#' @export
 relevel_columns <- function(df, ...) {
     relevel_specs <- list(...)
     assert_that(is_named(relevel_specs))
@@ -161,29 +224,14 @@ relevel_columns <- function(df, ...) {
     df
 }
 
+#' @export
 sprintf.single.value <- function(fmt, value) {
     ## Max function arguments is 100
     arglist = c(list(fmt=fmt), rep(list(value), 99))
     do.call(sprintf, arglist)
 }
 
-is_empty <- function(x) {
-    x %>% unlist %>% na.omit %>% length %>% equals(0)
-}
-
-is_fully_named <- function(obj, namefun=names) {
-    the.names <- namefun(obj)
-    if (is.null(the.names)) {
-        return(FALSE)
-    } else if (!is.character(the.names)) {
-        return(FALSE)
-    } else if (any(is.na(the.names))) {
-        return(FALSE)
-    } else {
-        return(TRUE)
-    }
-}
-
+#' @export
 strip_design_factor_names <- function(design, prefixes=names(attr(design, "contrasts"))) {
     if (!is.null(prefixes)) {
         regex.to.delete <- rex(or(prefixes) %if_prev_is% or(start, ":") %if_next_isnt% end)

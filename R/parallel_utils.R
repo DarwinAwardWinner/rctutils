@@ -1,7 +1,15 @@
+#' Parallelized version of [limma::selectModel()]
+#'
+#' @include internal.R
+#' @export
 BPselectModel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.prior = NULL,
-                           s2.true = NULL, ..., BPPARAM=bpparam())
+                           s2.true = NULL, ..., BPPARAM)
 {
-    ym <- as.matrix(dge)
+    req_ns("BiocParallel", "limma")
+    if (missing(BPPARAM)) {
+        BPPARAM <- BiocParallel::bpparam()
+    }
+    ym <- as.matrix(y)
     if (any(is.na(ym)))
         stop("NAs not allowed")
     narrays <- ncol(ym)
@@ -14,12 +22,11 @@ BPselectModel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.pr
         stop("s2.prior must be set")
     if (df.prior == 0)
         s2.prior <- 0
-    criterion <- match.arg(criterion, c("aic", "bic", "mallowscp"))
-    criterion <- match.arg(criterion, c("aic", "bic", "mallowscp"))
+    criterion <- match_arg(criterion, c("aic", "bic", "mallowscp"))
     if (criterion == "mallowscp") {
         if (is.null(s2.true))
             stop("Need s2.true values")
-        fits <- bplapply(designlist, lmFit, object=y, BPPARAM=BPPARAM)
+        fits <- BiocParallel::bplapply(designlist, limma::lmFit, object=y, BPPARAM=BPPARAM)
         for (i in 1:nmodels) {
             fit <- fits[[i]]
             npar <- narrays - fit$df.residual[1]
@@ -36,7 +43,7 @@ BPselectModel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.pr
     else {
         ntotal <- df.prior + narrays
         penalty <- switch(criterion, bic = log(narrays), aic = 2)
-        fits <- bplapply(designlist, lmFit, object=y, BPPARAM=BPPARAM)
+        fits <- BiocParallel::bplapply(designlist, limma::lmFit, object=y, BPPARAM=BPPARAM)
         for (i in 1:nmodels) {
             fit <- fits[[i]]
             npar <- narrays - fit$df.residual[1] + 1
@@ -53,6 +60,7 @@ BPselectModel <- function (y, designlist, criterion = "aic", df.prior = 0, s2.pr
     list(IC = IC, pref = pref, criterion = criterion)
 }
 
+#' Combine multiple featureCounts results
 combineFCResults <- function(fcreslist) {
     combfuncs <- list(
         counts=cbind,
@@ -76,32 +84,52 @@ combineFCResults <- function(fcreslist) {
     res
 }
 
-#' @importFrom withr with_output_sink
+#' @include internal.R
 featureCountsQuiet <- function(...) {
-    with_output_sink("/dev/null", featureCounts(...))
+    req_ns("withr", "Rsubread")
+    withr::with_output_sink("/dev/null", Rsubread::featureCounts(...))
 }
 
+#' Parallel version of [Rsubread::featureCounts()]
+#'
+#' @include internal.R
+#' @export
 featureCountsParallel <- function(files, ...) {
+    req_ns("Rsubread", "BiocParallel")
     # Let featureCounts handle the degenerate case itself
     if (length(files) == 0) {
-        return(featureCounts(files, ...))
+        return(Rsubread::featureCounts(files, ...))
     }
-    bplapply(files, featureCountsQuiet, ..., nthreads=1) %>%
+    ## We pass nthreads=1 to tell featureCounts not to parallelize
+    ## itself, since we are already handling parallelization.
+    BiocParallel::bplapply(files, featureCountsQuiet, ..., nthreads=1) %>%
         combineFCResults
 }
 
-windowCountsParallel <- function(bam.files, ..., filter=10, BPPARAM=bpparam()) {
-    reslist <- bplapply(X=bam.files, FUN=windowCounts, ..., filter=0, BPPARAM=BPPARAM)
-    assert_that(all(sapply(reslist, is, "SummarizedExperiment")))
+#' Parallel version of [csaw::windowCounts()]
+#'
+#' @include internal.R
+#' @export
+windowCountsParallel <- function(bam.files, ..., filter=10, BPPARAM) {
+    req_ns("BiocParallel", "csaw", "BiocGenerics")
+    if (missing(BPPARAM)) {
+        BPPARAM <- BiocParallel::bpparam()
+    }
+    reslist <- BiocParallel::bplapply(X=bam.files, FUN=csaw::windowCounts, ..., filter=0, BPPARAM=BPPARAM)
     res <- do.call(cbind, reslist)
     rm(reslist)
     keep <- rowSums(assay(res)) >= filter
     res[keep,]
 }
 
-# Like lapply, but returns future objects. The results can be fetched all at
-# once with values().
+#' Like lapply, but returns future objects.
+#'
+#' The results can be fetched all at once with [future::values()].
+#'
+#' @include internal.R
+#' @export
 future.lapply <- function(X, FUN, ...) {
-    FUTUREFUN <- function(x) future(FUN(x, ...))
+    req_ns("future")
+    FUTUREFUN <- function(x) future::future(FUN(x, ...))
     lapply(X, FUTUREFUN, ...)
 }

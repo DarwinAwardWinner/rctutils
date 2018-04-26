@@ -1,6 +1,8 @@
 ## TODO: Make ggplot an optional dep
 
 # Utilities for ggplot2 corrdinate transformation
+
+#' @export
 power_trans <- function(pow) {
     name <- glue("^{pow}")
     trans_new(name,
@@ -9,6 +11,7 @@ power_trans <- function(pow) {
         domain =c(0,Inf))
 }
 
+#' @export
 clamp_trans <- function(lower_threshold=0, upper_threshold=1) {
     name <- glue("Clamp values outside of [{lower_threshold}, {upper_threshold}]")
     trans_new(name,
@@ -17,6 +20,7 @@ clamp_trans <- function(lower_threshold=0, upper_threshold=1) {
         inverse=identity)
 }
 
+#' @export
 neglog_trans <- function(base = exp(1)) {
     trans <- function(x) -log(x, base)
     inv <- function(x) base^(-x)
@@ -25,6 +29,7 @@ neglog_trans <- function(base = exp(1)) {
               domain = c(1e-100, Inf))
 }
 
+#' @export
 discrete_gradient <- function(n) {
     seq_gradient_pal(low = "#132B43", high = "#56B1F7")(seq(0,1, length.out=n))
 }
@@ -32,6 +37,8 @@ discrete_gradient <- function(n) {
 # Always returns a list of ggplot objects. Flattens nested lists,
 # encapsulates single plots into a 1-element list, ensures that all
 # elements are ggplots.
+
+#' @export
 get.ggplots <- function(plots) {
     UseMethod("get.ggplots")
 }
@@ -49,6 +56,7 @@ get.ggplots.list <- function(plots) {
     do.call(c, plotlists)
 }
 
+#' @export
 ggprint <- function(plots, device=dev.cur(), closedev, printfun=print) {
     p <- get.ggplots(plots)
     with_dev(device, lapply(p, printfun), closedev)
@@ -58,11 +66,13 @@ ggprint <- function(plots, device=dev.cur(), closedev, printfun=print) {
 # Printer function for ggplotly, to be passed as the prinfun for
 # ggprint. TODO: Make plotly an optional dependency.
 
-#' @importFrom plotly ggplotly
+#' @include internal.R
+#' @export
 ggplotly.printer <- function(...) {
+    req_ns("plotly")
     dots <- list(...)
     function(p) {
         args <- c(list(p=p), dots)
-        print(do.call(ggplotly, args))
+        print(do.call(plotly::ggplotly, args))
     }
 }

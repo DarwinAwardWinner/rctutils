@@ -1,15 +1,19 @@
+#' @export
 aveLogCPMWithOffset <- function(y, ...) {
     UseMethod("aveLogCPMWithOffset")
 }
 
-aveLogCPMWithOffset.default <- function (y, offset = NULL, prior.count = 2,
-                                         dispersion = NULL, weights = NULL, ...) {
+#' @export
+aveLogCPMWithOffset.default <- function(y, offset = NULL, prior.count = 2,
+                                        dispersion = NULL, weights = NULL, ...) {
     aveLogCPM(y, lib.size = NULL, offset = offset, prior.count = prior.count,
               dispersion = dispersion, weights = weights, ...)
 }
 
-aveLogCPMWithOffset.DGEList <- function (y, offset = expandAsMatrix(getOffset(y), dim(y)),
-                                         prior.count = 2, dispersion = NULL, ...) {
+#' @importFrom edgeR getOffset expandAsMatrix
+#' @export
+aveLogCPMWithOffset.DGEList <- function(y, offset = expandAsMatrix(getOffset(y), dim(y)),
+                                        prior.count = 2, dispersion = NULL, ...) {
     if (is.null(dispersion)) {
         dispersion <- y$common.dispersion
     }
@@ -20,6 +24,7 @@ aveLogCPMWithOffset.DGEList <- function (y, offset = expandAsMatrix(getOffset(y)
 }
 
 
+#' @export
 cpmWithOffset <- function(dge, offset=getOffset(dge),
                          log = FALSE, prior.count = 0.25, preserve.mean=TRUE, ...) {
     if (preserve.mean) {
@@ -30,6 +35,7 @@ cpmWithOffset <- function(dge, offset=getOffset(dge),
     cpm(dge$counts, lib.size=exp(getOffset(dge)), log=log, prior.count=prior.count, ...)
 }
 
+#' @export
 estimateDispByGroup <- function(dge, group=as.factor(dge$samples$group), batch, ...) {
     assert_that(nlevels(group) > 1)
     assert_that(length(group) == ncol(dge))
@@ -53,7 +59,9 @@ estimateDispByGroup <- function(dge, group=as.factor(dge$samples$group), batch, 
     })
 }
 
+#' @export
 getBCVTable <- function(y, design, ..., rawdisp) {
+    req_ns("edgeR")
     assert_that(is(y, "DGEList"))
     design.passed <- !missing(design)
     if (!design.passed) {
@@ -66,14 +74,14 @@ getBCVTable <- function(y, design, ..., rawdisp) {
         if (is.null(design) && !design.passed) {
             warning("Estimating dispersions with no design matrix")
         }
-        y %<-% estimateDisp(y, design=design, ...)
+        y %<-% edgeR::estimateDisp(y, design=design, ...)
     }
     assert_that(!is.null(y$prior.df))
     if (all(y$prior.df == 0)) {
         if (missing(rawdisp) || is.null(rawdisp)) {
             rawdisp <- y
         }
-        y %<-% estimateDisp(y, design=design, ...)
+        y %<-% edgeR::estimateDisp(y, design=design, ...)
     }
     # Get raw (unsqueezed dispersions)
     if (missing(rawdisp) || is.na(rawdisp)) {
@@ -107,7 +115,9 @@ getBCVTable <- function(y, design, ..., rawdisp) {
     return(disptable)
 }
 
-## Returns mds values, with proper colnames.
+#' Returns mds values, with proper colnames.
+#'
+#' @export
 get_mds <- function(x, k) {
     dmat <- suppressPlot(plotMDS(x, top=5000)$distance.matrix) %>% as.dist
     if (missing(k)) {

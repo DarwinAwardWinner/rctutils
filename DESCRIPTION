@@ -1,4 +1,4 @@
-# -*- mode: yaml -*-
+# -*- mode: yaml; yaml-indent-offset: 4 -*-
 Package: rctutils
 Type: Package
 Title: Utility functions by Ryan C. Thompson
@@ -6,12 +6,35 @@ Version: 0.1.0
 Authors@R: person("Ryan C.", "Thompson", email="rct@thompsonclan.org", role=c("aut", "cre"))
 Maintainer: Ryan C. Thompson <rct@thompsonclan.org>
 Description: A collection of utility functions generally relating to bioinformatics analysis.
-License: GPL3
+Depends: R (>= 3.4.4)
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 6.0.1
 Roxygen: list(markdown = TRUE)
+Imports:
+    assertthat,
+    dplyr,
+    glue,
+    magrittr,
+    stringr,
+    withr,
+    methods
+Suggests:
+    BiocGenerics,
+    GenomicRanges,
+    Rsubread,
+    codingMatrices,
+    future,
+    limma,
+    qvalue,
+    rex,
+    sitools,
+    plotly,
+    GGally
 Collate:
+    'base_imports.R'
+    'internal.R'
     'si2f.R'
     'data_manip_utils.R'
     'edgeR_utils.R'

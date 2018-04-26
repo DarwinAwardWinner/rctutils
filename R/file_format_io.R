@@ -34,9 +34,12 @@ read.idr.table <- function(file) {
         mutate(LocalIDR=10^-LocalIDR, GlobalIDR=10^-GlobalIDR)
 }
 
-## Read MotifMap-provided BED file into a GRanges object. We can't use
-## rtracklayer::import.bed because it chokes on spaces in fields,
-## which MotifMap contains.
+#' Read MotifMap-provided BED file into a GRanges object.
+#'
+#' We can't use rtracklayer::import.bed because it chokes on spaces in
+#' fields, which MotifMap contains.
+#'
+#' @export
 read.motifmap <- function(x, parse_name=TRUE) {
     tab <- read_tsv(x, col_names=c("chr", "start", "end", "name", "score", "strand"),
                     col_types="ciicdc", progress=FALSE)
@@ -49,6 +52,7 @@ read.motifmap <- function(x, parse_name=TRUE) {
 
 ## write.motifmap
 
+#' @export
 read.narrowPeak <- function(file, ...) {
     peaks.df <- read.table(file, sep="\t", row.names=NULL, ...)
     names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
@@ -56,6 +60,7 @@ read.narrowPeak <- function(file, ...) {
     peaks.df
 }
 
+#' @export
 write.narrowPeak <- function(x, file, ...) {
     x <- as(x, "data.frame")
     if("seqnames" %in% names(x))
@@ -64,6 +69,7 @@ write.narrowPeak <- function(x, file, ...) {
     write.table(x, file, sep="\t", row.names=FALSE, col.names=FALSE, ...)
 }
 
+#' @export
 read.regions <- function(filename) {
     suppressWarnings({
         lazy.results <- list(
@@ -90,6 +96,7 @@ read.regions <- function(filename) {
     })
 }
 
+#' @export
 read.saf <- function(filename, ...) {
     saf <- read.table.general(filename, ...)
     assert_that("GeneID" %in% names(saf))
@@ -100,6 +107,7 @@ read.saf <- function(filename, ...) {
 
 ## TODO: Give the below functions better names
 
+#' @export
 read.tx2gene.from.genemap <- function(fname) {
     df <- read.table.general(fname)
     df %<>% .[1:2]
@@ -108,6 +116,7 @@ read.tx2gene.from.genemap <- function(fname) {
     df
 }
 
+#' @export
 read.annotation.from.gff <- function(filename, format="GFF3", ...) {
     gff <- NULL
     ## Allow the file to be an RDS file containing the GRanges
@@ -122,6 +131,7 @@ read.annotation.from.gff <- function(filename, format="GFF3", ...) {
     return(grl)
 }
 
+#' @export
 read.annotation.from.saf <- function(filename, ...) {
     saf <- read.table.general(filename, ...)
     assert_that("GeneID" %in% names(saf))
@@ -130,10 +140,12 @@ read.annotation.from.saf <- function(filename, ...) {
     return(grl)
 }
 
+#' @export
 read.annotation.from.rdata <- function(filename) {
     read.RDS.or.RDA(filename, "GRangesList")
 }
 
+#' @export
 read.additional.gene.info <- function(filename, gff_format="GFF3", geneFeatureType="gene",
  ...) {
     df <- tryCatch({

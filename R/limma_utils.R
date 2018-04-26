@@ -1,17 +1,20 @@
 ## limma:
 
-#' @importFrom limma removeBatchEffect
+#' @export
 subtractCoefs <- function(x, design, coefsToSubtract, ...) {
+    req_ns("limma")
     assert_that(!anyDuplicated(colnames(design)))
     subtract.design <- design[,coefsToSubtract]
     keep.design <- design[,setdiff(colnames(design), colnames(subtract.design))]
-    removeBatchEffect(x, design=keep.design, covariates=subtract.design, ...)
+    limma::removeBatchEffect(x, design=keep.design, covariates=subtract.design, ...)
 }
 
-voomWithOffset <-
-    function (dge, design = NULL, offset=expandAsMatrix(getOffset(dge), dim(dge)),
-              normalize.method = "none", plot = FALSE, span = 0.5, ...)
-{
+#' @importFrom graphics abline barplot lines par title
+#' @export
+voomWithOffset <- function (dge, design = NULL, offset=expandAsMatrix(getOffset(dge), dim(dge)),
+                            normalize.method = "none", plot = FALSE, span = 0.5, ...) {
+    req_ns("limma")
+    req_ns("BiocGenerics")
     out <- list()
     out$genes <- dge$genes
     out$targets <- dge$samples
@@ -27,10 +30,10 @@ voomWithOffset <-
     effective.lib.size <- exp(offset)
 
     y <- log2((counts + 0.5)/(effective.lib.size + 1) * 1e+06)
-    y <- normalizeBetweenArrays(y, method = normalize.method)
-    fit <- lmFit(y, design, ...)
+    y <- limma::normalizeBetweenArrays(y, method = normalize.method)
+    fit <- limma::lmFit(y, design, ...)
     if (is.null(fit$Amean))
-        fit$Amean <- rowMeans(y, na.rm = TRUE)
+        fit$Amean <- BiocGenerics::rowMeans(y, na.rm = TRUE)
     sx <- fit$Amean + mean(log2(effective.lib.size + 1)) - log2(1e+06)
     sy <- sqrt(fit$sigma)
     allzero <- rowSums(counts) == 0
@@ -64,14 +67,16 @@ voomWithOffset <-
     out$design <- design
     out$effective.lib.size <- effective.lib.size
     if (is.null(out$targets)) {
-        out$targets <- data.frame(lib.size = exp(colMeans(offset)))
+        out$targets <- data.frame(lib.size = exp(BiocGenerics::colMeans(offset)))
     } else {
-        out$targets$lib.size <- exp(colMeans(offset))
+        out$targets$lib.size <- exp(BiocGenerics::colMeans(offset))
     }
     new("EList", out)
 }
 
-# Version of voom that uses an offset matrix instead of lib sizes
+#' Version of voom that uses an offset matrix instead of lib sizes
+#'
+#' @export
 voomWithQualityWeightsAndOffset <-
     function (dge, design = NULL,
               offset=expandAsMatrix(getOffset(dge), dim(dge)),
@@ -110,46 +115,9 @@ voomWithQualityWeightsAndOffset <-
     }
 }
 
-# Version of voom that uses an offset matrix instead of lib sizes
-voomWithQualityWeightsAndOffset <-
-    function (dge, design = NULL,
-              offset=expandAsMatrix(getOffset(dge), dim(dge)),
-              normalize.method = "none",
-              plot = FALSE, span = 0.5, var.design = NULL, method = "genebygene",
-              maxiter = 50, tol = 1e-10, trace = FALSE, replace.weights = TRUE,
-              col = NULL, ...)
-{
-    counts <- dge$counts
-    if (plot) {
-        oldpar <- par(mfrow = c(1, 2))
-        on.exit(par(oldpar))
-    }
-    v <- voomWithOffset(dge, design = design, offset = offset, normalize.method = normalize.method,
-        plot = FALSE, span = span, ...)
-    aw <- arrayWeights(v, design = design, method = method, maxiter = maxiter,
-        tol = tol, var.design = var.design)
-    v <- voomWithOffset(dge, design = design, weights = aw, offset = offset,
-        normalize.method = normalize.method, plot = plot, span = span,
-        ...)
-    aw <- arrayWeights(v, design = design, method = method, maxiter = maxiter,
-        tol = tol, trace = trace, var.design = var.design)
-    wts <- asMatrixWeights(aw, dim(v)) * v$weights
-    attr(wts, "arrayweights") <- NULL
-    if (plot) {
-        barplot(aw, names = 1:length(aw), main = "Sample-specific weights",
-            ylab = "Weight", xlab = "Sample", col = col)
-        abline(h = 1, col = 2, lty = 2)
-    }
-    if (replace.weights) {
-        v$weights <- wts
-        v$sample.weights <- aw
-        return(v)
-    } else {
-        return(wts)
-    }
-}
-
-# Convenience function for alternating dupCor and voom until convergence
+#' Convenience function for alternating dupCor and voom until convergence
+#'
+#' @export
 voomWithDuplicateCorrelation <-
     function(counts, design = NULL, plot = FALSE, block = NULL, trim = 0.15,
              voom.fun=voom, dupCor.fun=duplicateCorrelation, initial.correlation=0,

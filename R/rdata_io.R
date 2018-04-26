@@ -81,8 +81,6 @@ save.image.filtered <-
 #' as.list(loaded_vars)
 #' @seealso [save.image()]
 #' @export
-
-# Unlike load, returns the environment itself
 load.in.new.env <- function(file, envir=new.env(), ...) {
     load(file, envir, ...)
     return(envir)
@@ -121,8 +119,12 @@ load.filtered <- function(file, envir = parent.frame(), ..., exclude=NULL) {
     }
 }
 
-## Read a single R object from an RDA file. If run on an RDA
-## file containing more than one object, throws an error.
+#' Read a single R object from an RDA file.
+#'
+#' If run on an RDA file containing more than one object, throws an
+#' error.
+#'
+#' @export
 read.single.object.from.rda <- function(filename) {
     objects <- within(list(), suppressWarnings(load(filename)))
     if (length(objects) != 1) {
@@ -131,7 +133,9 @@ read.single.object.from.rda <- function(filename) {
     return(objects[[1]])
 }
 
-## Read a single object from RDS or RDA file
+#' Read a single object from RDS or RDA file
+#'
+#' @export
 read.RDS.or.RDA <- function(filename, expected.class="ANY") {
     object <- suppressWarnings(tryCatch({
         readRDS(filename)

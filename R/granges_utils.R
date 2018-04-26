@@ -1,35 +1,76 @@
-## Should really be an S4 method, but writing S4 methods is a pain
-readsToFragmentMidpoints <- function(reads, fraglen) {
+#' Compute the midpoints of a collection of read fragments
+#'
+#' @param reads A [GenomicAlignments::GAlignments],
+#'     [GenomicAlignments::GAlignmentPairs], or
+#'     [GenomicAlignments::GAlignmentsList] object representing a set
+#'     of reads or read pairs.
+#' @param fraglen The estimated fragment length. This is only required
+#'     if `reads` contains any un-paired reads, since the far end of
+#'     the fragment represented by a single-end read is unknown.
+#' @param extend_fragment_upstream If FALSE (the default), each
+#'     single-end read is assumed to represent the 5-prime end of a
+#'     fragment, so the fragment will be extended `fraglen` base pairs
+#'     in the 3-prime direction starting from the 5-prime end of the
+#'     read. If reads represent the 3-prime ends of fragments, set
+#'     this argument to TRUE, and the reverse will happen: fragments
+#'     will be extended `fraglen` base pairs in the 5-prime direction
+#'     starting from the 3-prime end of the read.
+#'
+#' This should really be an S4 method, but writing S4 methods is a
+#' pain.
+#'
+#' @include internal.R
+#' @importFrom magrittr %>% %<>%
+#' @export
+readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FALSE) {
+    req_ns("GenomicRanges")
+    ## Depending on whether reads are paired or single, get the full
+    ## fragment length
     if (is(reads, "GAlignmentsList")) {
+        ## Split into single and paired reads
         isSingle <- lengths(reads) == 1
-        mated.frags <- granges(reads[!isSingle], ignore.strand=TRUE)
-        ## Extend smaller reads to fraglen, but don't shrink longer
-        ## reads
-        single.frags <- granges(reads[isSingle]) %>% resize(width=pmax(fraglen, width(.)), fix="start")
+        mated.frags <- GenomicRanges::granges(reads[!isSingle], ignore.strand=TRUE)
+        if (any(isSingle)) {
+            single.frags <- GenomicRanges::granges(reads[isSingle]) %>%
+                ## Extend smaller single reads to fraglen, but don't
+                ## shrink longer reads
+                GenomicRanges::resize(
+                    width=pmax(fraglen, width(.)),
+                    fix=ifelse(extend_fragment_upstream, "end", "start"))
+        } else {
+            single.frags <- GRanges()
+        }
         frags <- c(mated.frags, single.frags)
     } else if (is(reads, "GAlignmentPairs")) {
-        frags <- granges(reads)
+        ## Only paired reads
+        frags <- GenomicRanges::granges(reads)
     } else if (is(reads, "GAlignments")) {
-        ## Extend smaller reads to fraglen, but don't shrink longer
-        ## reads
-        frags <- reads %>% granges %>% resize(width=pmax(fraglen, width(.)), fix="start")
+        ## Only single reads
+        frags <- reads %>% GenomicRanges::granges %>%
+            ## Extend smaller reads to fraglen, but don't shrink
+            ## longer reads
+            GenomicRanges::resize(
+                width=pmax(fraglen, GenomicRanges::width(.)),
+                fix=ifelse(extend_fragment_upstream, "end", "start"))
     } else {
         warning(glue("Unknown reads type: {class(reads)}. Attempting to coerce to GRanges."))
         reads %<>% as("GRanges")
         ## If all ranges are the same width, assume they represent
         ## single-end reads and resize them to fraglen
-        if (all(width(reads) == width(reads[1])) && width(reads[1]) < fraglen) {
+        if (all(GenomicRanges::width(reads) == GenomicRanges::width(reads[1])) &&
+            GenomicRanges::width(reads[1]) < fraglen) {
             warning(glue("All reads from unknown class have the same length, {width(reads[1])}, and are therefore assumed to be single-end reads, which will be resized to {fraglen}."))
-            frags <- resize(reads, width=fraglen, fix="start")
+            frags <- GenomicRanges::resize(reads, width=fraglen, fix="start")
         } else {
             frags <- reads
         }
     }
     ## Finally, get the center of each fragment
-    resize(frags, width=1, fix="center")
+    GenomicRanges::resize(frags, width=1, fix="center")
 }
 
 ## Convert strand to -1, 0, or 1
+#' @export
 strand_sign <- function(x, allow.unstranded=FALSE) {
     s <- strand(x)
     ss <- (s == "+") - (s == "-")
@@ -42,6 +83,7 @@ strand_sign <- function(x, allow.unstranded=FALSE) {
 }
 
 ## This merges exons into genes (GRanges to GRangesList)
+#' @export
 gff.to.grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFeatureType="gene") {
     exon.gr <- gr[gr$type %in% exonFeatureType]
     exon.gr %<>% cleanup.mcols
@@ -64,6 +106,7 @@ gff.to.grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFea
 
 ## This converts a GRangesList into the SAF ("Simplified annotation
 ## format")
+#' @export
 grl.to.saf <- function(grl) {
     gr <- unlist(grl)
     data.frame(Chr=as.vector(seqnames(gr)),
@@ -105,38 +148,61 @@ get.gene.common.colnames <- function(df, geneids, blacklist=c("type", "Parent"))
     names(which(genecols))
 }
 
-## Given a GRangesList whose underlying ranges have mcols, find mcols
-## of the ranges that are constant within each gene and promote them
-## to mcols of the GRangesList. For example, if exons are annotated with
+#' Promote common mcols from the GRanges inside a GRangesList
+#'
+#' Given a GRangesList whose underlying ranges have mcols, this finds
+#' mcols of the ranges that are constant within each gene and promotes
+#' them to mcols of the GRangesList. For example, you have a
+#' GRangesList of exons grouped by gene, and the exons are annotated
+#' with gene IDs, then the gene ID column will be promoted to the
+#' GRangesList object itself.
+#'
+#' @include internal.R
+#' @importFrom magrittr %<>%
+#' @export
 promote.common.mcols <- function(grl, delete.from.source=FALSE, ...) {
-    colnames.to.promote <- get.gene.common.colnames(mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
-    promoted.df <- mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop=FALSE]
+    req_ns("S4Vectors", "GenomicRanges")
+    colnames.to.promote <- get.gene.common.colnames(S4Vectors::mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
+    promoted.df <- S4Vectors::mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop=FALSE]
     if (delete.from.source) {
         mcols(grl@unlistData) %<>% .[setdiff(names(.), colnames.to.promote)]
     }
-    mcols(grl) %<>% cbind(promoted.df)
+    S4Vectors::mcols(grl) %<>% cbind(promoted.df)
     grl
 }
 
-## Like rtracklayer::liftOver but "fills in" small gaps induced by the
-## liftOver process (i.e. no larger than allow.gap). If allow.gap is
-## zero, this is equivalent to liftOver.
-#' @importFrom rtracklayer liftOver
+#' Like rtracklayer::liftOver but "fills in" small gaps.
+#'
+#' @param x,chain,... These arguments have the same meaning as in
+#'     [rtracklayer::liftOver()].
+#' @param allow.gap Maximum gap size to "fill in". If set to zero,
+#'     this is equivalent to [rtracklayer::liftOver()].
+#'
+#' @include internal.R
+#' @export
 liftOverLax <- function(x, chain, ..., allow.gap=0) {
-    newx <- liftOver(x, chain)
+    req_ns("rtracklayer", "S4Vectors")
+
+    newx <- rtracklayer::liftOver(x, chain)
     if (allow.gap > 0) {
         gapped <- which(lengths(newx) > 1)
         newx.gapped.reduced <- reduce(newx[gapped], min.gapwidth = allow.gap + 1, with.revmap=TRUE)
-        mcols(newx.gapped.reduced@unlistData) <- rep(mcols(x[gapped]), lengths(newx.gapped.reduced))
+        S4Vectors::mcols(newx.gapped.reduced@unlistData) <-
+            rep(S4Vectors::mcols(x[gapped]), lengths(newx.gapped.reduced))
         newx[gapped] <- newx.gapped.reduced
     }
     return(newx)
 }
 
+#' Convenience function for running liftOver on a MotifMap BED file
+#'
+#' @include internal.R file_format_io.R
+#' @export
 liftOver_motifMap <- function(infile, chainfile, outfile, allow.gap=2) {
+    req_ns("rtracklayer")
     gr <- read.motifmap(infile, parse_name=TRUE)
-    chain <- import.chain(chainfile)
-    gr2 <- liftOverLax(gr, chain, allow.gap=allow.gap)
+    chain <- rtracklayer::import.chain(chainfile)
+    gr2 <- rtracklayer::liftOverLax(gr, chain, allow.gap=allow.gap)
     gr2 <- unlist(gr2[lengths(gr2) == 1])
     write.motifmap(gr2, outfile)
 }

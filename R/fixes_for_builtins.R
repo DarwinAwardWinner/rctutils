@@ -1,9 +1,9 @@
 ## Fixed versions of existing functions:
 
-## Extension of match.arg with automatic detection of the argument
-## name for use in error messages.
-
+#' Improved match.arg with automatic detection of the argument name
+#'
 #' @importFrom glue glue
+#' @export
 match_arg <- function (arg, choices, several.ok = FALSE, arg.name=substitute(arg), ignore.case=FALSE) {
     if (missing(choices)) {
         formal.args <- formals(sys.function(sys.parent()))
@@ -35,7 +35,9 @@ match_arg <- function (arg, choices, several.ok = FALSE, arg.name=substitute(arg
     choices[i]
 }
 
-## Deparse and then concatenate into a single string
+#' Deparse and then concatenate into a single string
+#'
+#' @export
 deparse_onestring <- function(...) {
     paste(deparse(...), collapse="\n")
 }

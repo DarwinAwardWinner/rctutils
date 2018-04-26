@@ -1,11 +1,13 @@
 # Make cairo_pdf use onefile=TRUE by default
 ## TODO: Rename to something unique
+#' @export
 cairo_pdf <- function(..., onefile=TRUE) {
     grDevices::cairo_pdf(..., onefile = onefile)
 }
 
 ## Note: relies on external command-line util. TODO: Use
 ## https://cran.r-project.org/web/packages/magick/vignettes/intro.html
+#' @export
 rasterpdf <- function(pdffile, outfile=pdffile, resolution=600) {
     tempf <- tempfile(pattern="raster", fileext=".pdf")
     on.exit(unlink(tempf))
@@ -23,10 +25,12 @@ rasterpdf <- function(pdffile, outfile=pdffile, resolution=600) {
 
 ## Returns TRUE if x refers to the device number of a currently active
 ## graphics device.
+#' @export
 is_dev <- function(x) {
     is_scalar_integer(x) && x %in% dev.list()
 }
 
+#' @export
 with_dev <- function(dev, code, closedev) {
     orig.device <- dev.cur()
     new.device <- force(dev)
@@ -53,6 +57,7 @@ with_dev <- function(dev, code, closedev) {
 
 # Useful to wrap functions that both produce a plot and return a
 # useful value, when you only want the return value and not the plot.
+#' @export
 suppressPlot <- function(arg) {
     png("/dev/null")
     result <- arg

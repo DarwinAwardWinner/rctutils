@@ -1,6 +1,8 @@
 # TODO: Make ggplot, GGally optional
 
-# Function to create an annotatied p-value histogram
+#' Create an annotatied p-value histogram plot
+#'
+#' @export
 plotpvals <- function(pvals, ptn=propTrueNull(pvals)) {
     df <- data.frame(p=pvals)
     linedf <- data.frame(y=c(1, ptn), Line=c("Uniform", "Est. Null") %>% factor(levels=unique(.)))
@@ -16,20 +18,28 @@ plotpvals <- function(pvals, ptn=propTrueNull(pvals)) {
             legend.justification=c(1,1))
 }
 
-#' @importFrom GGally ggduo
-# Variant of ggduo that accepts dataX and dataY as separate data frames
+#' Variant of `GGally::ggduo()` with separate arguments for  `dataX` and `dataY`
+#'
+#' @export
 ggduo.dataXY <- function(dataX, dataY, extraData=NULL, ...) {
+    req_ns("GGally")
     assert_that(ncol(dataX) > 0)
     assert_that(ncol(dataY) > 0)
     alldata <- cbind(dataX, dataY)
     if (!is.null(extraData)) {
         alldata <- cbind(alldata, extraData)
     }
-    ggduo(alldata, columnsX=colnames(dataX), columnsY=colnames(dataY), ...)
+    GGally::ggduo(alldata, columnsX=colnames(dataX), columnsY=colnames(dataY), ...)
 }
 
-# ggplot version of edgeR::plotBCV. Additional arguments passed to getBCVTable
+#' ggplot version of `edgeR::plotBCV()`.
+#'
+#' Additional arguments passed to [getBCVTable()].
+#'
+#' @include edgeR_utils.R
+#' @export
 ggplotBCV <- function(y, xlab="Average log CPM", ylab="Biological coefficient of variation", rawdisp=NULL, ...) {
+    req_ns("ggplot2")
     if (is(y, "DGEList")) {
         disptable <- getBCVTable(y, ..., rawdisp=rawdisp)
     } else {

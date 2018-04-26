@@ -29,4 +29,5 @@ si2f("23 mV", unit="V")
 # convert list of numbers
 si_strings <- c("100 k", "35 E", "4 m")
 si2f(si_strings)
+
 }

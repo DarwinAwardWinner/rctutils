@@ -15,9 +15,12 @@
 #' # convert list of numbers
 #' si_strings <- c("100 k", "35 E", "4 m")
 #' si2f(si_strings)
-#' @importFrom rex rex
+#'
+#' @include internal.R
 #' @export
 si2f <- function(string, unit="") {
+    req_ns("rex")
+
     if (length(string) == 0) {
         return(numeric(0))
     }
@@ -27,7 +30,7 @@ si2f <- function(string, unit="") {
     pre <- c("y", "z", "a", "f", "p", "n", "u", "m",
              "", "k", "M", "G", "T", "P", "E", "Z", "Y")
 
-    rx <- rex(
+    rx <- rex::rex(
         ## Leading whitespace
         start,
         zero_or_more(space),
