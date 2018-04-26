@@ -6,9 +6,27 @@
 \usage{
 auto_factorize_columns(df)
 }
+\arguments{
+\item{df}{The data frame to operate on.}
+}
+\value{
+\code{df}, possibly with some character columns replaced by
+factors
+}
 \description{
 For each column of a data frame, if it is a character vector with
-at least one repeated value, convert that column to a factor.
-Character columns with all unique values (e.g. sample IDs) will not
+at least one non-unique value, convert that column to a factor.
+Character columns with no repeated values (e.g. sample IDs) will not
 be modified.
+}
+\examples{
+
+# Initially, both columns are character vectors
+x <- data.frame(sample=letters, group=LETTERS[1:2], stringsAsFactors=FALSE)
+sapply(x, class)
+
+# This converts group, but not sample, into a factor
+x2 <- auto_factorize_columns(x)
+sapply(x2, class)
+
 }

@@ -2,13 +2,26 @@
 % Please edit documentation in R/data_manip_utils.R
 \name{add_numbered_colnames}
 \alias{add_numbered_colnames}
-\title{Add numbered colnames with a commo prefix.}
+\title{Add numbered colnames with a common prefix.}
 \usage{
 add_numbered_colnames(x, prefix = "C")
 }
+\arguments{
+\item{x}{The variable to add column names to.}
+
+\item{prefix}{The prefix to use for each column name. Each column's
+number will be appended to this prefix to generate the column
+name.}
+}
+\value{
+\code{x}, with its column names set to the column number
+appended to \code{prefix}.
+}
 \description{
-Add numbered colnames with a commo prefix.
+Add numbered colnames with a common prefix.
 }
 \examples{
+
 # TODO: PCA example
+
 }

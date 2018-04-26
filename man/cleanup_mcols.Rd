@@ -4,8 +4,29 @@
 \alias{cleanup_mcols}
 \title{Remove valueless mcols from an object}
 \usage{
-cleanup_mcols(object, mcols_df)
+cleanup_mcols(object, mcols_df = S4Vectors::mcols(object))
+}
+\arguments{
+\item{object}{The object whose mcols should be cleaned.}
+
+\item{mcols_df}{Instead of passing \code{object}, you can pass a data
+frame (or \link[S4Vectors:DataFrame]{S4Vectors::DataFrame}) using this named argument.}
+}
+\value{
+If \code{object} was passed, it is returned with any valueless
+mcols removed. If \code{mcols_df} was passed and \code{object} was not,
+the data frame is returned directly.
+
+Note that \code{mcols_df} can only be passed by name. An unnamed
+argument is always interpreted as \code{object}.
 }
 \description{
-Emptiness is defined as in \code{\link[=is_valueless]{is_valueless()}}.
+Any mcols for which \code{\link[=is_valueless]{is_valueless()}} returns TRUE will be removed.
+}
+\examples{
+#TODO
+
+}
+\seealso{
+\code{\link[S4Vectors:mcols]{S4Vectors::mcols()}}, \code{\link[=is_valueless]{is_valueless()}}
 }

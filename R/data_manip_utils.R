@@ -18,23 +18,47 @@ is_valueless <- function(x, empty_values = NA) {
     x %>% unlist %>% na.omit %>% length %>% equals(0)
 }
 
-#' Add numbered colnames with a commo prefix.
+#' Add numbered colnames with a common prefix.
+#'
+#' @param x The variable to add column names to.
+#' @param prefix The prefix to use for each column name. Each column's
+#'     number will be appended to this prefix to generate the column
+#'     name.
+#'
+#' @return `x`, with its column names set to the column number
+#'     appended to `prefix`.
 #'
 #' @examples
+#'
 #' # TODO: PCA example
+#'
 #' @importFrom glue glue
 #' @export
 add_numbered_colnames <- function(x, prefix="C") {
     x %>% set_colnames(glue("{prefix}{num}", num=seq(from=1, length.out=ncol(x))))
 }
 
-
 #' Intelligently convert character columns to factors in a data frame
 #'
 #' For each column of a data frame, if it is a character vector with
-#' at least one repeated value, convert that column to a factor.
-#' Character columns with all unique values (e.g. sample IDs) will not
+#' at least one non-unique value, convert that column to a factor.
+#' Character columns with no repeated values (e.g. sample IDs) will not
 #' be modified.
+#'
+#' @param df The data frame to operate on.
+#'
+#' @return `df`, possibly with some character columns replaced by
+#'     factors
+#'
+#' @examples
+#'
+#' # Initially, both columns are character vectors
+#' x <- data.frame(sample=letters, group=LETTERS[1:2], stringsAsFactors=FALSE)
+#' sapply(x, class)
+#'
+#' # This converts group, but not sample, into a factor
+#' x2 <- auto_factorize_columns(x)
+#' sapply(x2, class)
 #'
 #' @export
 auto_factorize_columns <- function(df) {
@@ -48,14 +72,26 @@ auto_factorize_columns <- function(df) {
 
 #' Remove valueless mcols from an object
 #'
-#' Emptiness is defined as in [is_valueless()].
+#' Any mcols for which [is_valueless()] returns TRUE will be removed.
 #'
+#' @param object The object whose mcols should be cleaned.
+#' @param mcols_df Instead of passing `object`, you can pass a data
+#'     frame (or [S4Vectors::DataFrame]) using this named argument.
+#'
+#' @return If `object` was passed, it is returned with any valueless
+#'     mcols removed. If `mcols_df` was passed and `object` was not,
+#'     the data frame is returned directly.
+#'
+#' Note that `mcols_df` can only be passed by name. An unnamed
+#' argument is always interpreted as `object`.
+#'
+#' @examples
+#' #TODO
+#'
+#' @seealso [S4Vectors::mcols()], [is_valueless()]
 #' @export
-cleanup_mcols <- function(object, mcols_df) {
+cleanup_mcols <- function(object, mcols_df = S4Vectors::mcols(object)) {
     req_ns("S4Vectors")
-    if (missing(mcols_df)) {
-        mcols_df <- S4Vectors::mcols(object)
-    }
     nonempty <- !sapply(mcols_df, is_valueless)
     mcols_df <- mcols_df[nonempty]
     if (!missing(object)) {
@@ -68,49 +104,53 @@ cleanup_mcols <- function(object, mcols_df) {
 
 #' Variant of code_control that generates more verbose column names
 #'
+#' @param ... All arguments are passed to
+#'     `codingMatrices::code_control()`.
+#'
+#' @return The same as `codingMatrices::code_control()`, but with more
+#'     descriptive column names.
+#'
+#' @seealso [codingMatrices::code_control()]
+#' @examples
+#' library(codingMatrices)
+#'
+#' # Compare the resulting column names
+#' code_control(3)
+#' code_control_named(3)
+#'
 #' @export
-code_control_named <- function (n, contrasts = TRUE, sparse = FALSE) {
+code_control_named <- function (...) {
     req_ns("codingMatrices")
-    if (is.numeric(n) && length(n) == 1L) {
-        if (n > 1L)
-            levels <- codingMatrices:::.zf(seq_len(n))
-        else stop("not enough degrees of freedom to define contrasts")
-    }
-    else {
-        levels <- as.character(n)
-        n <- length(n)
-    }
-    B <- diag(n)
-    dimnames(B) <- list(1:n, levels)
-    if (!contrasts) {
-        if (sparse)
-            B <- codingMatrices:::.asSparse(B)
-        return(B)
-    }
-    B <- B - 1/n
-    B <- B[, -1, drop=FALSE]
-    colnames(B) <- paste(levels[1], levels[-1], sep = ".vs.")
-    if (sparse) {
-        codingMatrices:::.asSparse(B)
-    }
-    else {
-        B
-    }
+    x <- codingMatrices::code_control(...)
+    colnames(x) %<>% str_replace("(\\d+)-(\\d+)", "\\2.vs.\\1")
+    x
 }
 
 #' Convert a list to an atomic vector.
 #'
-#' TODO: If sep is NA, throw an error for lists.
+#' If `x` is already an atomc vector, it is not modified. If it is a
+#' list, non-scalar elements are converted to scalars, and these are
+#' concatenated to produce an atomic vector the same length as `x`.
+#' Specifically, list elements with 0 length are replaced by NA, and
+#' elements with length greater than one are pasted together into
+#' strings using `sep` as the separator.
+#'
+#' @param x The list to convert.
+#' @param sep Separator to use for collapsing vectors to scalars.
+#'
+#' @return An atomic vector that same length and names as `x`.
+#'
 #'
 #' @export
-collapseToAtomic <- function(x, sep=",") {
+collapse_to_atomic <- function(x, sep=",") {
     if (is.atomic(x)) {
         return(x)
     } else {
         y <- lapply(x, str_c, collapse=sep)
         y[lengths(y) == 0] <- NA
         assert_that(all(lengths(y) == 1))
-        y <- unlist(y)
+        ## Ensure that unlisting does not mess up the names
+        y <- set_names(unlist(y), names(y))
         assert_that(length(y) == length(x))
         return(y)
     }
@@ -119,12 +159,17 @@ collapseToAtomic <- function(x, sep=",") {
 #' Ensure that all columns of a data frame are atomic vectors.
 #'
 #' Columns that are lists have each of their elements collapsed into
-#' strings using the sepcified separator. TODO: If sep is NA, throw an
-#' error for lists.
+#' strings using the sepcified separator.
+#'
+#' @param df The data frame whose list columns should be collapsed
+#' @param sep The separator to use when collapsing vectors to scalars
+#'
+#' @return `df` with all columns converted to atomic vectors.
+#'
+#' @seealso [collapse_to_atomic]
 #'
 #' @export
-ensureAtomicColumns <- function(df, sep=",") {
-
+ensure_atomic_columns <- function(df, sep=",") {
     df[] %<>% lapply(collapseToAtomic, sep=sep)
     df
 }

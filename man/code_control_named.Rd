@@ -4,8 +4,27 @@
 \alias{code_control_named}
 \title{Variant of code_control that generates more verbose column names}
 \usage{
-code_control_named(n, contrasts = TRUE, sparse = FALSE)
+code_control_named(...)
+}
+\arguments{
+\item{...}{All arguments are passed to
+\code{codingMatrices::code_control()}.}
+}
+\value{
+The same as \code{codingMatrices::code_control()}, but with more
+descriptive column names.
 }
 \description{
 Variant of code_control that generates more verbose column names
+}
+\examples{
+library(codingMatrices)
+
+# Compare the resulting column names
+code_control(3)
+code_control_named(3)
+
+}
+\seealso{
+\code{\link[codingMatrices:code_control]{codingMatrices::code_control()}}
 }

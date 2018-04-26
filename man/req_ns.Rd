@@ -6,6 +6,12 @@
 \usage{
 req_ns(..., caller = as.character(sys.call(-1)[1]))
 }
+\arguments{
+\item{...}{Packages to require}
+
+\item{caller}{The name of the function this was called from. Only
+used to create an appropriate error message.}
+}
 \description{
 This shortens the boilerplate required to use functios from a
 suggested package.
