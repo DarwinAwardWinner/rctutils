@@ -166,7 +166,13 @@ collapse_to_atomic <- function(x, sep=",") {
 #'
 #' @return `df` with all columns converted to atomic vectors.
 #'
-#' @seealso [collapse_to_atomic]
+#' @examples
+#'
+#' library(S4Vectors)
+#' x <- DataFrame(a=1:5, b=List(split(1:25, 1:5)))
+#' ensure_atomic_columns(x)
+#'
+#' @seealso [collapse_to_atomic()]
 #'
 #' @export
 ensure_atomic_columns <- function(df, sep=",") {
@@ -174,8 +180,23 @@ ensure_atomic_columns <- function(df, sep=",") {
     df
 }
 
-#' Convert all factors to character in a data frame
+#' Convert all factors in a data frame to character vectors
 #'
+#' This is useful when you forgot to specify `stringsAsFactors =
+#' FALSE` when creating your data frame.
+#'
+#' @param df The data frame in which fo convert factors.
+#' @return `df`, with all factor columns converted to character
+#'     vectors.
+#'
+#' @examples
+#'
+#' x <- data.frame(letters, 1:26, LETTERS)
+#' sapply(x, class)
+#' x2 <- fac2char(x)
+#' sapply(x2, class)
+#'
+#' @seealso [as.character()], [data.frame()]
 #' @export
 fac2char <- function(df) {
     df[sapply(df, class) == "factor"] %<>% lapply(as.character)
@@ -239,35 +260,142 @@ mutate_if_present <- function(.data, names, ...) {
     }
 }
 
+#' Escape a string for use in a Perl-compatible regular expression
+#'
+#' This is an implementation of Perl's `quotemeta` operator. It is
+#' meant for escaping any characters that might have special meanings
+#' in a PCRE.
+#'
+#' @param string The string to escape
+#' @return `string`, with all non-word characters escaped with backslashes.
+#'
+#' Note that this strategy does not work for R's own regular
+#' expression syntax, so you should specify `perl = TRUE`, or an
+#' equivalent option, when using this to construct a regular
+#' expression.
+#'
+#' @examples
+#'
+#' s <- "A (string) with [many] regex *characters* in it."
+#' grepl(s, s, perl=TRUE)
+#' quotemeta(s)
+#' # After escaping, the string matches itself.
+#' grepl(quotemeta(s), s, perl=TRUE)
+#'
 #' @export
 quotemeta <- function (string) {
   str_replace_all(string, "(\\W)", "\\\\\\1")
 }
 
+#' Relevel many factor columns in a data frame at once
+#'
+#' This is a shortcut for calling [forcats::fct_relevel()] on multiple
+#' columns of a data frame.
+#'
+#' @param df The data frame in which to re-level some factor columns.
+#' @param ... Additional arguments control the re-leveling of factors.
+#'     The name of each argument indicates the column of `df` to
+#'     re-level (this column should be a factor). The value should be
+#'     the new levels in the order that they should appear (or any
+#'     valid list of arguments to [forcats::fct_relevel()]).
+#' @return `df`, with the specified factor columns re-leveled
+#'     according to the provided specifications.
+#' @examples
+#'
+#' x <- data.frame(a=letters[1:2], b=LETTERS[1:6])
+#' sapply(x, levels)
+#' x2 <- relevel_columns(x, a=c("b", "a"), b=list("B", "A", after=2))
+#' sapply(x2, levels)
+#'
 #' @importFrom rlang is_named
 #' @export
 relevel_columns <- function(df, ...) {
-    req_ns("forcats")
+    req_ns("forcats", "rlang")
     relevel_specs <- list(...)
     assert_that(is_named(relevel_specs))
     for (i in names(relevel_specs)) {
-        df[[i]] %<>% forcats::fct_relevel(relevel_specs[[i]])
+        spec <- relevel_specs[[i]]
+        after <- 0L
+        if (!is.list(spec)) {
+            spec <- list(spec)
+        }
+        arglist <- c(list(.f=df[[i]]), spec)
+        df[[i]] <- do.call(forcats::fct_relevel, arglist)
     }
     df
 }
 
+#' Like `sprintf()` but using the same value in each specification
+#'
+#' This is equivalent to calling [sprintf()] with `value` passed after
+#' `fmt` as many times as there are conversion specifications in
+#' `fmt`.
+#'
+#' @param fmt This has the same meaning as in `sprintf()`.
+#' @param value The single value use for every conversion
+#'     specification in `fmt`.
+#' @return See [sprintf()].
+#'
+#' Note that vector arguments are still recycled normally.
+#'
+#' @examples
+#'
+#' fmt <- "Hello %s. Your name is %s. Isn't it good to be named %s?"
+#' # With normal sprintf, you need to specify the right number of
+#' # arguments:
+#' name <- c("John Doe", "Jane Doe")
+#' sprintf(fmt, name, name, name)
+#' # Instead, this figures out the right number of times to pass it:
+#' sprintf_single_value(fmt, name)
+#'
 #' @export
-sprintf.single.value <- function(fmt, value) {
+sprintf_single_value <- function(fmt, value) {
     ## Max function arguments is 100
     arglist = c(list(fmt=fmt), rep(list(value), 99))
     do.call(sprintf, arglist)
 }
 
+#' Simplify the column names of a simple design matrix
+#'
+#' The standard [model.matrix()] function generates column names for
+#' factor columns by concatenating the factor's name with the level.
+#' This helps guarantee non-duplicated column names in the general
+#' case, but for simple cases it results in overly long and complex
+#' column names. This function removes the factor names, leaving only
+#' the level names.
+#'
+#' @param design The design matrix whose column names should be
+#'     cleaned up (usually created by `model.matrix()`).
+#' @param prefixes A character vector of prefixes to be deleted from
+#'     column names. Normally, this argument is set automatically
+#'     based on the attributes of `design`, but you can set it
+#'     manually.
+#' @return The same matrix as `design`, possibly with some column
+#'     names shortened by deleting one of `prefixes` from the start of
+#'     the column names.
+#'
+#' Column names for columns not corresponding to factors are left
+#' unchanged.
+#'
+#' Note that this is only guaranteed to work correctly if none of your
+#' variable names are prefixes of other variable names.
+#'
+#' A warning will be issued if, after stripping factor names, the
+#' column names of `design` are no longer unique.
+#'
+#' @examples
+#'
+#' targets <- data.frame(group=letters[1:2], batch=LETTERS[1:5], x=rnorm(10))
+#' design <- model.matrix(~0 + group + x + batch, targets)
+#' colnames(design)
+#' design2 <- strip_design_factor_names(design)
+#' colnames(design2)
+#'
 #' @export
 strip_design_factor_names <- function(design, prefixes=names(attr(design, "contrasts"))) {
     req_ns("rex")
     if (!is.null(prefixes)) {
-        regex.to.delete <- res::rex(or(prefixes) %if_prev_is% or(start, ":") %if_next_isnt% end)
+        regex.to.delete <- rex::rex(or(prefixes) %if_prev_is% or(start, ":") %if_next_isnt% end)
         colnames(design) %<>% str_replace_all(regex.to.delete, "")
         if (anyDuplicated(colnames(design))) {
             warning("Stripping design names resulted in non-unique names")

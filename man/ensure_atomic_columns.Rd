@@ -18,6 +18,13 @@ ensure_atomic_columns(df, sep = ",")
 Columns that are lists have each of their elements collapsed into
 strings using the sepcified separator.
 }
+\examples{
+
+library(S4Vectors)
+x <- DataFrame(a=1:5, b=List(split(1:25, 1:5)))
+ensure_atomic_columns(x)
+
+}
 \seealso{
-\link{collapse_to_atomic}
+\code{\link[=collapse_to_atomic]{collapse_to_atomic()}}
 }

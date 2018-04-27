@@ -7,7 +7,7 @@
 eBayes_auto_proportion(..., prop.method = "lfdr")
 }
 \arguments{
-\item{...}{All other arguments are passed to \code{\link[=limma:eBayes]{limma:eBayes()}}.}
+\item{...}{All other arguments are passed to \code{\link[limma:eBayes]{limma::eBayes()}}.}
 
 \item{prop.method}{The method by which to calculate the proportion
 of true null hypotheses (i.e. non-differentially expressed

@@ -76,7 +76,7 @@ voomWithOffset <-
             0)
             design <- model.matrix(~group, data = counts$samples)
         if (missing(offset)) {
-            offset <- edgeR::expandAsMatrix(edgeR::getOffset(dge), dim(dge))
+            offset <- edgeR::expandAsMatrix(edgeR::getOffset(counts), dim(counts))
         }
         counts <- counts$counts
     }
@@ -187,9 +187,7 @@ voomWithOffset <-
 #'
 #' @export
 voomWithQualityWeightsAndOffset <-
-    function (counts, design = NULL,
-              offset=edgeR::expandAsMatrix(edgeR::getOffset(dge), dim(dge)),
-              normalize.method = "none",
+    function (counts, design = NULL, offset, normalize.method = "none",
               plot = FALSE, span = 0.5, var.design = NULL, method = "genebygene",
               maxiter = 50, tol = 1e-10, trace = FALSE, replace.weights = TRUE,
               col = NULL, ...)
@@ -380,4 +378,37 @@ eBayes_auto_proportion <- function(..., prop.method="lfdr") {
     }
     assert_that(ptn > 0,ptn < 1)
     limma::eBayes(..., proportion=1-ptn)
+}
+
+#' Get a table of MDS values, with proper column names.
+#'
+#' This runs [limma::plotMDS()], but suppresses the generation of the
+#' plot and instead returns the MDS dimensions in a matrix.
+#'
+#' @param x The object to run [limma::plotMDS()] on.
+#' @param k The number of MDS dimensions to return. If not specified,
+#'     the maximum possible number will be returned.
+#' @param ... Additional arguments to [limma::plotMDS()].
+#'
+#' @return A matrix with `k` columns, and `ncol(x)` rows containing
+#'     the MDS dimensions, with each column named "DimN", where N is
+#'     the number of that dimension.
+#'
+#' @examples
+#'
+#' # TODO Steal from plotMDS
+#'
+#' @export
+get_mds <- function(x, k, ...) {
+    req_ns("limma")
+    dmat <- limma::plotMDS(x, ..., plot = FALSE)$distance.matrix %>% as.dist
+    max_k <- attr(dmat, "Size") - 1
+    if (missing(k)) {
+        k <- attr(dmat, "Size") - 1
+    } else if (k > max_k) {
+        warning(glue("Number of requested dimensions ({k}) is greater than the number available ({max_k}). Returning all dimensions."))
+        k <- max_k
+    }
+    mds <- cmdscale(dmat, k=k, eig=TRUE)
+    mds$points %>% add_numbered_colnames("Dim")
 }

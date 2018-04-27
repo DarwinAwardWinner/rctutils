@@ -2,10 +2,28 @@
 % Please edit documentation in R/data_manip_utils.R
 \name{fac2char}
 \alias{fac2char}
-\title{Convert all factors to character in a data frame}
+\title{Convert all factors in a data frame to character vectors}
 \usage{
 fac2char(df)
 }
+\arguments{
+\item{df}{The data frame in which fo convert factors.}
+}
+\value{
+\code{df}, with all factor columns converted to character
+vectors.
+}
 \description{
-Convert all factors to character in a data frame
+This is useful when you forgot to specify \code{stringsAsFactors = FALSE} when creating your data frame.
+}
+\examples{
+
+x <- data.frame(letters, 1:26, LETTERS)
+sapply(x, class)
+x2 <- fac2char(x)
+sapply(x2, class)
+
+}
+\seealso{
+\code{\link[=as.character]{as.character()}}, \code{\link[=data.frame]{data.frame()}}
 }

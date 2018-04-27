@@ -4,8 +4,7 @@
 \alias{voomWithQualityWeightsAndOffset}
 \title{Implementation of \code{limma::voomWithQualityWeights()} that uses an offset matrix}
 \usage{
-voomWithQualityWeightsAndOffset(counts, design = NULL,
-  offset = edgeR::expandAsMatrix(edgeR::getOffset(dge), dim(dge)),
+voomWithQualityWeightsAndOffset(counts, design = NULL, offset,
   normalize.method = "none", plot = FALSE, span = 0.5,
   var.design = NULL, method = "genebygene", maxiter = 50, tol = 1e-10,
   trace = FALSE, replace.weights = TRUE, col = NULL, ...)
