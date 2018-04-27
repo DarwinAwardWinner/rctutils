@@ -21,7 +21,8 @@ Imports:
     withr,
     methods,
     ggplot2,
-    rlang
+    rlang,
+    R.utils
 Suggests:
     BiocGenerics,
     GenomicRanges,

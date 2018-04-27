@@ -6,16 +6,15 @@
 #' @param ... Packages to require
 #' @param caller The name of the function this was called from. Only
 #'     used to create an appropriate error message.
-#' @importFrom stringr str_c
 req_ns <- function(..., caller=as.character(sys.call(-1)[1])) {
     for (pkg in unlist(list(...))) {
         if (!requireNamespace(pkg, quietly = TRUE)) {
-        if (length(caller) != 1 || is.na(caller)) {
-            caller <- "this function"
-        } else {
-            caller <- str_c(caller, "()")
-        }
-        stop(sprintf("Package '%s' must be installed to use %s", pkg, caller), call. = FALSE)
+            if (length(caller) != 1 || is.na(caller)) {
+                caller <- "this function"
+            } else {
+                caller <- str_c(caller, "()")
+            }
+            stop(sprintf("Package '%s' must be installed to use %s", pkg, caller), call. = FALSE)
         }
     }
 }

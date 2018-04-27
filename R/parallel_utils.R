@@ -1,3 +1,65 @@
+## https://github.com/HenrikBengtsson/future/issues/162
+## https://github.com/DarwinAwardWinner/future/blob/6a000af1e9ea41674c85a5476cf5e8c6c9e75d80/R/use_futures.R
+
+#' @export
+use_futures <- function() {
+  use_futures_for_foreach()
+  req_ns("BiocParallel")
+    ## Using future indirectly through foreach seems faster than the
+    ## actual FutureParam() class, so we use that instead.
+    BiocParallel::register(BiocParallel::DoparParam())
+}
+
+#' @importFrom R.utils isPackageLoaded
+use_futures_for_foreach <- function() {
+    hookfun <- function(...) {
+        if (requireNamespace("doFuture", quietly=TRUE)) {
+            doFuture::registerDoFuture()
+        } else {
+            warning("Install the doFuture package to allow foreach to use futures for parallel operation")
+        }
+    }
+    if (isPackageLoaded("foreach")) {
+        hookfun()
+    } else {
+        setHook(packageEvent("foreach", "onLoad"), hookfun, "append")
+    }
+}
+
+#' @importFrom R.utils isPackageLoaded
+use_futures_for_BiocParallel <- function() {
+    hookfun <- function(...) {
+        if (requireNamespace("BiocParallel", quietly = TRUE) &&
+            requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
+            BiocParallel::register(BiocParallel.FutureParam::FutureParam())
+        } else {
+            warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation")
+        }
+    }
+    if (isPackageLoaded("BiocParallel")) {
+        hookfun()
+    } else {
+        setHook(packageEvent("BiocParallel", "onLoad"), hookfun, "append")
+    }
+}
+
+#' Set up all parallel backends to use multicore
+#'
+#' There are several different parallel-processing packages with
+#' multiple backends. This function sets all of them up to use
+#' multi-core processing.
+#'
+#' @param ncores The number of cores to use. If not specified, it is
+#'     set automatically from the environment, using
+#'     [future::availableCores()].
+#'
+#' @export
+setup_multicore <- function(ncores = future::availableCores()) {
+    req_ns("future", "BiocParallel")
+    future::plan(future::multiprocess, workers = ncores)
+    use_futures()
+}
+
 #' Parallelized version of [limma::selectModel()]
 #'
 #' @param y,designlist,criterion,df.prior,s2.prior,s2.true,... These
