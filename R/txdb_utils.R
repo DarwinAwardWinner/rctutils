@@ -1,7 +1,7 @@
 #' Get a TxDb from either a package name or file name
 #'
 #' @export
-get.txdb <- function(txdbname) {
+get_txdb <- function(txdbname) {
     tryCatch({
         return(get(txdbname, loadNamespace(txdbname)))
         ## pos <- str_c("package:", txdbname)
@@ -12,8 +12,10 @@ get.txdb <- function(txdbname) {
     })
 }
 
+#' Generate a tx2gene table from a TxDb
+#'
 #' @export
-get.tx2gene.from.txdb <- function(txdb) {
+get_tx2gene_from_txdb <- function(txdb) {
     req_ns("AnnotationDbi")
     k <- AnnotationDbi::keys(txdb, keytype = "GENEID")
     suppressMessages(AnnotationDbi::select(txdb, keys = k, keytype = "GENEID", columns = "TXNAME")) %>%

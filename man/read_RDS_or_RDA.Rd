@@ -2,10 +2,10 @@
 % Please edit documentation in R/rdata_io.R
 \name{read_RDS_or_RDA}
 \alias{read_RDS_or_RDA}
-\title{Read a single object from RDS or RDA file}
+\title{Read a single object from an RDS or RDA file}
 \usage{
 read_RDS_or_RDA(filename, expected.class = "ANY")
 }
 \description{
-Read a single object from RDS or RDA file
+Read a single object from an RDS or RDA file
 }

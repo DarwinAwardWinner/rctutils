@@ -133,7 +133,7 @@ read_single_object_from_rda <- function(filename) {
     return(objects[[1]])
 }
 
-#' Read a single object from RDS or RDA file
+#' Read a single object from an RDS or RDA file
 #'
 #' @export
 read_RDS_or_RDA <- function(filename, expected.class="ANY") {
@@ -146,4 +146,28 @@ read_RDS_or_RDA <- function(filename, expected.class="ANY") {
         object <- as(object, expected.class)
     }
     return(object)
+}
+
+#' Save a single object to am RDS or RDA file
+#'
+#' If the output file name ends in ".rda" or ".rdata", the file will
+#' be saved using [save()]. Otherwise, it will be saved using
+#' [saveRDS()].
+#'
+#' @export
+save_RDS_or_RDA <- function(object, file, ascii = FALSE, version = NULL,
+                            compress = TRUE, savetype) {
+    if (missing(savetype)) {
+        if (str_detect(file, regex("\\.rda(ta)?", ignore_case = TRUE))) {
+            savetype <- "rda"
+        } else {
+            savetype <- "rds"
+        }
+    }
+    savetype <- match_arg(savetype, choices = c("rda", "rds"))
+    if (savetype == "rda") {
+        save(list="object", file=file, ascii=ascii, version=version, compress=compress)
+    } else{
+        saveRDS(object=object, file=file, ascii=ascii, version=version, compress=compress)
+    }
 }
