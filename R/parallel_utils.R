@@ -2,44 +2,38 @@
 ## https://github.com/DarwinAwardWinner/future/blob/6a000af1e9ea41674c85a5476cf5e8c6c9e75d80/R/use_futures.R
 
 #' @export
-use_futures <- function() {
-  use_futures_for_foreach()
-  req_ns("BiocParallel")
-    ## Using future indirectly through foreach seems faster than the
-    ## actual FutureParam() class, so we use that instead.
-    BiocParallel::register(BiocParallel::DoparParam())
+use_futures <- function(plan, ...) {
+    req_ns("future")
+    if (!missing(plan)) {
+        future::plan(plan, ...)
+    }
+    use_futures_for_foreach()
+    use_futures_for_BiocParallel()
 }
 
-#' @importFrom R.utils isPackageLoaded
 use_futures_for_foreach <- function() {
-    hookfun <- function(...) {
-        if (requireNamespace("doFuture", quietly=TRUE)) {
-            doFuture::registerDoFuture()
-        } else {
-            warning("Install the doFuture package to allow foreach to use futures for parallel operation")
-        }
-    }
-    if (isPackageLoaded("foreach")) {
-        hookfun()
+    if (requireNamespace("doFuture", quietly=TRUE)) {
+        doFuture::registerDoFuture()
+        message("Foreach will now use the doFuture backend")
     } else {
-        setHook(packageEvent("foreach", "onLoad"), hookfun, "append")
+        warning("Install the doFuture package to allow foreach to use futures for parallel operation")
     }
 }
 
-#' @importFrom R.utils isPackageLoaded
-use_futures_for_BiocParallel <- function() {
-    hookfun <- function(...) {
-        if (requireNamespace("BiocParallel", quietly = TRUE) &&
-            requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
+## Using future indirectly through foreach seems substantially faster
+## than the actual FutureParam() class, so we use that instead.
+use_futures_for_BiocParallel <- function(via_foreach=TRUE) {
+    if (requireNamespace("BiocParallel", quietly = TRUE)) {
+        if (via_foreach) {
+            suppressMessages(use_futures_for_foreach())
+            BiocParallel::register(BiocParallel::DoparParam())
+            message("BiocParallel will now use the DoparParam (i.e. foreach) backend, which should in turn use the doFuture backend.")
+        } else if (requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
             BiocParallel::register(BiocParallel.FutureParam::FutureParam())
+            message("BiocParallel will now use the FutureParam backend")
         } else {
             warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation")
         }
-    }
-    if (isPackageLoaded("BiocParallel")) {
-        hookfun()
-    } else {
-        setHook(packageEvent("BiocParallel", "onLoad"), hookfun, "append")
     }
 }
 
@@ -54,10 +48,8 @@ use_futures_for_BiocParallel <- function() {
 #'     [future::availableCores()].
 #'
 #' @export
-setup_multicore <- function(ncores = future::availableCores()) {
-    req_ns("future", "BiocParallel")
-    future::plan(future::multiprocess, workers = ncores)
-    use_futures()
+use_multicore_futures <- function(ncores = future::availableCores()) {
+    use_futures("multicore", workers=ncores)
 }
 
 #' Parallelized version of [limma::selectModel()]
