@@ -2,19 +2,19 @@
 ## https://github.com/DarwinAwardWinner/future/blob/6a000af1e9ea41674c85a5476cf5e8c6c9e75d80/R/use_futures.R
 
 #' @export
-use_futures <- function(plan, ...) {
+use_futures <- function(plan, ..., quiet = FALSE) {
     req_ns("future")
     if (!missing(plan)) {
         future::plan(plan, ...)
     }
-    use_futures_for_foreach()
-    use_futures_for_BiocParallel()
+    use_futures_for_foreach(quiet = quiet)
+    use_futures_for_BiocParallel(quiet = quiet)
 }
 
-use_futures_for_foreach <- function() {
+use_futures_for_foreach <- function(quiet = FALSE) {
     if (requireNamespace("doFuture", quietly=TRUE)) {
         doFuture::registerDoFuture()
-        message("Foreach will now use the doFuture backend")
+        if (!quiet) message("Foreach will now use the doFuture backend")
     } else {
         warning("Install the doFuture package to allow foreach to use futures for parallel operation")
     }
@@ -22,34 +22,19 @@ use_futures_for_foreach <- function() {
 
 ## Using future indirectly through foreach seems substantially faster
 ## than the actual FutureParam() class, so we use that instead.
-use_futures_for_BiocParallel <- function(via_foreach=TRUE) {
+use_futures_for_BiocParallel <- function(via_foreach=TRUE, quiet = FALSE) {
     if (requireNamespace("BiocParallel", quietly = TRUE)) {
         if (via_foreach) {
             suppressMessages(use_futures_for_foreach())
             BiocParallel::register(BiocParallel::DoparParam())
-            message("BiocParallel will now use the DoparParam (i.e. foreach) backend, which should in turn use the doFuture backend.")
+            if (!quiet) message("BiocParallel will now use the DoparParam (i.e. foreach) backend, which should in turn use the doFuture backend.")
         } else if (requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
             BiocParallel::register(BiocParallel.FutureParam::FutureParam())
-            message("BiocParallel will now use the FutureParam backend")
+            if (!quiet) message("BiocParallel will now use the FutureParam backend")
         } else {
             warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation")
         }
     }
-}
-
-#' Set up all parallel backends to use multicore
-#'
-#' There are several different parallel-processing packages with
-#' multiple backends. This function sets all of them up to use
-#' multi-core processing.
-#'
-#' @param ncores The number of cores to use. If not specified, it is
-#'     set automatically from the environment, using
-#'     [future::availableCores()].
-#'
-#' @export
-use_multicore_futures <- function(ncores = future::availableCores()) {
-    use_futures("multicore", workers=ncores)
 }
 
 #' Parallelized version of [limma::selectModel()]
