@@ -3,7 +3,7 @@
 #' Create an annotatied p-value histogram plot
 #'
 #' @export
-plotpvals <- function(pvals, ptn) {
+plot_pval_hist <- function(pvals, ptn) {
     req_ns("limma")
     if (missing(ptn)) {
         ptn <- limma::propTrueNull(pvals)
@@ -25,10 +25,11 @@ plotpvals <- function(pvals, ptn) {
 #' Variant of `GGally::ggduo()` with separate arguments for  `dataX` and `dataY`
 #'
 #' @export
-ggduo.dataXY <- function(dataX, dataY, extraData=NULL, ...) {
+ggduo_dataXY <- function(dataX, dataY, extraData=NULL, ...) {
     req_ns("GGally")
     assert_that(ncol(dataX) > 0)
     assert_that(ncol(dataY) > 0)
+    ## TODO: Ensure no repeated colnames
     alldata <- cbind(dataX, dataY)
     if (!is.null(extraData)) {
         alldata <- cbind(alldata, extraData)

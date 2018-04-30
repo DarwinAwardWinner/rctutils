@@ -93,7 +93,7 @@ assign_into <- function(x, expr, value) {
 #'
 #' @examples
 #'
-#' withGC({
+#' with_gc({
 #'   # Create a "large" object (this one is not actually large because
 #'   # examples need to be kept small)
 #'   large_object <- 1:5000
@@ -105,7 +105,7 @@ assign_into <- function(x, expr, value) {
 #' @seealso [gc()]
 #'
 #' @export
-withGC <- function(expr, ...) {
+with_gc <- function(expr, ...) {
     on.exit(gc(...))
     return(expr)
 }
