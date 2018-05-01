@@ -11,11 +11,12 @@ read_table_general <- function(filename, read.table.args=NULL, read.xlsx.args=NU
         read.table.args$header <- TRUE
         read.xlsx.args %<>% as.list
         read.xlsx.args$xlsxFile <- filename
-        lazy_results <- list(
-            rdata=future::future(read_RDS_or_RDA(filename, dataframe.class), lazy=TRUE),
-            table=future::future(do.call(read.table, read.table.args), lazy=TRUE),
-            csv=future::future(do.call(read.csv, read.table.args), lazy=TRUE),
-            xlsx=future::future(do.call(openxlsx::read.xlsx, read.xlsx.args), lazy=TRUE))
+        lazy_results <- make_futures(
+            .future.args = list(evaluator = future::sequential, lazy=TRUE),
+            rdata=read_RDS_or_RDA(filename, dataframe.class),
+            table=do.call(read.table, read.table.args),
+            csv=do.call(read.csv, read.table.args),
+            xlsx=do.call(openxlsx::read.xlsx, read.xlsx.args))
         for (lzresult in lazy_results) {
             result <- tryCatch({
                 x <- as(future::value(lzresult), dataframe.class)
@@ -89,13 +90,14 @@ write_narrowPeak <- function(x, file, ...) {
 read_regions <- function(filename) {
     req_ns("rtracklayer", "future")
     suppressWarnings({
-        lazy_results <- list(
-            rdata=future::future(read_RDS_or_RDA(filename), lazy=TRUE),
-            narrowPeak=future::future(read_narrowPeak(filename), lazy=TRUE),
-            bed=future::future(rtracklayer::import(filename, format="bed"), lazy=TRUE),
-            gff=future::future(rtracklayer::import(filename, format="gff"), lazy=TRUE),
-            saf=future::future(read_saf(filename), lazy=TRUE),
-            table=future::future(read_table_general(filename), lazy=TRUE))
+        lazy_results <- make_futures(
+            .future.args = list(evaluator = future::sequential, lazy=TRUE),
+            rdata=read_RDS_or_RDA(filename),
+            narrowPeak=read_narrowPeak(filename),
+            bed=rtracklayer::import(filename, format="bed"),
+            gff=rtracklayer::import(filename, format="gff"),
+            saf=read_saf(filename),
+            table=read_table_general(filename))
         for (lzresult in lazy_results) {
             result <- tryCatch({
                 x <- future::value(lzresult)
