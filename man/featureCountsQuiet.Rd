@@ -6,6 +6,12 @@
 \usage{
 featureCountsQuiet(...)
 }
+\arguments{
+\item{...}{See \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}.}
+}
+\value{
+See \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}.
+}
 \description{
 This is a helper function for \code{featureCountsParallel()}.
 }

@@ -164,6 +164,15 @@ selectModelParallel <- function (y, designlist, criterion = "aic", df.prior = 0,
 #' Combine multiple featureCounts results
 #'
 #' This is a helper function for `featureCountsParallel()`.
+#'
+#' @param fcreslist A list of values returned by multiple calls to
+#'     [Rsubread::featureCounts()]. They should all contain the same
+#'     set of features but different samples.
+#' @return A single value of the same type that is returned by
+#'     `Rsubread::featureCounts()`. It will contain the same features
+#'     as the inputs and the union of all samples.
+#'
+#' @export
 combineFCResults <- function(fcreslist) {
     combfuncs <- list(
         counts=cbind,
@@ -193,12 +202,24 @@ combineFCResults <- function(fcreslist) {
 #'
 #' This redirects the output to `/dev/null`, so it assumes a UNIX-like
 #' system.
+#'
+#' @param ... See [Rsubread::featureCounts()].
+#' @return See [Rsubread::featureCounts()].
+#'
+#' @export
 featureCountsQuiet <- function(...) {
     req_ns("withr", "Rsubread")
     withr::with_output_sink("/dev/null", Rsubread::featureCounts(...))
 }
 
-#' Parallel version of `Rsubread::featureCounts()`
+#' (Alternative) parallel version of `Rsubread::featureCounts()`
+#'
+#' [Rsubread::featureCounts()] already has its own parallel option via
+#' the `nthreads` argument, but sometimes this does not result in a
+#' speed-up, presumably due to the file reading being a bottleneck.
+#' Instead, this function calls `Rsubread::featureCounts()` on
+#' multiple files in parallel. Empirically, this sometimes results in
+#' a better parallel speed-up than using `nthreads`.
 #'
 #' @param files This has the same meaning as in
 #'     [Rsubread::featureCounts()]
@@ -217,7 +238,7 @@ featureCountsParallel <- function(files, ...,
     req_ns("Rsubread", "BiocParallel")
     # Let featureCounts handle the degenerate case itself
     if (length(files) == 0) {
-        return(Rsubread::featureCounts(files, ...))
+        return(featureCountsQuiet(files, ...))
     }
     ## We pass nthreads=1 to tell featureCounts not to parallelize
     ## itself, since we are already handling parallelization.
@@ -236,29 +257,18 @@ featureCountsParallel <- function(files, ...,
 #' @return See [csaw::windowCounts()].
 #'
 #' @seealso [csaw::windowCounts()], [BiocParallel::bplapply()]
+#'
 #' @export
 windowCountsParallel <- function(bam.files, ..., filter=10,
                                  BPPARAM = BiocParallel::bpparam()) {
     req_ns("BiocParallel", "csaw", "SummarizedExperiment")
+    # Let windowCounts handle the degenerate case itself
+    if (length(bam.files) == 0) {
+        return(csaw::windowCounts(bam.files, ..., filter = 10))
+    }
     reslist <- BiocParallel::bplapply(X=bam.files, FUN=csaw::windowCounts, ..., filter=0, BPPARAM=BPPARAM)
     res <- do.call(cbind, reslist)
     rm(reslist)
     keep <- rowSums(SummarizedExperiment::assay(res)) >= filter
     res[keep,]
-}
-
-#' Like lapply, but returns a list of future objects.
-#'
-#' @param X,FUN,... See [lapply()].
-#'
-#' @return A list of futures. You can fetch all the results in a list
-#'     using [future::values()].
-#'
-#' @seealso [lapply()], [future::future()]
-#'
-#' @export
-future.lapply <- function(X, FUN, ...) {
-    req_ns("future")
-    FUTUREFUN <- function(x) future::future(FUN(x, ...))
-    lapply(X, FUTUREFUN, ...)
 }

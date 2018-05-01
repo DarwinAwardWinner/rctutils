@@ -2,7 +2,7 @@
 % Please edit documentation in R/parallel_utils.R
 \name{featureCountsParallel}
 \alias{featureCountsParallel}
-\title{Parallel version of \code{Rsubread::featureCounts()}}
+\title{(Alternative) parallel version of \code{Rsubread::featureCounts()}}
 \usage{
 featureCountsParallel(files, ..., BPPARAM = BiocParallel::bpparam())
 }
@@ -20,7 +20,12 @@ parallelize the operation}
 See \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}.
 }
 \description{
-Parallel version of \code{Rsubread::featureCounts()}
+\code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}} already has its own parallel option via
+the \code{nthreads} argument, but sometimes this does not result in a
+speed-up, presumably due to the file reading being a bottleneck.
+Instead, this function calls \code{Rsubread::featureCounts()} on
+multiple files in parallel. Empirically, this sometimes results in
+a better parallel speed-up than using \code{nthreads}.
 }
 \seealso{
 \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}, \code{\link[BiocParallel:bplapply]{BiocParallel::bplapply()}}
