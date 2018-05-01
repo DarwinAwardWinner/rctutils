@@ -42,4 +42,6 @@ Suggests:
     forcats,
     openxlsx,
     tidyr,
-    SummarizedExperiment
+    SummarizedExperiment,
+    BiocParallel.FutureParam,
+    doFuture
