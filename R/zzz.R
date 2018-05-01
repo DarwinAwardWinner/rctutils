@@ -6,7 +6,7 @@
 #' @param ... Packages to require
 #' @param caller The name of the function this was called from. Only
 #'     used to create an appropriate error message.
-req_ns <- function(..., caller=as.character(sys.call(-1)[1])) {
+req_ns <- function(..., caller = as.character(sys.call(-1)[1])) {
     for (pkg in unlist(list(...))) {
         if (!requireNamespace(pkg, quietly = TRUE)) {
             if (length(caller) != 1 || is.na(caller)) {

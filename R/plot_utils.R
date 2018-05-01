@@ -1,10 +1,10 @@
-# Make cairo_pdf use onefile=TRUE by default
+# Make cairo_pdf use onefile = TRUE by default
 ## TODO: Rename to something unique
 
-#' Same as `cairo_pdf()` but with a default of `onefile=TRUE`
+#' Same as `cairo_pdf()` but with a default of `onefile = TRUE`
 #'
 #' @export
-cairo_pdf_onefile <- function(..., onefile=TRUE) {
+cairo_pdf_onefile <- function(..., onefile = TRUE) {
     cairo_pdf(..., onefile = onefile)
 }
 
@@ -12,11 +12,11 @@ cairo_pdf_onefile <- function(..., onefile=TRUE) {
 ## https://cran.r-project.org/web/packages/magick/vignettes/intro.html
 
 #' @export
-rasterpdf <- function(pdffile, outfile=pdffile, resolution=600) {
-    tempf <- tempfile(pattern="raster", fileext=".pdf")
+rasterpdf <- function(pdffile, outfile = pdffile, resolution = 600) {
+    tempf <- tempfile(pattern = "raster", fileext = ".pdf")
     on.exit(unlink(tempf))
-    exitcode <- system2("convert", args=c("-density", resolution, pdffile, tempf),
-        stdout=FALSE, stderr=FALSE)
+    exitcode <- system2("convert", args = c("-density", resolution, pdffile, tempf),
+        stdout = FALSE, stderr = FALSE)
     assert_that(exitcode == 0)
     assert_that(file.exists(tempf))
     suppressWarnings(file.rename(tempf, outfile))

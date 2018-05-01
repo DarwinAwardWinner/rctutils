@@ -10,14 +10,14 @@
 #' si2f("10k")
 #'
 #' # convert single number with unit
-#' si2f("23 mV", unit="V")
+#' si2f("23 mV", unit = "V")
 #'
 #' # convert list of numbers
 #' si_strings <- c("100 k", "35 E", "4 m")
 #' si2f(si_strings)
 #'
 #' @export
-si2f <- function(string, unit="") {
+si2f <- function(string, unit = "") {
     req_ns("rex")
 
     if (length(string) == 0) {

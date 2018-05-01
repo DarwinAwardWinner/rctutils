@@ -10,9 +10,9 @@
 #' @examples
 #' x <- 5
 #' y <- 3
-#' datafile <- tempfile(fileext=".rda")
+#' datafile <- tempfile(fileext = ".rda")
 #' # Only saves y, not x
-#' save_image_filtered(datafile, exclude="x")
+#' save_image_filtered(datafile, exclude = "x")
 #' @seealso [save.image()]
 #' @export
 save_image_filtered <-
@@ -74,14 +74,14 @@ save_image_filtered <-
 #' @examples
 #' x <- 5
 #' y <- 3
-#' datafile <- tempfile(fileext=".rda")
-#' save(file=datafile, list=c("x", "y"))
+#' datafile <- tempfile(fileext = ".rda")
+#' save(file = datafile, list = c("x", "y"))
 #' rm(x,y)
 #' loaded_vars <- load_in_new_env(datafile)
 #' as.list(loaded_vars)
 #' @seealso [save.image()]
 #' @export
-load_in_new_env <- function(file, envir=new.env(), ...) {
+load_in_new_env <- function(file, envir = new.env(), ...) {
     load(file, envir, ...)
     return(envir)
 }
@@ -98,22 +98,22 @@ load_in_new_env <- function(file, envir=new.env(), ...) {
 #' @examples
 #' x <- 5
 #' y <- 3
-#' datafile <- tempfile(fileext=".rda")
+#' datafile <- tempfile(fileext = ".rda")
 #' # Only saves y, not x
 #' save.image(datafile)
 #' # Set new values which can be overridden by loading the old ones.
 #' x <- 10
 #' y <- 10
-#' load_filtered(datafile, exclude="x")
+#' load_filtered(datafile, exclude = "x")
 #' # x is still 10, but y is now 3 again
 #' mget(c("x", "y"))
 #' @seealso [load()]
 #' @export
-load_filtered <- function(file, envir = parent.frame(), ..., exclude=NULL) {
+load_filtered <- function(file, envir = parent.frame(), ..., exclude = NULL) {
     if (!length(exclude)) {
         return(load(file, envir, ...))
     }
-    tempenv <- load_in_new_env(file=file, ...)
+    tempenv <- load_in_new_env(file = file, ...)
     for (i in setdiff(names(tempenv), exclude)) {
         envir[[i]] <- tempenv[[i]]
     }
@@ -136,13 +136,13 @@ read_single_object_from_rda <- function(filename) {
 #' Read a single object from an RDS or RDA file
 #'
 #' @export
-read_RDS_or_RDA <- function(filename, expected.class="ANY") {
+read_RDS_or_RDA <- function(filename, expected.class = "ANY") {
     object <- suppressWarnings(tryCatch({
         readRDS(filename)
-    }, error=function(...) {
+    }, error = function(...) {
         read_single_object_from_rda(filename)
     }))
-    if (!any(sapply(expected.class, is, object=object))) {
+    if (!any(sapply(expected.class, is, object = object))) {
         object <- as(object, expected.class)
     }
     return(object)
@@ -166,8 +166,8 @@ save_RDS_or_RDA <- function(object, file, ascii = FALSE, version = NULL,
     }
     savetype <- match_arg(savetype, choices = c("rda", "rds"))
     if (savetype == "rda") {
-        save(list="object", file=file, ascii=ascii, version=version, compress=compress)
+        save(list = "object", file = file, ascii = ascii, version = version, compress = compress)
     } else{
-        saveRDS(object=object, file=file, ascii=ascii, version=version, compress=compress)
+        saveRDS(object = object, file = file, ascii = ascii, version = version, compress = compress)
     }
 }

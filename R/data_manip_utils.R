@@ -34,8 +34,8 @@ is_valueless <- function(x, empty_values = NA) {
 #'
 #' @importFrom glue glue
 #' @export
-add_numbered_colnames <- function(x, prefix="C") {
-    x %>% set_colnames(glue("{prefix}{num}", num=seq(from=1, length.out=ncol(x))))
+add_numbered_colnames <- function(x, prefix = "C") {
+    x %>% set_colnames(glue("{prefix}{num}", num = seq(from = 1, length.out = ncol(x))))
 }
 
 #' Intelligently convert character columns to factors in a data frame
@@ -53,7 +53,7 @@ add_numbered_colnames <- function(x, prefix="C") {
 #' @examples
 #'
 #' # Initially, both columns are character vectors
-#' x <- data.frame(sample=letters, group=LETTERS[1:2], stringsAsFactors=FALSE)
+#' x <- data.frame(sample = letters, group = LETTERS[1:2], stringsAsFactors = FALSE)
 #' sapply(x, class)
 #'
 #' # This converts group, but not sample, into a factor
@@ -142,11 +142,11 @@ code_control_named <- function (...) {
 #'
 #'
 #' @export
-collapse_to_atomic <- function(x, sep=",") {
+collapse_to_atomic <- function(x, sep = ",") {
     if (is.atomic(x)) {
         return(x)
     } else {
-        y <- lapply(x, str_c, collapse=sep)
+        y <- lapply(x, str_c, collapse = sep)
         y[lengths(y) == 0] <- NA
         assert_that(all(lengths(y) == 1))
         ## Ensure that unlisting does not mess up the names
@@ -169,14 +169,14 @@ collapse_to_atomic <- function(x, sep=",") {
 #' @examples
 #'
 #' library(S4Vectors)
-#' x <- DataFrame(a=1:5, b=List(split(1:25, 1:5)))
+#' x <- DataFrame(a = 1:5, b = List(split(1:25, 1:5)))
 #' ensure_atomic_columns(x)
 #'
 #' @seealso [collapse_to_atomic()]
 #'
 #' @export
-ensure_atomic_columns <- function(df, sep=",") {
-    df[] %<>% lapply(collapse_to_atomic, sep=sep)
+ensure_atomic_columns <- function(df, sep = ",") {
+    df[] %<>% lapply(collapse_to_atomic, sep = sep)
     df
 }
 
@@ -277,10 +277,10 @@ mutate_if_present <- function(.data, names, ...) {
 #' @examples
 #'
 #' s <- "A (string) with [many] regex *characters* in it."
-#' grepl(s, s, perl=TRUE)
+#' grepl(s, s, perl = TRUE)
 #' quotemeta(s)
 #' # After escaping, the string matches itself.
-#' grepl(quotemeta(s), s, perl=TRUE)
+#' grepl(quotemeta(s), s, perl = TRUE)
 #'
 #' @export
 quotemeta <- function (string) {
@@ -302,9 +302,9 @@ quotemeta <- function (string) {
 #'     according to the provided specifications.
 #' @examples
 #'
-#' x <- data.frame(a=letters[1:2], b=LETTERS[1:6])
+#' x <- data.frame(a = letters[1:2], b = LETTERS[1:6])
 #' sapply(x, levels)
-#' x2 <- relevel_columns(x, a=c("b", "a"), b=list("B", "A", after=2))
+#' x2 <- relevel_columns(x, a = c("b", "a"), b = list("B", "A", after = 2))
 #' sapply(x2, levels)
 #'
 #' @importFrom rlang is_named
@@ -319,7 +319,7 @@ relevel_columns <- function(df, ...) {
         if (!is.list(spec)) {
             spec <- list(spec)
         }
-        arglist <- c(list(.f=df[[i]]), spec)
+        arglist <- c(list(.f = df[[i]]), spec)
         df[[i]] <- do.call(forcats::fct_relevel, arglist)
     }
     df
@@ -351,7 +351,7 @@ relevel_columns <- function(df, ...) {
 #' @export
 sprintf_single_value <- function(fmt, value) {
     ## Max function arguments is 100
-    arglist = c(list(fmt=fmt), rep(list(value), 99))
+    arglist = c(list(fmt = fmt), rep(list(value), 99))
     do.call(sprintf, arglist)
 }
 
@@ -385,14 +385,14 @@ sprintf_single_value <- function(fmt, value) {
 #'
 #' @examples
 #'
-#' targets <- data.frame(group=letters[1:2], batch=LETTERS[1:5], x=rnorm(10))
+#' targets <- data.frame(group = letters[1:2], batch = LETTERS[1:5], x = rnorm(10))
 #' design <- model.matrix(~0 + group + x + batch, targets)
 #' colnames(design)
 #' design2 <- strip_design_factor_names(design)
 #' colnames(design2)
 #'
 #' @export
-strip_design_factor_names <- function(design, prefixes=names(attr(design, "contrasts"))) {
+strip_design_factor_names <- function(design, prefixes = names(attr(design, "contrasts"))) {
     req_ns("rex")
     if (!is.null(prefixes)) {
         regex.to.delete <- rex::rex(or(prefixes) %if_prev_is% or(start, ":") %if_next_isnt% end)

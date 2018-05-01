@@ -20,21 +20,21 @@
 #' pain.
 #'
 #' @export
-readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FALSE) {
+readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream = FALSE) {
     req_ns("GenomicRanges")
     ## Depending on whether reads are paired or single, get the full
     ## fragment length
     if (is(reads, "GAlignmentsList")) {
         ## Split into single and paired reads
         isSingle <- lengths(reads) == 1
-        mated.frags <- GenomicRanges::granges(reads[!isSingle], ignore.strand=TRUE)
+        mated.frags <- GenomicRanges::granges(reads[!isSingle], ignore.strand = TRUE)
         if (any(isSingle)) {
             single.frags <- GenomicRanges::granges(reads[isSingle]) %>%
                 ## Extend smaller single reads to fraglen, but don't
                 ## shrink longer reads
                 GenomicRanges::resize(
-                    width=pmax(fraglen, GenomicRanges::width(.)),
-                    fix=ifelse(extend_fragment_upstream, "end", "start"))
+                    width = pmax(fraglen, GenomicRanges::width(.)),
+                    fix = ifelse(extend_fragment_upstream, "end", "start"))
         } else {
             single.frags <- GenomicRanges::GRanges()
         }
@@ -48,8 +48,8 @@ readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FA
             ## Extend smaller reads to fraglen, but don't shrink
             ## longer reads
             GenomicRanges::resize(
-                width=pmax(fraglen, GenomicRanges::width(.)),
-                fix=ifelse(extend_fragment_upstream, "end", "start"))
+                width = pmax(fraglen, GenomicRanges::width(.)),
+                fix = ifelse(extend_fragment_upstream, "end", "start"))
     } else {
         warning(glue("Unknown reads type: {class(reads)}. Attempting to coerce to GRanges."))
         reads %<>% as("GRanges")
@@ -58,18 +58,18 @@ readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream=FA
         if (all(GenomicRanges::width(reads) == GenomicRanges::width(reads[1])) &&
             GenomicRanges::width(reads[1]) < fraglen) {
             warning(glue("All reads from unknown class have the same length, {width(reads[1])}, and are therefore assumed to be single-end reads, which will be resized to {fraglen}."))
-            frags <- GenomicRanges::resize(reads, width=fraglen, fix="start")
+            frags <- GenomicRanges::resize(reads, width = fraglen, fix = "start")
         } else {
             frags <- reads
         }
     }
     ## Finally, get the center of each fragment
-    GenomicRanges::resize(frags, width=1, fix="center")
+    GenomicRanges::resize(frags, width = 1, fix = "center")
 }
 
 ## Convert strand to -1, 0, or 1
 #' @export
-strand_sign <- function(x, allow.unstranded=FALSE) {
+strand_sign <- function(x, allow.unstranded = FALSE) {
     req_ns("GenomicRanges")
     s <- GenomicRanges::strand(x)
     ss <- (s == "+") - (s == "-")
@@ -83,7 +83,7 @@ strand_sign <- function(x, allow.unstranded=FALSE) {
 
 ## This merges exons into genes (GRanges to GRangesList)
 #' @export
-gff_to_grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFeatureType="gene") {
+gff_to_grl <- function(gr, exonFeatureType = "exon", geneIdAttr = "gene_id", geneFeatureType = "gene") {
     req_ns("S4Vectors")
     exon.gr <- gr[gr$type %in% exonFeatureType]
     exon.gr %<>% cleanup_mcols
@@ -91,7 +91,7 @@ gff_to_grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFea
         promote_common_mcols
     if (!is.null(geneFeatureType)) {
         gene.meta <- gr[gr$type %in% geneFeatureType] %>%
-            S4Vectors::mcols %>% cleanup_mcols(mcols_df=.) %>%
+            S4Vectors::mcols %>% cleanup_mcols(mcols_df = .) %>%
             .[match(names(grl), .[[geneIdAttr]]),]
         for (i in names(gene.meta)) {
             if (i %in% names(S4Vectors::mcols(grl))) {
@@ -111,18 +111,18 @@ gff_to_grl <- function(gr, exonFeatureType="exon", geneIdAttr="gene_id", geneFea
 grl_to_saf <- function(grl) {
     req_ns("GenomicRanges")
     gr <- unlist(grl)
-    data.frame(Chr=as.vector(GenomicRanges::seqnames(gr)),
-               Start=GenomicRanges::start(gr),
-               End=GenomicRanges::end(gr),
-               Strand=as.vector(GenomicRanges::strand(gr)),
-               GeneID=rep(names(grl), lengths(grl)))
+    data.frame(Chr = as.vector(GenomicRanges::seqnames(gr)),
+               Start = GenomicRanges::start(gr),
+               End = GenomicRanges::end(gr),
+               Strand = as.vector(GenomicRanges::strand(gr)),
+               GeneID = rep(names(grl), lengths(grl)))
 }
 
 ## Get column names that are always the same for all elements of a
 ## gene. Used for extracting only the gene metadata from exon
 ## metadata.
 
-get_gene_common_colnames <- function(df, geneids, blacklist=c("type", "Parent")) {
+get_gene_common_colnames <- function(df, geneids, blacklist = c("type", "Parent")) {
     req_ns("S4Vectors")
     if (nrow(df) < 1) {
         return(character(0))
@@ -162,10 +162,10 @@ get_gene_common_colnames <- function(df, geneids, blacklist=c("type", "Parent"))
 #' GRangesList object itself.
 #'
 #' @export
-promote_common_mcols <- function(grl, delete.from.source=FALSE, ...) {
+promote_common_mcols <- function(grl, delete.from.source = FALSE, ...) {
     req_ns("S4Vectors", "GenomicRanges")
     colnames.to.promote <- get_gene_common_colnames(S4Vectors::mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
-    promoted.df <- S4Vectors::mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop=FALSE]
+    promoted.df <- S4Vectors::mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop = FALSE]
     if (delete.from.source) {
         S4Vectors::mcols(grl@unlistData) %<>%
             .[setdiff(names(.), colnames.to.promote)]
@@ -182,13 +182,13 @@ promote_common_mcols <- function(grl, delete.from.source=FALSE, ...) {
 #'     this is equivalent to [rtracklayer::liftOver()].
 #'
 #' @export
-liftOverLax <- function(x, chain, ..., allow.gap=0) {
+liftOverLax <- function(x, chain, ..., allow.gap = 0) {
     req_ns("rtracklayer", "S4Vectors", "GenomicRanges")
     newx <- rtracklayer::liftOver(x, chain)
     if (allow.gap > 0) {
         gapped <- which(lengths(newx) > 1)
         newx.gapped.reduced <- GenomicRanges::reduce(
-            newx[gapped], min.gapwidth = allow.gap + 1, with.revmap=TRUE)
+            newx[gapped], min.gapwidth = allow.gap + 1, with.revmap = TRUE)
         S4Vectors::mcols(newx.gapped.reduced@unlistData) <-
             rep(S4Vectors::mcols(x[gapped]), lengths(newx.gapped.reduced))
         newx[gapped] <- newx.gapped.reduced
@@ -199,11 +199,11 @@ liftOverLax <- function(x, chain, ..., allow.gap=0) {
 #' Convenience function for running liftOver on a MotifMap BED file
 #'
 #' @export
-liftOver_motifMap <- function(infile, chainfile, outfile, allow.gap=2) {
+liftOver_motifMap <- function(infile, chainfile, outfile, allow.gap = 2) {
     req_ns("rtracklayer")
-    gr <- read_motifmap(infile, parse_name=TRUE)
+    gr <- read_motifmap(infile, parse_name = TRUE)
     chain <- rtracklayer::import.chain(chainfile)
-    gr2 <- rtracklayer::liftOverLax(gr, chain, allow.gap=allow.gap)
+    gr2 <- rtracklayer::liftOverLax(gr, chain, allow.gap = allow.gap)
     gr2 <- unlist(gr2[lengths(gr2) == 1])
     write_motifmap(gr2, outfile)
 }

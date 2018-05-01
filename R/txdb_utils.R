@@ -6,7 +6,7 @@ get_txdb <- function(txdbname) {
         return(get(txdbname, loadNamespace(txdbname)))
         ## pos <- str_c("package:", txdbname)
         ## get(txdbname, pos)
-    }, error=function(...) {
+    }, error = function(...) {
         req_ns("AnnotationDbi")
         AnnotationDbi::loadDb(txdbname)
     })

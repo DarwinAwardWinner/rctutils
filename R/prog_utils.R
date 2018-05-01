@@ -31,7 +31,7 @@ tsmsg <- function(...) {
 #' the whole object.
 #'
 #' @param x The object to assign into. (Typically this argument is
-#'     delivered via \code{\%\>\%()}.)
+#'     delivered via \code{\%\ > \%()}.)
 #' @param expr The left hand side of the assignment operation to be
 #'     performed on \code{x}.
 #' @param value The right hand side of the assignment operation to be
@@ -62,7 +62,7 @@ tsmsg <- function(...) {
 #' x %>% assign_into(assays(.[[1]])$counts[3,5], 45) %>% ...
 #' }
 #'
-#' @seealso \code{\%\>\%} from the magrittr package.
+#' @seealso \code{\%\ > \%} from the magrittr package.
 #'
 #' @export
 assign_into <- function(x, expr, value) {
@@ -122,7 +122,7 @@ with_gc <- function(expr, ...) {
 #'
 #' @examples
 #'
-#' x <- list(verbose=TRUE, infile="a.txt", outfile="b.txt", ncores=8)
+#' x <- list(verbose = TRUE, infile = "a.txt", outfile = "b.txt", ncores = 8)
 #' print_var_vector(x)
 #'
 #' @importFrom rlang is_named
@@ -130,7 +130,7 @@ with_gc <- function(expr, ...) {
 print_var_vector <- function(v) {
     assert_that(is_named(v))
     for (i in names(v)) {
-        cat(i, ": ", deparse(v[[i]]), "\n", sep="")
+        cat(i, ": ", deparse(v[[i]]), "\n", sep = "")
     }
     invisible(v)
 }
@@ -170,7 +170,7 @@ print_var_vector <- function(v) {
 #'
 #' @importFrom rlang eval_tidy quo as_quosure as_list
 #' @export
-make_futures_ <- function(expressions, .future.args=list()) {
+make_futures_ <- function(expressions, .future.args = list()) {
     .future.args <- as_list(.future.args)
     if (! "lazy" %in% names(.future.args)) {
         .future.args$lazy <- TRUE
@@ -193,12 +193,12 @@ make_futures_ <- function(expressions, .future.args=list()) {
 #' @examples
 #'
 #' library(future)
-#' flist <- make_futures(a=1+1, b=2+2)
+#' flist <- make_futures(a = 1+1, b = 2+2)
 #' flist
 #' values(flist)
 #'
 #' @importFrom rlang enquos
 #' @export
-make_futures <- function(..., .future.args=list()) {
+make_futures <- function(..., .future.args = list()) {
     make_futures_(enquos(...), .future.args)
 }

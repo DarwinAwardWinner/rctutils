@@ -9,21 +9,21 @@ power_trans <- function(pow) {
     name <- glue("^{pow}")
     scales::trans_new(
         name,
-        transform=function(x) x ^ pow,
-        inverse=function(x) x ^ (1/pow),
-        domain =c(0,Inf))
+        transform = function(x) x ^ pow,
+        inverse = function(x) x ^ (1/pow),
+        domain = c(0,Inf))
 }
 
 #' @importFrom glue glue
 #' @export
-clamp_trans <- function(lower_threshold=0, upper_threshold=1) {
+clamp_trans <- function(lower_threshold = 0, upper_threshold = 1) {
     req_ns("scales")
     name <- glue("Clamp values outside of [{lower_threshold}, {upper_threshold}]")
     scales::trans_new(
         name,
-        transform=function(x) pmin(upper_threshold, pmax(lower_threshold, x)),
+        transform = function(x) pmin(upper_threshold, pmax(lower_threshold, x)),
         # transform is only invertible for part of the range
-        inverse=identity)
+        inverse = identity)
 }
 
 #' @export
@@ -40,7 +40,7 @@ neglog_trans <- function(base = exp(1)) {
 #' @export
 discrete_gradient <- function(n) {
     req_ns("scales")
-    scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7")(seq(0,1, length.out=n))
+    scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7")(seq(0,1, length.out = n))
 }
 
 # Always returns a list of ggplot objects. Flattens nested lists,
@@ -66,7 +66,7 @@ get.ggplots.list <- function(plots) {
 }
 
 #' @export
-ggprint <- function(plots, device=dev.cur(), closedev, printfun=print) {
+ggprint <- function(plots, device = dev.cur(), closedev, printfun = print) {
     req_ns("withr")
     p <- get.ggplots(plots)
     with_dev(device, lapply(p, printfun), closedev)
@@ -81,7 +81,7 @@ ggplotly.printer <- function(...) {
     req_ns("plotly")
     dots <- list(...)
     function(p) {
-        args <- c(list(p=p), dots)
+        args <- c(list(p = p), dots)
         print(do.call(plotly::ggplotly, args))
     }
 }

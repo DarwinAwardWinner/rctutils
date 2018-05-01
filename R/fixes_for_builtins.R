@@ -4,7 +4,7 @@
 #'
 #' @importFrom glue glue
 #' @export
-match_arg <- function (arg, choices, several.ok = FALSE, arg_name=substitute(arg), ignore.case=FALSE) {
+match_arg <- function (arg, choices, several.ok = FALSE, arg_name = substitute(arg), ignore.case = FALSE) {
     if (missing(choices)) {
         formal.args <- formals(sys.function(sys.parent()))
         choices <- eval(formal.args[[as.character(substitute(arg))]])
@@ -39,5 +39,5 @@ match_arg <- function (arg, choices, several.ok = FALSE, arg_name=substitute(arg
 #'
 #' @export
 deparse_onestring <- function(...) {
-    paste(deparse(...), collapse="\n")
+    paste(deparse(...), collapse = "\n")
 }

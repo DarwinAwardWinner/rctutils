@@ -81,7 +81,7 @@ cpmWithOffset <- function(y, offset, ...) {
     UseMethod("cpmWithOffset")
 }
 
-cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..., preserve.mean=TRUE) {
+cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..., preserve.mean = TRUE) {
     req_ns("edgeR")
     if (preserve.mean) {
         offset <- edgeR::scaleOffset(y, offset)
@@ -91,7 +91,7 @@ cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..
 }
 
 cpmWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR::getOffset(y), dim(y)),
-                                  log = FALSE, prior.count = 0.25, ..., preserve.mean=TRUE) {
+                                  log = FALSE, prior.count = 0.25, ..., preserve.mean = TRUE) {
     req_ns("edgeR")
     cpmWithOffset(t$counts, offset, log = log,
                   prior.count = prior.count, preserve.mean = preserve.mean, ...)
@@ -100,26 +100,26 @@ cpmWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR::getOf
 #' Estimate edgeR dispersions separately for each group
 #'
 #' @export
-estimateDispByGroup <- function(dge, group=as.factor(dge$samples$group), batch, ...) {
+estimateDispByGroup <- function(dge, group = as.factor(dge$samples$group), batch, ...) {
     req_ns("edgeR", "BiocParallel", "magrittr")
     assert_that(nlevels(group) > 1)
     assert_that(length(group) == ncol(dge))
     if (!is.list(batch)) {
-        batch <- list(batch=batch)
+        batch <- list(batch = batch)
     }
     batch <- as.data.frame(batch)
     assert_that(nrow(batch) == ncol(dge))
-    colnames(batch) %>% make.names(unique=TRUE)
+    colnames(batch) %>% make.names(unique = TRUE)
     igroup <- seq_len(ncol(dge)) %>% split(group)
     BiocParallel::bplapply(igroup, function(i) {
         group.dge <- dge[,i]
-        group.batch <- droplevels(batch[i,, drop=FALSE])
+        group.batch <- droplevels(batch[i,, drop = FALSE])
         group.batch <- group.batch[sapply(group.batch, . %>% unique %>% length %>%
                                                        is_greater_than(1))]
         group.vars <- names(group.batch)
         if (length(group.vars) == 0)
             group.vars <- "1"
-        group.batch.formula <- as.formula(str_c("~", str_c(group.vars, collapse="+")))
+        group.batch.formula <- as.formula(str_c("~", str_c(group.vars, collapse = "+")))
         des <- model.matrix(group.batch.formula, group.batch)
         edgeR::estimateDisp(group.dge, des, ...)
     })
@@ -140,19 +140,19 @@ getBCVTable <- function(y, design, ..., rawdisp) {
         if (is.null(design) && !design.passed) {
             warning("Estimating dispersions with no design matrix")
         }
-        y <- edgeR::estimateDisp(y, design=design, ...)
+        y <- edgeR::estimateDisp(y, design = design, ...)
     }
     assert_that(!is.null(y$prior.df))
     if (all(y$prior.df == 0)) {
         if (missing(rawdisp) || is.null(rawdisp)) {
             rawdisp <- y
         }
-        y <- edgeR::estimateDisp(y, design=design, ...)
+        y <- edgeR::estimateDisp(y, design = design, ...)
     }
     # Get raw (unsqueezed dispersions)
     if (missing(rawdisp) || is.na(rawdisp)) {
         # Estimate raw disperions using given design
-        y.raw <- edgeR::estimateDisp(y, design=design, prior.df=0)
+        y.raw <- edgeR::estimateDisp(y, design = design, prior.df = 0)
     } else if (is.null(rawdisp)) {
         # Explicitly passing NULL means no raw disperions are desired.
         y.raw <- NULL
@@ -171,11 +171,11 @@ getBCVTable <- function(y, design, ..., rawdisp) {
     assert_that(all(y.raw$prior.df == 0))
     y %<>% as.list
     disptable <- data.frame(
-        logCPM=y$AveLogCPM,
-        CommonBCV=y$common.dispersion %>% sqrt,
-        TrendBCV=y$trended.dispersion %>% sqrt,
-        PriorDF=y$prior.df,
-        eBayesBCV=y$tagwise.dispersion %>% sqrt)
+        logCPM = y$AveLogCPM,
+        CommonBCV = y$common.dispersion %>% sqrt,
+        TrendBCV = y$trended.dispersion %>% sqrt,
+        PriorDF = y$prior.df,
+        eBayesBCV = y$tagwise.dispersion %>% sqrt)
     if (!is.null(y.raw)) {
         disptable$RawBCV <- y.raw$tagwise.dispersion %>% sqrt
     }

@@ -38,7 +38,7 @@
 #' use_futures("multisession")
 #'
 #' # Same, but pass additional options to the multicore strategy.
-#' use_futures("multisession", workers=2)
+#' use_futures("multisession", workers = 2)
 #'
 #' @export
 use_futures <- function(strategy, ..., quiet = FALSE) {
@@ -61,7 +61,7 @@ use_futures_for_foreach <- function(quiet = FALSE) {
         message <- identity
     }
     if (requireNamespace("foreach", quietly = TRUE)) {
-        if (requireNamespace("doFuture", quietly=TRUE)) {
+        if (requireNamespace("doFuture", quietly = TRUE)) {
             doFuture::registerDoFuture()
             message("Foreach will now use the doFuture backend.")
         } else {
@@ -73,7 +73,7 @@ use_futures_for_foreach <- function(quiet = FALSE) {
     NULL
 }
 
-use_futures_for_BiocParallel <- function(quiet = FALSE, via_foreach=FALSE) {
+use_futures_for_BiocParallel <- function(quiet = FALSE, via_foreach = FALSE) {
     if (!via_foreach && !requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
 
     }
@@ -127,7 +127,7 @@ selectModelParallel <- function (y, designlist, criterion = "aic", df.prior = 0,
     if (criterion == "mallowscp") {
         if (is.null(s2.true))
             stop("Need s2.true values")
-        fits <- BiocParallel::bplapply(designlist, limma::lmFit, object=y, BPPARAM=BPPARAM)
+        fits <- BiocParallel::bplapply(designlist, limma::lmFit, object = y, BPPARAM = BPPARAM)
         for (i in 1:nmodels) {
             fit <- fits[[i]]
             npar <- narrays - fit$df.residual[1]
@@ -144,7 +144,7 @@ selectModelParallel <- function (y, designlist, criterion = "aic", df.prior = 0,
     else {
         ntotal <- df.prior + narrays
         penalty <- switch(criterion, bic = log(narrays), aic = 2)
-        fits <- BiocParallel::bplapply(designlist, limma::lmFit, object=y, BPPARAM=BPPARAM)
+        fits <- BiocParallel::bplapply(designlist, limma::lmFit, object = y, BPPARAM = BPPARAM)
         for (i in 1:nmodels) {
             fit <- fits[[i]]
             npar <- narrays - fit$df.residual[1] + 1
@@ -175,14 +175,14 @@ selectModelParallel <- function (y, designlist, criterion = "aic", df.prior = 0,
 #' @export
 combineFCResults <- function(fcreslist) {
     combfuncs <- list(
-        counts=cbind,
-        counts_junction=cbind,
-        annotation=function(x, ...) x,
-        targets=c,
-        stat=function(...) {
+        counts = cbind,
+        counts_junction = cbind,
+        annotation = function(x, ...) x,
+        targets = c,
+        stat = function(...) {
             statlist <- list(...)
-            firstcol <- statlist[[1]][,1, drop=FALSE]
-            restcols <- statlist %>% lapply(. %>% .[,-1, drop=FALSE])
+            firstcol <- statlist[[1]][,1, drop = FALSE]
+            restcols <- statlist %>% lapply(. %>% .[,-1, drop = FALSE])
             cbind(firstcol, do.call(cbind, restcols))
         })
     res <- list()
@@ -190,7 +190,7 @@ combineFCResults <- function(fcreslist) {
         if (i %in% names(fcreslist[[1]])) {
             res[[i]] <- fcreslist %>%
                 lapply(`[[`, i) %>%
-                do.call(what=combfuncs[[i]])
+                do.call(what = combfuncs[[i]])
         }
     }
     res
@@ -240,9 +240,9 @@ featureCountsParallel <- function(files, ...,
     if (length(files) == 0) {
         return(featureCountsQuiet(files, ...))
     }
-    ## We pass nthreads=1 to tell featureCounts not to parallelize
+    ## We pass nthreads = 1 to tell featureCounts not to parallelize
     ## itself, since we are already handling parallelization.
-    BiocParallel::bplapply(files, featureCountsQuiet, ..., nthreads=1, BPPARAM = BPPARAM) %>%
+    BiocParallel::bplapply(files, featureCountsQuiet, ..., nthreads = 1, BPPARAM = BPPARAM) %>%
         combineFCResults
 }
 
@@ -259,14 +259,14 @@ featureCountsParallel <- function(files, ...,
 #' @seealso [csaw::windowCounts()], [BiocParallel::bplapply()]
 #'
 #' @export
-windowCountsParallel <- function(bam.files, ..., filter=10,
+windowCountsParallel <- function(bam.files, ..., filter = 10,
                                  BPPARAM = BiocParallel::bpparam()) {
     req_ns("BiocParallel", "csaw", "SummarizedExperiment")
     # Let windowCounts handle the degenerate case itself
     if (length(bam.files) == 0) {
         return(csaw::windowCounts(bam.files, ..., filter = 10))
     }
-    reslist <- BiocParallel::bplapply(X=bam.files, FUN=csaw::windowCounts, ..., filter=0, BPPARAM=BPPARAM)
+    reslist <- BiocParallel::bplapply(X = bam.files, FUN = csaw::windowCounts, ..., filter = 0, BPPARAM = BPPARAM)
     res <- do.call(cbind, reslist)
     rm(reslist)
     keep <- rowSums(SummarizedExperiment::assay(res)) >= filter

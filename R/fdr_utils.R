@@ -59,7 +59,7 @@ add_qvalue <- function(ttab, ...) {
         ttab$QValue <- qobj$qvalues
         ttab$LocFDR <- qobj$lfdr
         attr(ttab, "qvalue") <- qobj
-    }, error=function(e) {
+    }, error = function(e) {
         warning(str_c("Failed to compute q-values: ", e$message))
     })
     ttab

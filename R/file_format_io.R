@@ -2,8 +2,8 @@
 ## frame or throws an error.
 
 #' @export
-read_table_general <- function(filename, read.table.args=NULL, read.xlsx.args=NULL,
-                               dataframe.class="data.frame") {
+read_table_general <- function(filename, read.table.args = NULL, read.xlsx.args = NULL,
+                               dataframe.class = "data.frame") {
     req_ns("future", "openxlsx")
     suppressWarnings({
         read.table.args %<>% as.list
@@ -12,17 +12,17 @@ read_table_general <- function(filename, read.table.args=NULL, read.xlsx.args=NU
         read.xlsx.args %<>% as.list
         read.xlsx.args$xlsxFile <- filename
         lazy_results <- make_futures(
-            .future.args = list(evaluator = future::sequential, lazy=TRUE),
-            rdata=read_RDS_or_RDA(filename, dataframe.class),
-            table=do.call(read.table, read.table.args),
-            csv=do.call(read.csv, read.table.args),
-            xlsx=do.call(openxlsx::read.xlsx, read.xlsx.args))
+            .future.args = list(evaluator = future::sequential, lazy = TRUE),
+            rdata = read_RDS_or_RDA(filename, dataframe.class),
+            table = do.call(read.table, read.table.args),
+            csv = do.call(read.csv, read.table.args),
+            xlsx = do.call(openxlsx::read.xlsx, read.xlsx.args))
         for (lzresult in lazy_results) {
             result <- tryCatch({
                 x <- as(future::value(lzresult), dataframe.class)
                 assert_that(is(x, dataframe.class))
                 x
-            }, error=function(...) NULL)
+            }, error = function(...) NULL)
             if (!is.null(result)) {
                 return(result)
             }
@@ -35,8 +35,8 @@ read_table_general <- function(filename, read.table.args=NULL, read.xlsx.args=NU
 read_idr_table <- function(file) {
     idrcols <- c("chr", "start", "end", "name", "score", "strand",
                  "LocalIDR", "GlobalIDR", "startA", "endA", "scoreA", "startB", "endB", "scoreB")
-    read.table(file, header=FALSE, sep="\t", col.names=idrcols) %>%
-        mutate_(LocalIDR=~10^-LocalIDR, GlobalIDR=~10^-GlobalIDR)
+    read.table(file, header = FALSE, sep = "\t", col.names = idrcols) %>%
+        mutate_(LocalIDR = ~10^-LocalIDR, GlobalIDR = ~10^-GlobalIDR)
 }
 
 #' Read MotifMap-provided BED file into a GRanges object.
@@ -45,14 +45,14 @@ read_idr_table <- function(file) {
 #' fields, which MotifMap contains.
 #'
 #' @export
-read_motifmap <- function(x, parse_name=TRUE) {
+read_motifmap <- function(x, parse_name = TRUE) {
     req_ns("tidyr", "GenomicRanges", "readr")
-    tab <- readr::read_tsv(x, col_names=c("chr", "start", "end", "name", "score", "strand"),
-                    col_types="ciicdc", progress=FALSE)
+    tab <- readr::read_tsv(x, col_names = c("chr", "start", "end", "name", "score", "strand"),
+                    col_types = "ciicdc", progress = FALSE)
     if (parse_name) {
-        tab %<>% tidyr::separate_(~name, into=c("motif_ID", "TF_name"), sep="=")
+        tab %<>% tidyr::separate_(~name, into = c("motif_ID", "TF_name"), sep = " = ")
     }
-    gr <- GenomicRanges::makeGRangesFromDataFrame(tab, starts.in.df.are.0based=TRUE)
+    gr <- GenomicRanges::makeGRangesFromDataFrame(tab, starts.in.df.are.0based = TRUE)
     gr
 }
 
@@ -63,15 +63,15 @@ write_motifmap <- function(x, file) {
     if (! "name" %in% names(S4Vectors::mcols(x))) {
         assert_that(all(c("motif_ID", "TF_name") %in% names(S4Vectors::mcols(x))))
         S4Vectors::mcols(x) %<>% as.data.frame %>%
-            tidyr::unite_(~name, ~c(motif_ID, TF_name), sep="=") %>%
+            tidyr::unite_(~name, ~c(motif_ID, TF_name), sep = " = ") %>%
             as("DataFrame")
     }
-    rtracklayer::export(x, file, format="BED")
+    rtracklayer::export(x, file, format = "BED")
 }
 
 #' @export
 read_narrowPeak <- function(file, ...) {
-    peaks.df <- read.table(file, sep="\t", row.names=NULL, ...)
+    peaks.df <- read.table(file, sep = "\t", row.names = NULL, ...)
     names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
     peaks.df$name <- as.character(peaks.df$name)
     peaks.df
@@ -83,7 +83,7 @@ write_narrowPeak <- function(x, file, ...) {
     if("seqnames" %in% names(x))
         names(x)[names(x) == "seqnames"] <- "chr"
     x <- x[c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")]
-    write.table(x, file, sep="\t", row.names=FALSE, col.names=FALSE, ...)
+    write.table(x, file, sep = "\t", row.names = FALSE, col.names = FALSE, ...)
 }
 
 #' @export
@@ -91,13 +91,13 @@ read_regions <- function(filename) {
     req_ns("rtracklayer", "future")
     suppressWarnings({
         lazy_results <- make_futures(
-            .future.args = list(evaluator = future::sequential, lazy=TRUE),
-            rdata=read_RDS_or_RDA(filename),
-            narrowPeak=read_narrowPeak(filename),
-            bed=rtracklayer::import(filename, format="bed"),
-            gff=rtracklayer::import(filename, format="gff"),
-            saf=read_saf(filename),
-            table=read_table_general(filename))
+            .future.args = list(evaluator = future::sequential, lazy = TRUE),
+            rdata = read_RDS_or_RDA(filename),
+            narrowPeak = read_narrowPeak(filename),
+            bed = rtracklayer::import(filename, format = "bed"),
+            gff = rtracklayer::import(filename, format = "gff"),
+            saf = read_saf(filename),
+            table = read_table_general(filename))
         for (lzresult in lazy_results) {
             result <- tryCatch({
                 x <- future::value(lzresult)
@@ -106,7 +106,7 @@ read_regions <- function(filename) {
                 }
                 x <- as(x, "GRanges")
                 x
-            }, error=function(...) NULL)
+            }, error = function(...) NULL)
             if (!is.null(result)) {
                 return(result)
             }
@@ -136,15 +136,15 @@ read_tx2gene_from_genemap <- function(fname) {
 }
 
 #' @export
-read_annotation_from_gff <- function(filename, format="GFF3", ...) {
+read_annotation_from_gff <- function(filename, format = "GFF3", ...) {
     gff <- NULL
     ## Allow the file to be an RDS file containing the GRanges
     ## resulting from import()
     gff <- tryCatch({
         read_RDS_or_RDA(filename, "GRanges")
-    }, error=function(...) {
+    }, error = function(...) {
         req_ns("rtracklayer")
-        rtracklayer::import(filename, format=format)
+        rtracklayer::import(filename, format = format)
     })
     assert_that(is(gff, "GRanges"))
     grl <- gff_to_grl(gff, ...)
@@ -166,24 +166,24 @@ read_annotation_from_rdata <- function(filename) {
 }
 
 #' @export
-read_additional_gene_info <- function(filename, gff_format="GFF3",
-                                      geneFeatureType="gene", ...) {
+read_additional_gene_info <- function(filename, gff_format = "GFF3",
+                                      geneFeatureType = "gene", ...) {
     req_ns("S4Vectors")
     df <- tryCatch({
         gff <- tryCatch({
             read_RDS_or_RDA(filename, "GRanges")
-        }, error=function(...) {
+        }, error = function(...) {
             req_ns("rtracklayer")
-            rtracklayer::import(filename, format=gff_format)
+            rtracklayer::import(filename, format = gff_format)
         })
         assert_that(is(gff, "GRanges"))
         if (!is.null(geneFeatureType)) {
             gff %<>% .[.$type %in% geneFeatureType]
         }
         gff %<>% .[!is.na(.$ID) & !duplicated(.$ID)]
-        gff %>% S4Vectors::mcols %>% cleanup_mcols(mcols_df=.)
-    }, error=function(...) {
-        tab <- read_table_general(filename, ..., dataframe.class="DataFrame")
+        gff %>% S4Vectors::mcols %>% cleanup_mcols(mcols_df = .)
+    }, error = function(...) {
+        tab <- read_table_general(filename, ..., dataframe.class = "DataFrame")
         ## Nonexistent or automatic row names
         if (.row_names_info(tab) <= 0) {
             row.names(tab) <- tab[[1]]

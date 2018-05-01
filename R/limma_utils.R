@@ -28,7 +28,7 @@ subtractCoefs <- function(x, design, coefsToSubtract, ...) {
     assert_that(!anyDuplicated(colnames(design)))
     subtract.design <- design[,coefsToSubtract]
     keep.design <- design[,setdiff(colnames(design), colnames(subtract.design))]
-    limma::removeBatchEffect(x, design=keep.design, covariates=subtract.design, ...)
+    limma::removeBatchEffect(x, design = keep.design, covariates = subtract.design, ...)
 }
 
 #' Implementation of `limma::voom()` that uses an offset matrix
@@ -280,10 +280,10 @@ voomWithQualityWeightsAndOffset <-
 #'
 #' @export
 voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, block = NULL, trim = 0.15,
-                                         voom.fun=voomWithOffset,
-                                         dupCor.fun=limma::duplicateCorrelation,
-                                         initial.correlation=0,
-                                         maxiter=5, tol=1e-6, verbose=TRUE, ...) {
+                                         voom.fun = voomWithOffset,
+                                         dupCor.fun = limma::duplicateCorrelation,
+                                         initial.correlation = 0,
+                                         maxiter = 5, tol = 1e-6, verbose = TRUE, ...) {
     req_ns("limma", "glue")
     assert_that(maxiter >= 1)
     assert_that(is.finite(maxiter))
@@ -295,9 +295,9 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
     prev.cor <- 0
     iter.num <- 0
     if (initial.correlation != 0 && !is.null(block)) {
-        elist <- voom.fun(counts, design=design, plot=FALSE, block=block, correlation=initial.correlation, ...)
+        elist <- voom.fun(counts, design = design, plot = FALSE, block = block, correlation = initial.correlation, ...)
     } else {
-        elist <- voom.fun(counts, design=design, plot=FALSE, ...)
+        elist <- voom.fun(counts, design = design, plot = FALSE, ...)
     }
     if (is.null(block)) {
         warning("Not running duplicateCorrelation because block is NULL.")
@@ -305,7 +305,7 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
     if (verbose) {
         message(glue::glue("Initial guess for duplicate correlation before 1st iteration: {initial.correlation}"))
     }
-    dupcor <- dupCor.fun(elist, design, block=block, trim=trim)
+    dupcor <- dupCor.fun(elist, design, block = block, trim = trim)
     iter.num <- iter.num + 1
     if (verbose) {
         message(glue::glue("Duplicate correlation after {toOrdinal(iter.num)} iteration: {dupcor$consensus.correlation}"))
@@ -320,14 +320,14 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
             }
         }
         prev.cor <- dupcor$consensus.correlation
-        elist <- voom.fun(counts, design=design, plot=FALSE, block=block, correlation=prev.cor, ...)
-        dupcor <- dupCor.fun(elist, design, block=block, trim=trim)
+        elist <- voom.fun(counts, design = design, plot = FALSE, block = block, correlation = prev.cor, ...)
+        dupcor <- dupCor.fun(elist, design, block = block, trim = trim)
         iter.num <- iter.num + 1
         if (verbose) {
             message(glue::glue("Duplicate correlation after toOrdinal(iter.num) iteration: dupcor$consensus.correlation"))
         }
     }
-    elist <- voom.fun(counts, design=design, plot=plot, block=block, correlation=dupcor$consensus.correlation, ...)
+    elist <- voom.fun(counts, design = design, plot = plot, block = block, correlation = dupcor$consensus.correlation, ...)
     for (i in names(dupcor)) {
         elist[[i]] <- dupcor[[i]]
     }
@@ -368,16 +368,16 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
 #' #TODO Steal from eBayes
 #'
 #' @export
-eBayes_auto_proportion <- function(..., prop.method="lfdr") {
+eBayes_auto_proportion <- function(..., prop.method = "lfdr") {
     req_ns("limma")
     eb <- limma::eBayes(...)
     if (is.function(prop.method)) {
         ptn <- prop.method(eb$p.value)
     } else {
-        ptn <- limma::propTrueNull(eb$p.value, method=prop.method)
+        ptn <- limma::propTrueNull(eb$p.value, method = prop.method)
     }
     assert_that(ptn > 0,ptn < 1)
-    limma::eBayes(..., proportion=1-ptn)
+    limma::eBayes(..., proportion = 1-ptn)
 }
 
 #' Get a table of MDS values, with proper column names.
@@ -409,6 +409,6 @@ get_mds <- function(x, k, ...) {
         warning(glue("Number of requested dimensions ({k}) is greater than the number available ({max_k}). Returning all dimensions."))
         k <- max_k
     }
-    mds <- cmdscale(dmat, k=k, eig=TRUE)
+    mds <- cmdscale(dmat, k = k, eig = TRUE)
     mds$points %>% add_numbered_colnames("Dim")
 }
