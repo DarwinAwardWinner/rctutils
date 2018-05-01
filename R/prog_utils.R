@@ -134,3 +134,71 @@ print_var_vector <- function(v) {
     }
     invisible(v)
 }
+
+#' Construct futures for a list of expressions
+#'
+#' Instead of evaluating the expressions in the list, this function
+#' constructs a future for each expression and returns the list of
+#' these futures.
+#'
+#' This is the standard-evaluation helper for [make_futures()], which
+#' uses non-standard evaluation.
+#'
+#' @param expressions The list of unevaluated expressions for which to
+#'     construct futures. Each element can be anything that
+#'     [rlang::as_quosure()] will accept.
+#' @param .future.args Additional arguments to pass to
+#'     [future::future()].
+#'
+#' @return A list of futures, whose values will be the result of
+#'     evaluating each of `expressions`.
+#'
+#' @seealso [rlang::eval_tidy()], [rlang::quo()], [rlang::as_quosure()], [future::values()]
+#'
+#' @examples
+#'
+#' library(future)
+#' library(rlang)
+#' expressions <- list(a = quo(1+1), b = quo(2+2))
+#'
+#' flist <- make_futures_(expressions)
+#' flist
+#' values(flist)
+#'
+#' # Same result without futures
+#' lapply(expressions, eval_tidy)
+#'
+#' @importFrom rlang eval_tidy quo as_quosure as_list
+#' @export
+make_futures_ <- function(expressions, .future.args=list()) {
+    .future.args <- as_list(.future.args)
+    if (! "lazy" %in% names(.future.args)) {
+        .future.args$lazy <- TRUE
+    }
+    req_ns("future")
+    lapply(expressions, . %>% as_quosure %>% {quo(future::future(!!., !!!.future.args))} %>% eval_tidy)
+}
+
+#' Construct futures for several expressions
+#'
+#' Instead of evaluating its arguments, this function converts them
+#' into futures using [future::future()]. Calling [future::value()] on
+#' each one will yield the value of that expression.
+#'
+#' @param ... Expressions for which to construct futures.
+#' @param .future.args Additional arguments to pass to
+#'     [future::future()].
+#' @return A list of futures, one for each expression in `...`.
+#'
+#' @examples
+#'
+#' library(future)
+#' flist <- make_futures(a=1+1, b=2+2)
+#' flist
+#' values(flist)
+#'
+#' @importFrom rlang enquos
+#' @export
+make_futures <- function(..., .future.args=list()) {
+    make_futures_(enquos(...), .future.args)
+}
