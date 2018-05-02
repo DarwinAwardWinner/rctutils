@@ -1,0 +1,18 @@
+This is a collection of utility functions I have written throughout my
+career as a graduate student doing bioinformatics research. At lot of
+them have to do with making it easier to do certain basic programming
+tasks, such as reading and writing data files, printing plots to
+files, and such, as well as certain kinds of data transformations that
+are common in my work. Hopefully you will find something useful here
+as well. 
+
+To install this package, use
+`devtools::install_github("DarwinAwdWinner/rctutils")`.
+
+Since this package provides lots of unrelated utilities, it is
+structured to have a relatively minimal set of hard dependencies, with
+most packages being only suggested. If you try to use a function that
+requires the installation of an optional package, it will tell you. If
+you want to install all the suggested packages ahead of time to avoid
+such errors, use `devtools::install_github("DarwinAwdWinner/rctutils",
+dependencies = TRUE)`.
