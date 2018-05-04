@@ -72,3 +72,23 @@ si2f <- function(string, unit = "") {
     fac <- sifactor[match(p, pre)]
     base * fac
 }
+
+# This is needed because sitools::f2si(0) is broken.
+
+#' @importFrom glue glue
+f2si_internal <- function (number, unit = "")
+{
+    sifactor <- c(-Inf, 1e-24, 1e-21, 1e-18, 1e-15, 1e-12, 1e-09, 1e-06,
+        0.001, 1, 1000, 1e+06, 1e+09, 1e+12, 1e+15, 1e+18, 1e+21,
+        1e+24)
+    pre <- c("", "y", "z", "a", "f", "p", "n", "u", "m",
+             "", "k", "M", "G", "T", "P", "E", "Z", "Y")
+    ix <- findInterval(abs(number), sifactor)
+    if (length(ix) > 0) {
+        sistring <- glue("{number/sifactor[ix]} {pre[ix]}{unit}") %>% str_trim("right")
+    }
+    else {
+        sistring <- as.character(number)
+    }
+    return(sistring)
+}

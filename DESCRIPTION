@@ -32,7 +32,6 @@ Suggests:
     limma,
     qvalue,
     rex,
-    sitools,
     plotly,
     GGally,
     edgeR,

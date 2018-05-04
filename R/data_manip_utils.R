@@ -234,8 +234,8 @@ parse_bp <- function(size) {
 #'
 #' @export
 format_bp <- function(x) {
-    req_ns("sitools", "rex")
-    x %>% round %>% sitools::f2si("bp") %>% str_replace_all(rex::rex(one_or_more(space)), "")
+    req_ns("rex")
+    x %>% round %>% f2si_internal("bp") %>% str_replace_all(rex::rex(one_or_more(space)), "")
 }
 
 #' Perform mutations only if specific column names are present
