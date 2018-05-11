@@ -31,7 +31,7 @@ tsmsg <- function(...) {
 #' the whole object.
 #'
 #' @param x The object to assign into. (Typically this argument is
-#'     delivered via \code{\%\ > \%()}.)
+#'     delivered via \code{\%\>\%()}.)
 #' @param expr The left hand side of the assignment operation to be
 #'     performed on \code{x}.
 #' @param value The right hand side of the assignment operation to be
@@ -62,7 +62,7 @@ tsmsg <- function(...) {
 #' x %>% assign_into(assays(.[[1]])$counts[3,5], 45) %>% ...
 #' }
 #'
-#' @seealso \code{\%\ > \%} from the magrittr package.
+#' @seealso \code{\%\>\%} from the magrittr package.
 #'
 #' @export
 assign_into <- function(x, expr, value) {
