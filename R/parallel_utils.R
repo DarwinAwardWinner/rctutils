@@ -272,3 +272,8 @@ windowCountsParallel <- function(bam.files, ..., filter = 10,
     keep <- rowSums(SummarizedExperiment::assay(res)) >= filter
     res[keep,]
 }
+
+#' @export
+regionCountsParallel <- function (bam.files, regions, ext = 100, param = readParam()) {
+    stop("Unimplemented")
+}
