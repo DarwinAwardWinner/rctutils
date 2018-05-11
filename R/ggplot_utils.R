@@ -52,14 +52,17 @@ get.ggplots <- function(plots) {
     UseMethod("get.ggplots")
 }
 
+#' @export
 get.ggplots.default <- function(plots) {
     stop(glue("Don't know how to get ggplots from an object of class {deparse(class(plots)[1])}"))
 }
 
+#' @export
 get.ggplots.gg <- function(plots) {
     list(plots)
 }
 
+#' @export
 get.ggplots.list <- function(plots) {
     plotlists <- lapply(plots, get.ggplots)
     do.call(c, plotlists)
