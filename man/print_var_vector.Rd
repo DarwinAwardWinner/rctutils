@@ -19,7 +19,7 @@ arguments for a script. The output is generally more compact than
 }
 \examples{
 
-x <- list(verbose=TRUE, infile="a.txt", outfile="b.txt", ncores=8)
+x <- list(verbose = TRUE, infile = "a.txt", outfile = "b.txt", ncores = 8)
 print_var_vector(x)
 
 }

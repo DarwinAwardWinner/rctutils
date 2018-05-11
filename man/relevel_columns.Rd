@@ -25,9 +25,9 @@ columns of a data frame.
 }
 \examples{
 
-x <- data.frame(a=letters[1:2], b=LETTERS[1:6])
+x <- data.frame(a = letters[1:2], b = LETTERS[1:6])
 sapply(x, levels)
-x2 <- relevel_columns(x, a=c("b", "a"), b=list("B", "A", after=2))
+x2 <- relevel_columns(x, a = c("b", "a"), b = list("B", "A", after = 2))
 sapply(x2, levels)
 
 }

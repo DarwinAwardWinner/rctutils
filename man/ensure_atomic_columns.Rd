@@ -21,7 +21,7 @@ strings using the sepcified separator.
 \examples{
 
 library(S4Vectors)
-x <- DataFrame(a=1:5, b=List(split(1:25, 1:5)))
+x <- DataFrame(a = 1:5, b = List(split(1:25, 1:5)))
 ensure_atomic_columns(x)
 
 }

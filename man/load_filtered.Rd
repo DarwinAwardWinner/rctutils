@@ -20,13 +20,13 @@ function makes it easy to do so.
 \examples{
 x <- 5
 y <- 3
-datafile <- tempfile(fileext=".rda")
+datafile <- tempfile(fileext = ".rda")
 # Only saves y, not x
 save.image(datafile)
 # Set new values which can be overridden by loading the old ones.
 x <- 10
 y <- 10
-load_filtered(datafile, exclude="x")
+load_filtered(datafile, exclude = "x")
 # x is still 10, but y is now 3 again
 mget(c("x", "y"))
 }

@@ -39,7 +39,7 @@ the level names.
 }
 \examples{
 
-targets <- data.frame(group=letters[1:2], batch=LETTERS[1:5], x=rnorm(10))
+targets <- data.frame(group = letters[1:2], batch = LETTERS[1:5], x = rnorm(10))
 design <- model.matrix(~0 + group + x + batch, targets)
 colnames(design)
 design2 <- strip_design_factor_names(design)

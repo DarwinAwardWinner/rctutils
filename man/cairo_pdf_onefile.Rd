@@ -2,10 +2,10 @@
 % Please edit documentation in R/plot_utils.R
 \name{cairo_pdf_onefile}
 \alias{cairo_pdf_onefile}
-\title{Same as \code{cairo_pdf()} but with a default of \code{onefile=TRUE}}
+\title{Same as \code{cairo_pdf()} but with a default of \code{onefile = TRUE}}
 \usage{
 cairo_pdf_onefile(..., onefile = TRUE)
 }
 \description{
-Same as \code{cairo_pdf()} but with a default of \code{onefile=TRUE}
+Same as \code{cairo_pdf()} but with a default of \code{onefile = TRUE}
 }

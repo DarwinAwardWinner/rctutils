@@ -38,6 +38,6 @@ use_futures()
 use_futures("multisession")
 
 # Same, but pass additional options to the multicore strategy.
-use_futures("multisession", workers=2)
+use_futures("multisession", workers = 2)
 
 }

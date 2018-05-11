@@ -25,9 +25,9 @@ in a PCRE.
 \examples{
 
 s <- "A (string) with [many] regex *characters* in it."
-grepl(s, s, perl=TRUE)
+grepl(s, s, perl = TRUE)
 quotemeta(s)
 # After escaping, the string matches itself.
-grepl(quotemeta(s), s, perl=TRUE)
+grepl(quotemeta(s), s, perl = TRUE)
 
 }

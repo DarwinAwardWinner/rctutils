@@ -21,9 +21,9 @@ easy to do so.
 \examples{
 x <- 5
 y <- 3
-datafile <- tempfile(fileext=".rda")
+datafile <- tempfile(fileext = ".rda")
 # Only saves y, not x
-save_image_filtered(datafile, exclude="x")
+save_image_filtered(datafile, exclude = "x")
 }
 \seealso{
 \code{\link[=save.image]{save.image()}}
