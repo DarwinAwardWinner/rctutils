@@ -27,6 +27,7 @@ aveLogCPMWithOffset <- function(y, ...) {
     UseMethod("aveLogCPMWithOffset")
 }
 
+#' @export
 aveLogCPMWithOffset.default <- function(y, offset = NULL, prior.count = 2,
                                         dispersion = NULL, weights = NULL, ...) {
     req_ns("edgeR")
@@ -34,6 +35,7 @@ aveLogCPMWithOffset.default <- function(y, offset = NULL, prior.count = 2,
                      dispersion = dispersion, weights = weights, ...)
 }
 
+#' @export
 aveLogCPMWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR::getOffset(y), dim(y)),
                                         prior.count = 2, dispersion = NULL, ...) {
     req_ns("edgeR")
@@ -81,6 +83,7 @@ cpmWithOffset <- function(y, offset, ...) {
     UseMethod("cpmWithOffset")
 }
 
+#' @export
 cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..., preserve.mean = TRUE) {
     req_ns("edgeR")
     if (preserve.mean) {
@@ -90,6 +93,7 @@ cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..
                prior.count = prior.count, ...)
 }
 
+#' @export
 cpmWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR::getOffset(y), dim(y)),
                                   log = FALSE, prior.count = 0.25, ..., preserve.mean = TRUE) {
     req_ns("edgeR")
