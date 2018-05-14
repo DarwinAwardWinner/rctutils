@@ -95,18 +95,3 @@ add_bfdr <- function(ttab) {
     }
     ttab
 }
-
-#' Variant of propTrueNullByLocalFDR that does not restrict to the range [0,1]
-#'
-#' Useful for identifying potential atypical p-value distributions
-#' (e.g. too many large p-values).
-#'
-#' @export
-propTrueNullByLocalFDR_unrestricted <- function (p) {
-    n <- length(p)
-    i <- n:1L
-    p <- sort(p, decreasing = TRUE)
-    q <- n/i * p
-    n1 <- n + 1L
-    sum(i * q)/n/n1 * 2
-}

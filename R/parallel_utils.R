@@ -273,7 +273,7 @@ windowCountsParallel <- function(bam.files, ..., filter = 10,
     res[keep,]
 }
 
-#' @export
-regionCountsParallel <- function (bam.files, regions, ext = 100, param = readParam()) {
+regionCountsParallel <- function (bam.files, regions, ext = 100, param = csaw::readParam()) {
+    req_ns("csaw")
     stop("Unimplemented")
 }
