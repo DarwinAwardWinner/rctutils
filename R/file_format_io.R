@@ -74,7 +74,7 @@ read_narrowPeak <- function(file, ...) {
     peaks.df <- read.table(file, sep = "\t", row.names = NULL, ...)
     names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
     peaks.df$name <- as.character(peaks.df$name)
-    peaks.df
+    GenomicRanges::makeGRangesFromDataFrame(peaks.df, starts.in.df.are.0based = TRUE)
 }
 
 #' @export
