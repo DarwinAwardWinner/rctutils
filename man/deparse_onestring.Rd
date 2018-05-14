@@ -6,6 +6,27 @@
 \usage{
 deparse_onestring(...)
 }
+\arguments{
+\item{...}{See \code{\link[=deparse]{deparse()}}.}
+}
+\value{
+A character vector of length 1.
+
+Note that depending on the different deparse options, the resulting
+string may still not be a complete R expression that recreates the
+original object. Also note that the returned string may contain
+newlines.
+}
 \description{
-Deparse and then concatenate into a single string
+This is like the base R \code{deparse()}, except that it always returns
+a single string, rather than a character vector of lines of text.
+}
+\examples{
+
+# Make an object whose representation spans multiple lines
+x <- seq(100)[-50]
+length(deparse(x))
+length(deparse_onestring(x))
+identical(x, eval(parse(text=deparse_onestring(x))))
+
 }

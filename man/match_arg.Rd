@@ -2,11 +2,47 @@
 % Please edit documentation in R/fixes_for_builtins.R
 \name{match_arg}
 \alias{match_arg}
-\title{Improved match.arg with automatic detection of the argument name}
+\title{Improved match.arg with better errors and case folding.}
 \usage{
 match_arg(arg, choices, several.ok = FALSE, arg_name = substitute(arg),
   ignore.case = FALSE)
 }
+\arguments{
+\item{arg}{a character vector (of length one unless \code{several.ok}
+    is \code{TRUE}) or \code{NULL}.}
+
+\item{choices}{a character vector of candidate values}
+
+\item{several.ok}{logical specifying if \code{arg} should be allowed
+    to have more than one element.}
+
+\item{arg_name}{The name of the argument. Normally you do not need
+to specify this yourself, as it is detected automatically.
+However, if your variable name is not the name of the argument,
+you will need to specify this.}
+
+\item{ignore.case}{If TRUE, case will be ignored when comparing the
+argument to the choices. Note that the matching choice will be
+returned in its original case, regardless of the case of arg.}
+}
 \description{
-Improved match.arg with automatic detection of the argument name
+This function works identically to \code{\link[=match.arg]{match.arg()}}, except that the
+error messages include the actual name of the argument. So for
+example, if the argument name is "size", instead of a generic error
+message "'arg' must be of length 1", you will get
+"'size' must be of length 1". This makes it easier for users to
+figure out which argument has been passed incorrectly.
+}
+\examples{
+
+choices <- c("red", "green", "blue")
+color <- "blue"
+match_arg(color, choices)
+color <- "pink"
+try(match_arg(color, choices))
+try(match_arg(color, choices, arg_name = "colour"))
+color <- "BLUE"
+match_arg(color, choices, ignore.case = TRUE)
+try(match_arg(color, choices))
+
 }
