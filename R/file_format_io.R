@@ -62,7 +62,9 @@ read_motifmap <- function(file, parse_name = TRUE) {
     if (parse_name) {
         tab %<>% tidyr::separate_(~name, into = c("motif_ID", "TF_name"), sep = " = ")
     }
-    gr <- GenomicRanges::makeGRangesFromDataFrame(tab, starts.in.df.are.0based = TRUE)
+    gr <- GenomicRanges::makeGRangesFromDataFrame(
+        tab, starts.in.df.are.0based = TRUE,
+        keep.extra.columns = TRUE)
     gr
 }
 
@@ -103,7 +105,9 @@ read_narrowPeak <- function(file, ...) {
     peaks.df <- read.table(file, sep = "\t", row.names = NULL, ...)
     names(peaks.df) <- c("chr", "start", "end", "name", "score", "strand", "signalValue", "pValue", "qValue", "summit")
     peaks.df$name <- as.character(peaks.df$name)
-    GenomicRanges::makeGRangesFromDataFrame(peaks.df, starts.in.df.are.0based = TRUE)
+    GenomicRanges::makeGRangesFromDataFrame(
+        peaks.df, starts.in.df.are.0based = TRUE,
+        keep.extra.columns = TRUE)
 }
 
 #' Write a narrowPeak format BED file.
