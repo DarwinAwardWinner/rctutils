@@ -128,7 +128,10 @@ read_saf <- function(filename, ...) {
 
 #' @export
 read_tx2gene_from_genemap <- function(fname) {
-    df <- read_table_general(fname)
+    df <- read_table_general(
+        fname,
+        read.xlsx.args = list(colNames = FALSE),
+        read.table.args = list(header = FALSE))
     df %<>% .[1:2]
     df[] %<>% lapply(as.character)
     names(df) <- c("TXNAME", "GENEID")
