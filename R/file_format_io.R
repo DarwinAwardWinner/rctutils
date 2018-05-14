@@ -41,13 +41,23 @@ read_idr_table <- function(file) {
 
 #' Read MotifMap-provided BED file into a GRanges object.
 #'
-#' We can't use rtracklayer::import.bed because it chokes on spaces in
-#' fields, which MotifMap contains.
+#' Even though this function reads a BED file,
+#' [rtracklayer::import.bed()] is not suitable because it chokes on
+#' spaces in fields, which MotifMap contains. Hence the need for a
+#' separate function.
+#'
+#' @param file The file name to read from.
+#' @param parse_name If TRUE, separate the "name" column into
+#'     "motif_ID" and "TF_name" fields.
+#' @return a GRanges object with an mcol named "score". If
+#'     `parse_name` is FALSE, it will also have an mcol named "name".
+#'     If `parse_name` is TRUE, it will have mcols named "motif_ID",
+#'     and "TF_name".
 #'
 #' @export
-read_motifmap <- function(x, parse_name = TRUE) {
+read_motifmap <- function(file, parse_name = TRUE) {
     req_ns("tidyr", "GenomicRanges", "readr")
-    tab <- readr::read_tsv(x, col_names = c("chr", "start", "end", "name", "score", "strand"),
+    tab <- readr::read_tsv(file, col_names = c("chr", "start", "end", "name", "score", "strand"),
                     col_types = "ciicdc", progress = FALSE)
     if (parse_name) {
         tab %<>% tidyr::separate_(~name, into = c("motif_ID", "TF_name"), sep = " = ")
@@ -56,6 +66,14 @@ read_motifmap <- function(x, parse_name = TRUE) {
     gr
 }
 
+#' Write a MotifMap-type GRanges into a BED file.
+#'
+#' This takes a GRanges object with the appropriate mcols (see
+#' [read_motifmap()]) and saves it as a BED file.
+#'
+#' @param x A GRanges object with appropriate metadata columns.
+#' @param file The file name to save.
+#'
 #' @export
 write_motifmap <- function(x, file) {
     req_ns("S4Vectors", "rtracklayer", "tidyr")
@@ -69,6 +87,17 @@ write_motifmap <- function(x, file) {
     rtracklayer::export(x, file, format = "BED")
 }
 
+#' Read a narrowPeak format BED file.
+#'
+#' NarrowPeak is a sub-format of the BED file format used as the
+#' output format of some peak callers. [rtracklayer::import.bed()]
+#' often throws an error when reading these files, so a separate
+#' function is needed.
+#'
+#' @param file The file name to read from.
+#' @param ... Additional arguments are passed to `read.table()`.
+#' @return A GRanges object containing the ranges from `file`.
+#'
 #' @export
 read_narrowPeak <- function(file, ...) {
     peaks.df <- read.table(file, sep = "\t", row.names = NULL, ...)
@@ -77,6 +106,22 @@ read_narrowPeak <- function(file, ...) {
     GenomicRanges::makeGRangesFromDataFrame(peaks.df, starts.in.df.are.0based = TRUE)
 }
 
+#' Write a narrowPeak format BED file.
+#'
+#' This function takes a GRanges of the kind returned by
+#' [read_narrowPeak()] and writes it back to a file.
+#'
+#' @param x A GRanges or data frame containing the all appropriate
+#'     columns for a narrowPeak file. In addition to the normal BED
+#'     columns, it must contain columns named "signalValue", "pValue",
+#'     "qValue", and "summit".
+#' @param file The file name to write to.
+#' @param ... Additional arguments are passed to `write.table()`.
+#'
+#' If some of the required columns are not available (e.g. from a peak
+#' caller that does not report a summit), you can fill in the
+#' unavailable columns with NA.
+#'
 #' @export
 write_narrowPeak <- function(x, file, ...) {
     x <- as(x, "data.frame")
@@ -86,6 +131,18 @@ write_narrowPeak <- function(x, file, ...) {
     write.table(x, file, sep = "\t", row.names = FALSE, col.names = FALSE, ...)
 }
 
+#' Read a GRanges from a variety of possible file types.
+#'
+#' This function attempts to read in a set of genomic regions as a
+#' GRanges object. It does its best to auto-detect the input file
+#' type. If it cannot do so, it throws an error.
+#'
+#' @param filename The file to read regions from.
+#' @return a GRanges object.
+#'
+#' Possible input file types include: RDA or RDS file (containing a
+#' GRanges or data frame), narrowPeak, BED, GFF, and SAF.
+#'
 #' @export
 read_regions <- function(filename) {
     req_ns("rtracklayer", "future")
@@ -115,17 +172,47 @@ read_regions <- function(filename) {
     })
 }
 
+## TODO: Make import.saf and export.saf functions?
+
+#' Read a SAF file into a GRangesList.
+#'
+#' The SAF format is described in [Rsubread::featureCounts()].
+#'
+#' @param filename The file name to read
+#' @param ... Additional arguments are passed to
+#'     [read_table_general()].
+#' @return a GRangesList with one element for each GeneID, containing
+#'     the ranges for that gene.
+#'
 #' @export
 read_saf <- function(filename, ...) {
     saf <- read_table_general(filename, ...)
     assert_that("GeneID" %in% names(saf))
     gr <- as(saf, "GRanges")
-    grl <- split(gr, gr$GeneID) %>% promote_common_mcols
+    grl <- split(gr, gr$GeneID) %>%
+        promote_common_mcols(delete_from_source = FALSE)
     return(grl)
 }
 
 ## TODO: Give the below functions better names
 
+#' Read a Salmon "geneMap" file into a data frame
+#'
+#' This function reads a file in the Salmon "geneMap" format into a
+#' data frame. The format of this file is described in salmon's help
+#' text for the "--geneMap" command-line option.
+#'
+#' @param fname The file to read from. This should generally be a file
+#'     named "genemap.txt" in a Salmon index directory
+#' @return A data frame with 2 columns named "TXNAME" and "GENEID".
+#'
+#' Since this uses [read_table_general()] and allows additional
+#' columns to be present beyond the first two, it is actually quite
+#' lenient about the format of the table.
+#'
+#' @seealso The "--geneMap" option to salmon, whose help text
+#'     describes the format of the file.
+#'
 #' @export
 read_tx2gene_from_genemap <- function(fname) {
     df <- read_table_general(

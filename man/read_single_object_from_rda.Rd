@@ -6,7 +6,20 @@
 \usage{
 read_single_object_from_rda(filename)
 }
+\arguments{
+\item{filename}{The file to read an R object from.}
+}
+\value{
+The R object read from the file.
+
+This function allows you to read an RData file as if it were an RDS
+file, as long as it satisfies the requirement of containing only
+one object.
+}
 \description{
 If run on an RDA file containing more than one object, throws an
 error.
+}
+\seealso{
+\code{\link[=readRDS]{readRDS()}}, \code{\link[=load]{load()}}
 }

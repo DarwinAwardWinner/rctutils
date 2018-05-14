@@ -6,6 +6,29 @@
 \usage{
 add_bfdr(ttab)
 }
+\arguments{
+\item{ttab}{A data frame returned by \code{\link[limma:topTable]{limma::topTable()}} with
+\code{n=Inf} containing B-statistics.}
+}
+\value{
+The same table with additional columns named "PP" and
+"BFDR".
+
+Note that limma only produces B-statistics for single-contrast
+tests (i.e. moderated t-tests). As a convenience, if this fuction
+is called on a data frame with no column named "B", it will issue a
+warning and return the data frame unmodified.
+}
 \description{
-Add Bayesian FDR values to a limma top table
+This function uses \code{\link[=bfdr]{bfdr()}} to compute the posterior probability of
+differential expression and the FDR based on limma's B-statistics
+and add them as columns named "PP" and "BFDR" respectively.
+}
+\examples{
+
+# TODO copy examples from limma::topTable()
+
+}
+\seealso{
+\code{\link[limma:topTable]{limma::topTable()}}.
 }

@@ -4,9 +4,23 @@
 \alias{read_motifmap}
 \title{Read MotifMap-provided BED file into a GRanges object.}
 \usage{
-read_motifmap(x, parse_name = TRUE)
+read_motifmap(file, parse_name = TRUE)
+}
+\arguments{
+\item{file}{The file name to read from.}
+
+\item{parse_name}{If TRUE, separate the "name" column into
+"motif_ID" and "TF_name" fields.}
+}
+\value{
+a GRanges object with an mcol named "score". If
+\code{parse_name} is FALSE, it will also have an mcol named "name".
+If \code{parse_name} is TRUE, it will have mcols named "motif_ID",
+and "TF_name".
 }
 \description{
-We can't use rtracklayer::import.bed because it chokes on spaces in
-fields, which MotifMap contains.
+Even though this function reads a BED file,
+\code{\link[rtracklayer:import.bed]{rtracklayer::import.bed()}} is not suitable because it chokes on
+spaces in fields, which MotifMap contains. Hence the need for a
+separate function.
 }

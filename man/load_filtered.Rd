@@ -18,6 +18,7 @@ specific set of variable names that you wish to exclude, this
 function makes it easy to do so.
 }
 \examples{
+
 x <- 5
 y <- 3
 datafile <- tempfile(fileext = ".rda")
@@ -29,6 +30,7 @@ y <- 10
 load_filtered(datafile, exclude = "x")
 # x is still 10, but y is now 3 again
 mget(c("x", "y"))
+
 }
 \seealso{
 \code{\link[=load]{load()}}

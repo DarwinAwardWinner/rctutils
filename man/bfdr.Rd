@@ -2,10 +2,26 @@
 % Please edit documentation in R/fdr_utils.R
 \name{bfdr}
 \alias{bfdr}
-\title{Compute Bayesian FDR values from limma's B statistics}
+\title{Compute Bayesian FDR values from limma's B-statistics}
 \usage{
 bfdr(B)
 }
+\arguments{
+\item{B}{A vector of B-statistics}
+}
+\value{
+A data frame containing 3 columns: "B", the input; "PP",
+the posterior probability of each gene being differentially
+expressed; and "BFDR", the estimated FDR.
+}
 \description{
-Compute Bayesian FDR values from limma's B statistics
+Compute Bayesian FDR values from limma's B-statistics
+}
+\examples{
+
+# TODO Merge this documentation with that of add_bfdr().
+
+}
+\seealso{
+\code{\link[limma:topTable]{limma::topTable()}}.
 }

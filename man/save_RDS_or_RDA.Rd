@@ -7,8 +7,35 @@
 save_RDS_or_RDA(object, file, ascii = FALSE, version = NULL,
   compress = TRUE, savetype)
 }
+\arguments{
+\item{object}{R object to serialize.}
+
+\item{file}{A file name or connection object to save to.}
+
+\item{ascii, version, compress}{See \code{saveRDS()}.}
+
+\item{savetype}{Either "rda" or "rds". If this argument is
+supplied, it overrides the automatic detection of whether to
+use \code{save()} or \code{saveRDS()} based on the file extension.}
+}
 \description{
-If the output file name ends in ".rda" or ".rdata", the file will
-be saved using \code{\link[=save]{save()}}. Otherwise, it will be saved using
-\code{\link[=saveRDS]{saveRDS()}}.
+If the output file name ends in ".rda" or ".rdata" (with any
+capitalization), the file will be saved using \code{\link[=save]{save()}}. Otherwise,
+it will be saved using \code{\link[=saveRDS]{saveRDS()}}.
+}
+\examples{
+
+tmpf_rda <- tempfile(fileext = ".rda")
+tmpf_rds <- tempfile(fileext = ".rds")
+x <- 1:10
+save_RDS_or_RDA(x, tmpf_rda)
+save_RDS_or_RDA(x, tmpf_rds)
+# Load as an RData file
+x_rda <- read_single_object_from_rda(tmpf_rda)
+# Load as an RDS file
+x_rds <- readRDS(tmpf_rds)
+# Both loaded objects are identical to the original
+identical(x, x_rda)
+identical(x, x_rds)
+
 }

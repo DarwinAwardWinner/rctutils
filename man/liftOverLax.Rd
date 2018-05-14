@@ -2,7 +2,7 @@
 % Please edit documentation in R/granges_utils.R
 \name{liftOverLax}
 \alias{liftOverLax}
-\title{Like rtracklayer::liftOver but "fills in" small gaps.}
+\title{Like \code{rtracklayer::liftOver()} but "fills in" small gaps.}
 \usage{
 liftOverLax(x, chain, ..., allow.gap = 0)
 }
@@ -13,6 +13,12 @@ liftOverLax(x, chain, ..., allow.gap = 0)
 \item{allow.gap}{Maximum gap size to "fill in". If set to zero,
 this is equivalent to \code{\link[rtracklayer:liftOver]{rtracklayer::liftOver()}}.}
 }
+\value{
+See \code{\link[rtracklayer:liftOver]{rtracklayer::liftOver()}}.
+}
 \description{
-Like rtracklayer::liftOver but "fills in" small gaps.
+This is identical to \code{\link[rtracklayer:liftOver]{rtracklayer::liftOver()}}, except that gaps
+smaller than a specified size will be filled in. This allows the
+liftover process to tolerate small indels in the old genome
+relative to the new one without breaking up contiguous regions.
 }

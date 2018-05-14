@@ -65,7 +65,18 @@ add_qvalue <- function(ttab, ...) {
     ttab
 }
 
-#' Compute Bayesian FDR values from limma's B statistics
+#' Compute Bayesian FDR values from limma's B-statistics
+#'
+#' @param B A vector of B-statistics
+#' @return A data frame containing 3 columns: "B", the input; "PP",
+#'     the posterior probability of each gene being differentially
+#'     expressed; and "BFDR", the estimated FDR.
+#'
+#' @seealso [limma::topTable()].
+#'
+#' @examples
+#'
+#' # TODO Merge this documentation with that of add_bfdr().
 #'
 #' @export
 bfdr <- function(B) {
@@ -82,11 +93,31 @@ bfdr <- function(B) {
 
 #' Add Bayesian FDR values to a limma top table
 #'
+#' This function uses [bfdr()] to compute the posterior probability of
+#' differential expression and the FDR based on limma's B-statistics
+#' and add them as columns named "PP" and "BFDR" respectively.
+#'
+#' @param ttab A data frame returned by [limma::topTable()] with
+#'     `n=Inf` containing B-statistics.
+#' @return The same table with additional columns named "PP" and
+#'     "BFDR".
+#'
+#' Note that limma only produces B-statistics for single-contrast
+#' tests (i.e. moderated t-tests). As a convenience, if this fuction
+#' is called on a data frame with no column named "B", it will issue a
+#' warning and return the data frame unmodified.
+#'
+#' @examples
+#'
+#' # TODO copy examples from limma::topTable()
+#'
+#' @seealso [limma::topTable()].
+#'
 #' @export
 add_bfdr <- function(ttab) {
     B <- ttab[["B"]]
     if (is.null(B)) {
-        warning("Cannot add BFDR to table with no B statistics")
+        warning("Cannot add BFDR to table with no B-statistics")
         return(ttab)
     }
     btab <- bfdr(B)[c("PP", "BayesFDR")]

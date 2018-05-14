@@ -4,7 +4,28 @@
 \alias{promote_common_mcols}
 \title{Promote common mcols from the GRanges inside a GRangesList}
 \usage{
-promote_common_mcols(grl, delete.from.source = FALSE, ...)
+promote_common_mcols(grl, delete_from_source = FALSE, blacklist = c("type",
+  "Parent"))
+}
+\arguments{
+\item{grl}{A GRangesList}
+
+\item{delete_from_source}{If TRUE, delete any promoted mcols from
+the underlying GRanges, so that the GRangesList and underlying
+GRanges will not have any mcols in common (unless they already
+had some before).}
+
+\item{blacklist}{A vector of column names that should never be
+promoted. The default is to never promote "type" or "Parent",
+which is appropriate for typical GFF files.}
+}
+\value{
+The same GRangesList, possibly with additional mcols
+derived from the underlying GRanges.
+
+Note that if the GRangesList's mcols already contain some of the
+same colnames as the mcols of the inner GRanges, these will be
+replaced by the promoted mcols.
 }
 \description{
 Given a GRangesList whose underlying ranges have mcols, this finds
@@ -13,4 +34,27 @@ them to mcols of the GRangesList. For example, you have a
 GRangesList of exons grouped by gene, and the exons are annotated
 with gene IDs, then the gene ID column will be promoted to the
 GRangesList object itself.
+}
+\examples{
+
+gr <- GRanges("chr1", IRanges(start = (1:10) * 100, width = 50),
+              GeneID = rep(c("geneA", "geneB"), each=5),
+              GeneName = rep(c("Gene A", "Gene B"), each=5),
+              ExonID = rep(1:5, 2))
+grl <- split(gr, gr$GeneID)
+# All the mcols are still in the underlying GRanges, with none in
+# the GRangesList.
+names(mcols(grl))
+names(mcols(unlist(grl)))
+
+grl <- promote_common_mcols(grl)
+# Now grl has received the common mcols
+names(mcols(grl))
+names(mcols(unlist(grl)))
+
+grl <- promote_common_mcols(grl, delete_from_source = TRUE)
+# Now grl and only grl has the common mcols
+names(mcols(grl))
+names(mcols(unlist(grl)))
+
 }

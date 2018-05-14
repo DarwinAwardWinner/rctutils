@@ -19,11 +19,13 @@ of variable names that you wish to exclude, this function makes it
 easy to do so.
 }
 \examples{
+
 x <- 5
 y <- 3
 datafile <- tempfile(fileext = ".rda")
 # Only saves y, not x
 save_image_filtered(datafile, exclude = "x")
+
 }
 \seealso{
 \code{\link[=save.image]{save.image()}}

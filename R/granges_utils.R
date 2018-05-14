@@ -122,7 +122,7 @@ grl_to_saf <- function(grl) {
 ## gene. Used for extracting only the gene metadata from exon
 ## metadata.
 
-get_gene_common_colnames <- function(df, geneids, blacklist = c("type", "Parent")) {
+get_gene_common_colnames <- function(df, geneids) {
     req_ns("S4Vectors")
     if (nrow(df) < 1) {
         return(character(0))
@@ -136,8 +136,6 @@ get_gene_common_colnames <- function(df, geneids, blacklist = c("type", "Parent"
     if (!anyDuplicated(geneids)) {
         return(names(df))
     }
-    ## Forget blacklisted columns
-    df <- df[setdiff(names(df), blacklist)]
     ## Forget list columns
     df <- df[sapply(df, . %>% lengths %>% max) == 1]
     ## Forget empty columns
@@ -146,9 +144,9 @@ get_gene_common_colnames <- function(df, geneids, blacklist = c("type", "Parent"
         return(character(0))
     }
     ## Convert to Rle
-    df <- S4Vectors::DataFrame(lapply(df, . %>% unlist %>% S4Vectors::Rle))
-    geneids %<>% S4Vectors::Rle
-    genecols <- sapply(df, . %>% split(geneids) %>% S4Vectors::runLength %>% lengths %>% max %>% is_weakly_less_than(1))
+    df <- S4Vectors::DataFrame(lapply(df, function(x) S4Vectors::Rle(unlist(x))))
+    geneids <- S4Vectors::Rle(geneids)
+    genecols <- sapply(df, . %>% split(geneids) %>% as("List") %>% (S4Vectors::runLength) %>% lengths %>% max %>% is_weakly_less_than(1))
     names(which(genecols))
 }
 
@@ -161,30 +159,74 @@ get_gene_common_colnames <- function(df, geneids, blacklist = c("type", "Parent"
 #' with gene IDs, then the gene ID column will be promoted to the
 #' GRangesList object itself.
 #'
+#' @param grl A GRangesList
+#' @param delete_from_source If TRUE, delete any promoted mcols from
+#'     the underlying GRanges, so that the GRangesList and underlying
+#'     GRanges will not have any mcols in common (unless they already
+#'     had some before).
+#' @param blacklist A vector of column names that should never be
+#'     promoted. The default is to never promote "type" or "Parent",
+#'     which is appropriate for typical GFF files.
+#' @return The same GRangesList, possibly with additional mcols
+#'     derived from the underlying GRanges.
+#'
+#' Note that if the GRangesList's mcols already contain some of the
+#' same colnames as the mcols of the inner GRanges, these will be
+#' replaced by the promoted mcols.
+#'
+#' @examples
+#'
+#' gr <- GRanges("chr1", IRanges(start = (1:10) * 100, width = 50),
+#'               GeneID = rep(c("geneA", "geneB"), each=5),
+#'               GeneName = rep(c("Gene A", "Gene B"), each=5),
+#'               ExonID = rep(1:5, 2))
+#' grl <- split(gr, gr$GeneID)
+#' # All the mcols are still in the underlying GRanges, with none in
+#' # the GRangesList.
+#' names(mcols(grl))
+#' names(mcols(unlist(grl)))
+#'
+#' grl <- promote_common_mcols(grl)
+#' # Now grl has received the common mcols
+#' names(mcols(grl))
+#' names(mcols(unlist(grl)))
+#'
+#' grl <- promote_common_mcols(grl, delete_from_source = TRUE)
+#' # Now grl and only grl has the common mcols
+#' names(mcols(grl))
+#' names(mcols(unlist(grl)))
+#'
 #' @export
-promote_common_mcols <- function(grl, delete.from.source = FALSE, ...) {
+promote_common_mcols <- function(grl, delete_from_source = FALSE, blacklist = c("type", "Parent")) {
     req_ns("S4Vectors", "GenomicRanges")
-    colnames.to.promote <- get_gene_common_colnames(S4Vectors::mcols(unlist(grl)), rep(names(grl), lengths(grl)), ...)
+    colnames.to.promote <- get_gene_common_colnames(S4Vectors::mcols(unlist(grl)), rep(names(grl), lengths(grl))) %>%
+        setdiff(blacklist)
     promoted.df <- S4Vectors::mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop = FALSE]
-    if (delete.from.source) {
+    if (delete_from_source) {
         S4Vectors::mcols(grl@unlistData) %<>%
             .[setdiff(names(.), colnames.to.promote)]
     }
-    S4Vectors::mcols(grl) %<>% cbind(promoted.df)
+    S4Vectors::mcols(grl)[colnames(promoted.df)] <- promoted.df
     grl
 }
 
-#' Like rtracklayer::liftOver but "fills in" small gaps.
+#' Like `rtracklayer::liftOver()` but "fills in" small gaps.
+#'
+#' This is identical to [rtracklayer::liftOver()], except that gaps
+#' smaller than a specified size will be filled in. This allows the
+#' liftover process to tolerate small indels in the old genome
+#' relative to the new one without breaking up contiguous regions.
 #'
 #' @param x,chain,... These arguments have the same meaning as in
 #'     [rtracklayer::liftOver()].
 #' @param allow.gap Maximum gap size to "fill in". If set to zero,
 #'     this is equivalent to [rtracklayer::liftOver()].
+#' @return See [rtracklayer::liftOver()].
 #'
 #' @export
 liftOverLax <- function(x, chain, ..., allow.gap = 0) {
     req_ns("rtracklayer", "S4Vectors", "GenomicRanges")
-    newx <- rtracklayer::liftOver(x, chain)
+    newx <- rtracklayer::liftOver(x, chain, ...)
     if (allow.gap > 0) {
         gapped <- which(lengths(newx) > 1)
         newx.gapped.reduced <- GenomicRanges::reduce(
@@ -198,12 +240,24 @@ liftOverLax <- function(x, chain, ..., allow.gap = 0) {
 
 #' Convenience function for running liftOver on a MotifMap BED file
 #'
+#' This function is a shortcut for calling [read_motifmap()], [liftOverLax()],
+#' and then [write_motifmap()].
+#'
+#' @param infile The input file to read with `read_motifmap()`.
+#' @param chaingile The chain file to use for the liftover process, to
+#'     be read with [rtracklayer::import.chain()].
+#' @param outfile The output file to write with `write_motifmap()`.
+#' @param allow.gap,... These arguments are passed to `liftOverLax()`.
+#'
+#' Note that only features that remain contiguous after lifting over
+#' are written to the output file. The rest are discarded.
+#'
 #' @export
-liftOver_motifMap <- function(infile, chainfile, outfile, allow.gap = 2) {
+liftOver_motifMap <- function(infile, chainfile, outfile, allow.gap = 2, ...) {
     req_ns("rtracklayer")
     gr <- read_motifmap(infile, parse_name = TRUE)
     chain <- rtracklayer::import.chain(chainfile)
-    gr2 <- rtracklayer::liftOverLax(gr, chain, allow.gap = allow.gap)
+    gr2 <- rtracklayer::liftOverLax(gr, chain, allow.gap = allow.gap, ...)
     gr2 <- unlist(gr2[lengths(gr2) == 1])
     write_motifmap(gr2, outfile)
 }
