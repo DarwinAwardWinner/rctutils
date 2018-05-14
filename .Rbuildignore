@@ -3,3 +3,4 @@
 ^old_scripts$
 ^libraries.txt$
 ^.*\.Rcheck$
+^README.*$
