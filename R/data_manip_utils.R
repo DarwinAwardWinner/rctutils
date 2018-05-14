@@ -104,8 +104,15 @@ cleanup_mcols <- function(object, mcols_df = S4Vectors::mcols(object)) {
 
 #' Variant of code_control that generates more verbose column names
 #'
-#' @param ... All arguments are passed to
+#' This function is a drop-in replacement for
+#' [codingMatrices::code_control()], except that when generating a
+#' contrast matrix, it gives column names of the form "A.vs.B" instead
+#' of "B-A".
+#'
+#' @param n,contrasts,sparse These arguments are identical
 #'     `codingMatrices::code_control()`.
+#' @param sep The string to insert between two levels in order to
+#'     generate the column names of the coding matrix.
 #'
 #' @return The same as `codingMatrices::code_control()`, but with more
 #'     descriptive column names.
@@ -115,15 +122,26 @@ cleanup_mcols <- function(object, mcols_df = S4Vectors::mcols(object)) {
 #' library(codingMatrices)
 #'
 #' # Compare the resulting column names
-#' code_control(3)
-#' code_control_named(3)
+#' code_control(4)
+#' code_control_named(4)
 #'
 #' @export
-code_control_named <- function (...) {
+code_control_named <- function (n, contrasts = TRUE, sparse = FALSE, sep=".vs.") {
     req_ns("codingMatrices")
-    x <- codingMatrices::code_control(...)
-    colnames(x) %<>% str_replace("(\\d+)-(\\d+)", "\\2.vs.\\1")
-    x
+    if (is_scalar_double(n)) {
+        levels <- seq_len(n)
+    } else {
+        levels <- as.character(n)
+    }
+    assert_that(length(levels) >= 1)
+    assert_that(!anyDuplicated(levels))
+    B <- codingMatrices::code_control(n = length(levels), contrasts = contrasts, sparse = sparse)
+    if (contrasts) {
+        colnames(B) <- glue("{levels[1]}{sep}{levels[-1]}")
+    } else {
+        colnames(B) <- levels
+    }
+    B
 }
 
 #' Convert a list to an atomic vector.

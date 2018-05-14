@@ -4,10 +4,10 @@
 \alias{code_control_named}
 \title{Variant of code_control that generates more verbose column names}
 \usage{
-code_control_named(...)
+code_control_named(n, ...)
 }
 \arguments{
-\item{...}{All arguments are passed to
+\item{n, ...}{All arguments are passed to
 \code{codingMatrices::code_control()}.}
 }
 \value{
