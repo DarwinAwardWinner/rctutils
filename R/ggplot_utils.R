@@ -77,7 +77,7 @@ ggprint <- function(plots, device = dev.cur(), closedev, printfun = print) {
 }
 
 # Printer function for ggplotly, to be passed as the prinfun for
-# ggprint. TODO: Make plotly an optional dependency.
+# ggprint.
 
 #' @export
 ggplotly.printer <- function(...) {

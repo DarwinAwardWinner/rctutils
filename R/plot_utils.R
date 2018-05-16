@@ -3,6 +3,14 @@
 
 #' Same as `cairo_pdf()` but with a default of `onefile = TRUE`
 #'
+#' This function is identical to [grdevices::cairo_pdf()], except that
+#' the `onefile` argument defaults to TRUE in order to match the
+#' default behavior of [grDevices::pdf()].
+#'
+#' @param onefile,... All arguments are passed to
+#'     [grDevices::cairo_pdf()].
+#'
+#' @importFrom grDevices cairo_pdf
 #' @export
 cairo_pdf_onefile <- function(..., onefile = TRUE) {
     cairo_pdf(..., onefile = onefile)

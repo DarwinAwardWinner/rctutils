@@ -244,7 +244,7 @@ liftOverLax <- function(x, chain, ..., allow.gap = 0) {
 #' and then [write_motifmap()].
 #'
 #' @param infile The input file to read with `read_motifmap()`.
-#' @param chaingile The chain file to use for the liftover process, to
+#' @param chainfile The chain file to use for the liftover process, to
 #'     be read with [rtracklayer::import.chain()].
 #' @param outfile The output file to write with `write_motifmap()`.
 #' @param allow.gap,... These arguments are passed to `liftOverLax()`.

@@ -6,10 +6,10 @@
 #' and normalization factors. If called on a matrix of counts, the
 #' offset must be supplied manually.
 #'
-#' @param y,... All arguments have the same meaning as in
-#'     [edgeR::aveLogCPM()], except that if `y` is a
-#'     `edgeR::DGEList()`, the offset matrix will be used in favor of
-#'     the sample normalized library sizes.
+#' @param y,offset,prior.count,dispersion,weights,... All arguments
+#'     have the same meaning as in [edgeR::aveLogCPM()], except that
+#'     if `y` is a `edgeR::DGEList()`, the offset matrix will be used
+#'     in favor of the sample normalized library sizes.
 #' @return See [edgeR::aveLogCPM()].
 #'
 #' Note that `edgeR::aveLogCPM()` also accepts an offset argument. The
@@ -45,16 +45,16 @@ aveLogCPMWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR:
     offsetMat <- offset
     aveLogCPMWithOffset(
         y$counts, offset = offsetMat, prior.count = prior.count,
-        dispersion = dispersion, weights = y$weights)
+        dispersion = dispersion, weights = y$weights, ...)
 }
 
 #' Version of `edgeR::cpm()` that uses offsets
 #'
-#' This is the same as [edgeR::cpm()], except that when called
-#' on a [edgeR::DGEList()] object that contains an offset matrix, that
-#' matrix will be used for normalization instead of the library sizes
-#' and normalization factors. If called on a matrix of counts, the
-#' offset must be supplied manually.
+#' This is the same as [edgeR::cpm()], except that when called on a
+#' [edgeR::DGEList()] object that contains an offset matrix, that
+#' matrix will be used by default for normalization instead of the
+#' library sizes and normalization factors. If called on a matrix of
+#' counts, the offset must be supplied manually.
 #'
 #' @param y,log,prior.count,... These arguments have the same meaning
 #'     as in [edgeR::cpm()], except that if `y` is a
@@ -66,6 +66,7 @@ aveLogCPMWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR:
 #' @param preserve.mean If TRUE (the default), scale each row of
 #'     `offset` such that the average CPM is the same as it would be
 #'     without the offset.
+#' @param ... Additional arguments are passed to [edgeR::cpm()].
 #' @return A numeric matrix of CPM values, normalized using the
 #'     provided offset matrix.
 #'
@@ -76,7 +77,7 @@ aveLogCPMWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR:
 #'
 #' # TODO Steal from cpm and maybe scaleOffset
 #'
-#' @seealso [edgeR::getOffset()], [edgeR::scaleOffset()]
+#' @seealso [edgeR::getOffset()], [edgeR::scaleOffset()], [edgeR::cpm()]
 #'
 #' @export
 cpmWithOffset <- function(y, offset, ...) {
@@ -103,8 +104,25 @@ cpmWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR::getOf
 
 #' Estimate edgeR dispersions separately for each group
 #'
+#' This takes a DGEList and a grouping factor and estimates the dispersion
+#'
+#' @param dge A DGEList object.
+#' @param group A factor to use in spliting the samples in `dge` into
+#'     groups.
+#' @param batch A vector or list of multiple vectors to be treated as
+#'     batch effects when estimating dispersions.
+#' @param ... Additional arguments are passed to
+#'     [edgeR::estimateDisp()].
+#' @param BPPARAM A BiocParallelParam instance to be used for
+#'     parallelization.
+#' @return A named list with one DGEList for each group. Each DGEList
+#'     contains the samples and estimated dispersions for that group.
+#'
+#' @seealso [edgeR::estimateDisp()]
+#'
 #' @export
-estimateDispByGroup <- function(dge, group = as.factor(dge$samples$group), batch, ...) {
+estimateDispByGroup <- function(dge, group = as.factor(dge$samples$group), batch, ...,
+                                BPPARAM = BiocParallel::bpparam()) {
     req_ns("edgeR", "BiocParallel", "magrittr")
     assert_that(nlevels(group) > 1)
     assert_that(length(group) == ncol(dge))
@@ -126,9 +144,41 @@ estimateDispByGroup <- function(dge, group = as.factor(dge$samples$group), batch
         group.batch.formula <- as.formula(str_c("~", str_c(group.vars, collapse = "+")))
         des <- model.matrix(group.batch.formula, group.batch)
         edgeR::estimateDisp(group.dge, des, ...)
-    })
+    }, BPPARAM=BPPARAM)
 }
 
+#' Get a table of genewise BCV values from a DGEList
+#'
+#' Given a DGEList object, this will extract the average logCPM as
+#' well as the common, trended, and genewise dispersion values. In
+#' addition, it will re-estimate the dispersions with no empirical
+#' Bayes shrinkage (prior.df = 0) to obtain the raw genewise
+#' dispersion values.
+#'
+#' @param y A DGEList. If it does not already contain dispersion
+#'     values, they will be estimated.
+#' @param design A design matrix to use when estimating dispersions.
+#'     This is optional if `y` already contains a design.
+#' @param ... Additional arguments are passed to
+#'     [edgeR::estimateDisp()], if dispersion estimation is required
+#'     (see below).
+#' @param rawdisp Another DGEList, which should be identical to `y`
+#'     except that it had dispersions estimated with `prior.count` =
+#'     0. This argument is completely optional, and is only used for
+#'     speeding up the function if the raw dispersions have already
+#'     been estimated. To suppress estimation of raw dispersions
+#'     entirely, set this to NA, NULL, or FALSE.
+#'
+#' (TODO: Take a long hard look at the logic in this function and make
+#' sure it matches this documentation.)
+#'
+#' If `y` already contains estimated dispersions, then no other
+#' arguments are required, and the existing dispersion values will be
+#' used. If `y` does not contain dispersions, then they will be
+#' estimated using `design` and `...`. Similarly, `design` is only
+#' required if `y` does not already contain a design (check if
+#' `y$design` is non-NULL).
+#'
 #' @export
 getBCVTable <- function(y, design, ..., rawdisp) {
     req_ns("edgeR")
@@ -147,6 +197,7 @@ getBCVTable <- function(y, design, ..., rawdisp) {
         y <- edgeR::estimateDisp(y, design = design, ...)
     }
     assert_that(!is.null(y$prior.df))
+    # If y has prior.df == 0, then y is actually rawdisp
     if (all(y$prior.df == 0)) {
         if (missing(rawdisp) || is.null(rawdisp)) {
             rawdisp <- y

@@ -4,25 +4,31 @@
 \alias{code_control_named}
 \title{Variant of code_control that generates more verbose column names}
 \usage{
-code_control_named(n, ...)
+code_control_named(n, contrasts = TRUE, sparse = FALSE, sep = ".vs.")
 }
 \arguments{
-\item{n, ...}{All arguments are passed to
+\item{n, contrasts, sparse}{These arguments are identical
 \code{codingMatrices::code_control()}.}
+
+\item{sep}{The string to insert between two levels in order to
+generate the column names of the coding matrix.}
 }
 \value{
 The same as \code{codingMatrices::code_control()}, but with more
 descriptive column names.
 }
 \description{
-Variant of code_control that generates more verbose column names
+This function is a drop-in replacement for
+\code{\link[codingMatrices:code_control]{codingMatrices::code_control()}}, except that when generating a
+contrast matrix, it gives column names of the form "A.vs.B" instead
+of "B-A".
 }
 \examples{
 library(codingMatrices)
 
 # Compare the resulting column names
-code_control(3)
-code_control_named(3)
+code_control(4)
+code_control_named(4)
 
 }
 \seealso{

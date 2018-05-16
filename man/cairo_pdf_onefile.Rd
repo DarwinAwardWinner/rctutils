@@ -6,6 +6,12 @@
 \usage{
 cairo_pdf_onefile(..., onefile = TRUE)
 }
+\arguments{
+\item{onefile, ...}{All arguments are passed to
+\code{\link[grDevices:cairo_pdf]{grDevices::cairo_pdf()}}.}
+}
 \description{
-Same as \code{cairo_pdf()} but with a default of \code{onefile = TRUE}
+This function is identical to \code{\link[grdevices:cairo_pdf]{grdevices::cairo_pdf()}}, except that
+the \code{onefile} argument defaults to TRUE in order to match the
+default behavior of \code{\link[grDevices:pdf]{grDevices::pdf()}}.
 }

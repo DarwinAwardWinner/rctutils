@@ -6,10 +6,24 @@
 \usage{
 parse_bp(size)
 }
+\arguments{
+\item{size}{A character vector representing a numbers of base
+pairs, optionally including units such as bp, kpb, etc.}
+}
+\value{
+A numeric vector containing the parsed numbers of base
+pairs.
+
+If any input cannot be parsed, an error is thrown.
+}
 \description{
 Parse a number of base pairs with optional units.
 }
 \examples{
+
 parse_bp(c("100", "100bp", "100 kbp", "1Mbp"))
 
+}
+\seealso{
+\code{\link[=si2f]{si2f()}}
 }

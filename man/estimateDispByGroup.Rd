@@ -4,8 +4,31 @@
 \alias{estimateDispByGroup}
 \title{Estimate edgeR dispersions separately for each group}
 \usage{
-estimateDispByGroup(dge, group = as.factor(dge$samples$group), batch, ...)
+estimateDispByGroup(dge, group = as.factor(dge$samples$group), batch, ...,
+  BPPARAM = BiocParallel::bpparam())
+}
+\arguments{
+\item{dge}{A DGEList object.}
+
+\item{group}{A factor to use in spliting the samples in \code{dge} into
+groups.}
+
+\item{batch}{A vector or list of multiple vectors to be treated as
+batch effects when estimating dispersions.}
+
+\item{...}{Additional arguments are passed to
+\code{\link[edgeR:estimateDisp]{edgeR::estimateDisp()}}.}
+
+\item{BPPARAM}{A BiocParallelParam instance to be used for
+parallelization.}
+}
+\value{
+A named list with one DGEList for each group. Each DGEList
+contains the samples and estimated dispersions for that group.
 }
 \description{
-Estimate edgeR dispersions separately for each group
+This takes a DGEList and a grouping factor and estimates the dispersion
+}
+\seealso{
+\code{\link[edgeR:estimateDisp]{edgeR::estimateDisp()}}
 }

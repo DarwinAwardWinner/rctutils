@@ -16,6 +16,8 @@ not an accepted argument.}
 \item{offset}{The offset matrix to use. If \code{y} is a DGEList, this
 is determined automatically.}
 
+\item{...}{Additional arguments are passed to \code{\link[edgeR:cpm]{edgeR::cpm()}}.}
+
 \item{preserve.mean}{If TRUE (the default), scale each row of
 \code{offset} such that the average CPM is the same as it would be
 without the offset.}
@@ -28,11 +30,11 @@ If \code{y} is a DGEList with no offset matrix, \code{offset} is generated
 from the normalized library sizes.
 }
 \description{
-This is the same as \code{\link[edgeR:cpm]{edgeR::cpm()}}, except that when called
-on a \code{\link[edgeR:DGEList]{edgeR::DGEList()}} object that contains an offset matrix, that
-matrix will be used for normalization instead of the library sizes
-and normalization factors. If called on a matrix of counts, the
-offset must be supplied manually.
+This is the same as \code{\link[edgeR:cpm]{edgeR::cpm()}}, except that when called on a
+\code{\link[edgeR:DGEList]{edgeR::DGEList()}} object that contains an offset matrix, that
+matrix will be used by default for normalization instead of the
+library sizes and normalization factors. If called on a matrix of
+counts, the offset must be supplied manually.
 }
 \examples{
 
@@ -40,5 +42,5 @@ offset must be supplied manually.
 
 }
 \seealso{
-\code{\link[edgeR:getOffset]{edgeR::getOffset()}}, \code{\link[edgeR:scaleOffset]{edgeR::scaleOffset()}}
+\code{\link[edgeR:getOffset]{edgeR::getOffset()}}, \code{\link[edgeR:scaleOffset]{edgeR::scaleOffset()}}, \code{\link[edgeR:cpm]{edgeR::cpm()}}
 }

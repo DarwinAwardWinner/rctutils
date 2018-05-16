@@ -25,7 +25,7 @@ saving the setup time if they are never loaded. However, this does
 not appear to be possible. The available "on load" hook mechanism
 seems to only trigger when a package is attached, not when it is
 loaded. Hence, if another pacakge uses BiocParallel or foreach
-internally, (e.g. \code{\link[SummarizedExperiment:summarizeOverlaps]{SummarizedExperiment::summarizeOverlaps()}}),
+internally, (e.g. \code{\link[GenomicAlignments:summarizeOverlaps]{GenomicAlignments::summarizeOverlaps()}}),
 this would not trigger the hook.}
 }
 \examples{

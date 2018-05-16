@@ -7,6 +7,18 @@
 ggplotBCV(y, xlab = "Average log CPM",
   ylab = "Biological coefficient of variation", rawdisp = NULL, ...)
 }
+\arguments{
+\item{y}{A DGEList, or a data frame of the kind returned by
+\code{\link[=getBCVTable]{getBCVTable()}}, which should contain columns named "logCPM",
+"CommonBCV", "TrendBCV", "eBayesBCV", and optionally "RawBCV".}
+
+\item{xlab, ylab}{Axis labels}
+
+\item{rawdisp, ...}{Additional arguments are passed to
+\code{\link[=getBCVTable]{getBCVTable()}}. Note that this function is only called if \code{y}
+is a DGEList. Otherwise, these additional arguments are
+ignored.}
+}
 \description{
-Additional arguments passed to \code{\link[=getBCVTable]{getBCVTable()}}.
+ggplot version of \code{edgeR::plotBCV()}.
 }

@@ -25,7 +25,7 @@
 #' not appear to be possible. The available "on load" hook mechanism
 #' seems to only trigger when a package is attached, not when it is
 #' loaded. Hence, if another pacakge uses BiocParallel or foreach
-#' internally, (e.g. [SummarizedExperiment::summarizeOverlaps()]),
+#' internally, (e.g. [GenomicAlignments::summarizeOverlaps()]),
 #' this would not trigger the hook.
 #'
 #' @examples
@@ -75,7 +75,7 @@ use_futures_for_foreach <- function(quiet = FALSE) {
 
 use_futures_for_BiocParallel <- function(quiet = FALSE, via_foreach = FALSE) {
     if (!via_foreach && !requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
-
+        warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation.")
     }
     if (requireNamespace("BiocParallel", quietly = TRUE)) {
         if (via_foreach) {

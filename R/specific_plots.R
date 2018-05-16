@@ -1,13 +1,26 @@
-# TODO: Make ggplot, GGally optional
-
 #' Create an annotatied p-value histogram plot
 #'
+#' This function takes a vector of p-values and plots a histogram of
+#' them using ggplot. It will add horizontal lines at 1 and the
+#' estimated proportion of true null hypotheses for reference.
+#'
+#' @param pvals A vector of p-values
+#' @param ptn Estimated proportion of true null hypotheses. If not
+#'     provided, it will be estimated using [limma::propTrueNull()].
+#'     This can also be a function that takes one argument (the vector
+#'     of p-values) and returns the estimated proportion of true null
+#'     hypotheses, which should be a single number between 0 and 1.
+#' @return a ggplot object
+#'
+#' @importFrom rlang is_scalar_double
 #' @export
-plot_pval_hist <- function(pvals, ptn) {
+plot_pval_hist <- function(pvals, ptn = limma::propTrueNull) {
     req_ns("limma")
-    if (missing(ptn)) {
-        ptn <- limma::propTrueNull(pvals)
+    if (is.function(ptn)) {
+        ptn <- ptn(pvals)
     }
+    assert_that(is_scalar_double(ptn))
+    assert_that(ptn >= 0, ptn <= 1)
     df <- data.frame(p = pvals)
     linedf <- data.frame(y = c(1, ptn), Line = c("Uniform", "Est. Null") %>% factor(levels = unique(.)))
     ggplot(df) + aes_(x = ~p) +
@@ -39,7 +52,15 @@ ggduo_dataXY <- function(dataX, dataY, extraData = NULL, ...) {
 
 #' ggplot version of `edgeR::plotBCV()`.
 #'
-#' Additional arguments passed to [getBCVTable()].
+#' @param y A DGEList, or a data frame of the kind returned by
+#'     [getBCVTable()], which should contain columns named "logCPM",
+#'     "CommonBCV", "TrendBCV", "eBayesBCV", and optionally "RawBCV".
+#' @param xlab,ylab Axis labels
+#' @param rawdisp,... Additional arguments are passed to
+#'     [getBCVTable()]. Note that this function is only called if `y`
+#'     is a DGEList. Otherwise, these additional arguments are
+#'     ignored.
+#' @return
 #'
 #' @export
 ggplotBCV <- function(y, xlab = "Average log CPM", ylab = "Biological coefficient of variation", rawdisp = NULL, ...) {

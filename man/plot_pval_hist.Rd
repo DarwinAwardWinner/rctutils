@@ -4,8 +4,22 @@
 \alias{plot_pval_hist}
 \title{Create an annotatied p-value histogram plot}
 \usage{
-plot_pval_hist(pvals, ptn)
+plot_pval_hist(pvals, ptn = limma::propTrueNull)
+}
+\arguments{
+\item{pvals}{A vector of p-values}
+
+\item{ptn}{Estimated proportion of true null hypotheses. If not
+provided, it will be estimated using \code{\link[limma:propTrueNull]{limma::propTrueNull()}}.
+This can also be a function that takes one argument (the vector
+of p-values) and returns the estimated proportion of true null
+hypotheses, which should be a single number between 0 and 1.}
+}
+\value{
+a ggplot object
 }
 \description{
-Create an annotatied p-value histogram plot
+This function takes a vector of p-values and plots a histogram of
+them using ggplot. It will add horizontal lines at 1 and the
+estimated proportion of true null hypotheses for reference.
 }

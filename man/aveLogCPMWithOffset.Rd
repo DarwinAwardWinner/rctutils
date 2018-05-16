@@ -7,10 +7,10 @@
 aveLogCPMWithOffset(y, ...)
 }
 \arguments{
-\item{y, ...}{All arguments have the same meaning as in
-\code{\link[edgeR:aveLogCPM]{edgeR::aveLogCPM()}}, except that if \code{y} is a
-\code{edgeR::DGEList()}, the offset matrix will be used in favor of
-the sample normalized library sizes.}
+\item{y, offset, prior.count, dispersion, weights, ...}{All arguments
+have the same meaning as in \code{\link[edgeR:aveLogCPM]{edgeR::aveLogCPM()}}, except that
+if \code{y} is a \code{edgeR::DGEList()}, the offset matrix will be used
+in favor of the sample normalized library sizes.}
 }
 \value{
 See \code{\link[edgeR:aveLogCPM]{edgeR::aveLogCPM()}}.
