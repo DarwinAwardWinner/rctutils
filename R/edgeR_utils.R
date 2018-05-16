@@ -90,7 +90,7 @@ cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..
     if (preserve.mean) {
         offset <- edgeR::scaleOffset(y, offset)
     }
-    edgeR::cpm(y$counts, lib.size = exp(offset), log = log,
+    edgeR::cpm(y, lib.size = exp(offset), log = log,
                prior.count = prior.count, ...)
 }
 
@@ -98,7 +98,7 @@ cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..
 cpmWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR::getOffset(y), dim(y)),
                                   log = FALSE, prior.count = 0.25, ..., preserve.mean = TRUE) {
     req_ns("edgeR")
-    cpmWithOffset(t$counts, offset, log = log,
+    cpmWithOffset(y$counts, offset, log = log,
                   prior.count = prior.count, preserve.mean = preserve.mean, ...)
 }
 
