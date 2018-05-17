@@ -36,6 +36,7 @@ tsmsg <- function(...) {
 #'     performed on \code{x}.
 #' @param value The right hand side of the assignment operation to be
 #'     performed.
+#' @return The value of \code{x} after performing the assignment.
 #'
 #' As usual, \code{x}, the object being passed in, should be
 #' referenced in both \code{expr} and \code{value} as \code{.}. In
@@ -71,6 +72,54 @@ assign_into <- function(x, expr, value) {
     uq <- lazyeval::uq
     expr <- lazyeval::lazy(expr)$expr
     lazyeval::f_eval(lazyeval::f_interp(~( x %>% { uq(expr) <- uq(value); . })))
+}
+
+#' Evaluate an arbitrary mutating expression in a magrittr pipe
+#'
+#' @noMd
+#'
+#' This function exists to facilitate assignment to parts of an object
+#' in the middle of a magrittr pipeline. Normally this is disruptive,
+#' since assignment returns the value that was assigned, rather than
+#' the whole object.
+#'
+#' @param x The object to assign into. (Typically this argument is
+#'     delivered via \code{\%\>\%()}.)
+#' @param expr The expression to be evaluated with \code{.} set to
+#'     \code{x}. Typically this expression modifies \code{.} in some
+#'     way, e.g. by performing an assignment with \code{.} on the
+#'     left-hand side.
+#' @return The value of \code{x} after evaluating \code{expr}.
+#'
+#' As usual, \code{x}, the object being passed in, should be
+#' referenced in \code{expr} as \code{.}.
+#'
+#' Note that this function uses the lazyeval package rather than its
+#' apparent successor, rlang, because rlang doesn't support
+#' interpolating expressions on the left-hand-side of an assignment
+#' operation: https://github.com/r-lib/rlang/issues/212.
+#'
+#' @examples
+#'
+#' library(magrittr)
+#'
+#' # Returns the entire list, not just a single element
+#' list(a = 1, b = 2, c = 3) %>%
+#'   dot_mutate(.$d <- 4) %>%
+#'   dot_mutate({ .$e <- 5; .$f <- 6})
+#'
+#' # Compare:
+#' list(a = 1, b = 2, c = 3) %>%
+#'   {.$d <- 4} %>%
+#'   print
+#'
+#' @export
+dot_mutate <- function(x, expr) {
+    req_ns("lazyeval")
+    ## Required because `f_interp` doesn't seem to like `::`
+    uq <- lazyeval::uq
+    expr <- lazyeval::lazy(expr)$expr
+    lazyeval::f_eval(lazyeval::f_interp(~( x %>% { uq(expr); . })))
 }
 
 #' Evaluate an expression and then collect garbage.
