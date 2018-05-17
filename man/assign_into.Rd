@@ -14,7 +14,10 @@ delivered via \code{\%\>\%()}.)}
 performed on \code{x}.}
 
 \item{value}{The right hand side of the assignment operation to be
-    performed.
+performed.}
+}
+\value{
+The value of \code{x} after performing the assignment.
 
 As usual, \code{x}, the object being passed in, should be
 referenced in both \code{expr} and \code{value} as \code{.}. In
@@ -24,7 +27,7 @@ object will not be modified. (This is currently not checked.)
 Note that this function uses the lazyeval package rather than its
 apparent successor, rlang, because rlang doesn't support
 interpolating expressions on the left-hand-side of an assignment
-operation: https://github.com/r-lib/rlang/issues/212.}
+operation: https://github.com/r-lib/rlang/issues/212.
 }
 \description{
 Assign into complex sub-expressions and return the whole object
