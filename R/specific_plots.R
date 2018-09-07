@@ -104,3 +104,31 @@ ggplotBCV <- function(y, xlab = "Average log CPM", ylab = "Biological coefficien
         labs(title = "BCV plot", x = xlab, y = ylab)
     p
 }
+
+# Get log2-fold-change y-axis position of normalization lines between two
+# samples for a list of DGEList objects.
+#' @export
+getNormLineData <- function(dgelists, s1, s2) {
+    req_ns("rlang")
+    assert_that(length(dgelists) >= 1)
+    assert_that(rlang::is_dictionaryish(dgelists))
+    dgelists %>%
+        sapply(. %>% {.$samples$norm.factors} %>% log2 %>% {.[s2] - .[s1]}) %>%
+        data.frame(NormFactor=., NormType=names(dgelists))
+}
+
+# Get a curve representing the loess-based normaliation implied by the offsets
+# of two samples in a DGEList object. N is the number of points to interpolate the curve at.
+#' @export
+getOffsetNormCurveData <- function(dge, s1, s2, n=1000) {
+    req_ns("edgeR")
+    assert_that(is.numeric(dge$offset))
+    a <- edgeR::aveLogCPM(dge, dispersion=0.05, prior.count=0.5)
+    # Need to subtract the library size difference out of the offset
+    raw.offset <- dge$offset %>% {.[,s2] - .[,s1]} %>% divide_by(log(2))
+    lib.size.offset <- dge$samples$lib.size %>% {.[s2] / .[s1]} %>% log2
+    x <- data.frame(A=a, Offset=raw.offset - lib.size.offset)
+    f <- approxfun(x$A, x$Offset)
+    data.frame(A=seq(from=min(x$A), to=max(x$A), length.out = n)) %>%
+        mutate(M=f(A))
+}
