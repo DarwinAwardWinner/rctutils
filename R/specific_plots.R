@@ -60,7 +60,7 @@ ggduo_dataXY <- function(dataX, dataY, extraData = NULL, ...) {
 #'     [getBCVTable()]. Note that this function is only called if `y`
 #'     is a DGEList. Otherwise, these additional arguments are
 #'     ignored.
-#' @return
+#' @return A ggplot object.
 #'
 #' @export
 ggplotBCV <- function(y, xlab = "Average log CPM", ylab = "Biological coefficient of variation", rawdisp = NULL, ...) {

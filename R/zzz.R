@@ -43,4 +43,4 @@ globalVariables(c("one_or_more", "space", "zero_or_more", "capture", "maybe", "d
 #' @import stringr
 #' @import ggplot2
 #' @importFrom assertthat assert_that
-NULL
+"_PACKAGE"

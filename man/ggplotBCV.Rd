@@ -19,6 +19,9 @@ ggplotBCV(y, xlab = "Average log CPM",
 is a DGEList. Otherwise, these additional arguments are
 ignored.}
 }
+\value{
+A ggplot object.
+}
 \description{
 ggplot version of \code{edgeR::plotBCV()}.
 }
