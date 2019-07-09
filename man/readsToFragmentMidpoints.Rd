@@ -4,7 +4,8 @@
 \alias{readsToFragmentMidpoints}
 \title{Compute the midpoints of a collection of read fragments}
 \usage{
-readsToFragmentMidpoints(reads, fraglen, extend_fragment_upstream = FALSE)
+readsToFragmentMidpoints(reads, fraglen,
+  extend_fragment_upstream = FALSE)
 }
 \arguments{
 \item{reads}{A \link[GenomicAlignments:GAlignments]{GenomicAlignments::GAlignments},

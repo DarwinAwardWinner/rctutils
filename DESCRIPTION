@@ -6,12 +6,14 @@ Version: 0.1.0
 Authors@R: person("Ryan C.", "Thompson", email="rct@thompsonclan.org", role=c("aut", "cre"))
 Maintainer: Ryan C. Thompson <rct@thompsonclan.org>
 Description: A collection of utility functions generally relating to bioinformatics analysis.
-Depends: R (>= 3.4.4)
+Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.1
 Roxygen: list(markdown = TRUE)
+# https: //github.com/r-lib/devtools/issues/700#issuecomment-235127291
+biocViews: ~
 Imports:
     assertthat,
     dplyr,
@@ -21,27 +23,37 @@ Imports:
     withr,
     methods,
     ggplot2,
-    rlang,
-    R.utils
+    rlang
 Suggests:
-    BiocGenerics,
-    GenomicRanges,
-    Rsubread,
+    roxygen2,
     codingMatrices,
     future,
-    limma,
-    qvalue,
     rex,
     plotly,
+    scales,
     GGally,
-    edgeR,
-    AnnotationDbi,
-    GenomicFeatures,
     reshape2,
     forcats,
     openxlsx,
     tidyr,
-    SummarizedExperiment,
-    BiocParallel.FutureParam,
+    readr,
+    foreach,
     doFuture,
-    S4Vectors
+    lazyeval,
+    Biobase,
+    S4Vectors,
+    BiocGenerics,
+    GenomicRanges,
+    Rsubread,
+    SummarizedExperiment,
+    limma,
+    qvalue,
+    edgeR,
+    csaw,
+    AnnotationDbi,
+    GenomicFeatures,
+    rtracklayer,
+    BiocParallel,
+    BiocParallel.FutureParam
+Remotes:
+    github::DarwinAwardWinner/BiocParallel.FutureParam@prototype

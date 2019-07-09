@@ -6,8 +6,9 @@
 \usage{
 voomWithQualityWeightsAndOffset(counts, design = NULL, offset,
   normalize.method = "none", plot = FALSE, span = 0.5,
-  var.design = NULL, method = "genebygene", maxiter = 50, tol = 1e-10,
-  trace = FALSE, replace.weights = TRUE, col = NULL, ...)
+  var.design = NULL, method = "genebygene", maxiter = 50,
+  tol = 1e-10, trace = FALSE, replace.weights = TRUE, col = NULL,
+  ...)
 }
 \arguments{
 \item{counts, design, normalize.method, span, plot, var.design, method, maxiter, tol, trace, replace.weights, col, ...}{These arguments have the same meaning as in

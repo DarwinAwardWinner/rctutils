@@ -67,7 +67,7 @@ voomWithOffset <-
 
 
     ## TODO: Rewrite not to require a DGEList
-    req_ns("limma", "edgeR", "BiocGenerics")
+    req_ns("limma", "edgeR", "BiocGenerics", "Biobase")
     out <- list()
     if (is(counts, "DGEList")) {
         out$genes <- counts$genes

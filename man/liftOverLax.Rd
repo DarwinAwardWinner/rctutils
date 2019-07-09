@@ -22,3 +22,6 @@ smaller than a specified size will be filled in. This allows the
 liftover process to tolerate small indels in the old genome
 relative to the new one without breaking up contiguous regions.
 }
+\details{
+Obviously this is kind of an ugly hack.
+}

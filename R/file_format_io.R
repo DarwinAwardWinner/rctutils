@@ -1,6 +1,8 @@
 ## Read a table from a R data file, csv, or xlsx file. Returns a data
 ## frame or throws an error.
 
+#' General function for reading a table from any table-like file
+#'
 #' @export
 read_table_general <- function(filename, read.table.args = NULL, read.xlsx.args = NULL,
                                dataframe.class = "data.frame") {
@@ -231,6 +233,7 @@ read_tx2gene_from_genemap <- function(fname) {
 
 #' @export
 read_annotation_from_gff <- function(filename, format = "GFF3", ...) {
+    req_ns("rtracklayer")
     gff <- NULL
     ## Allow the file to be an RDS file containing the GRanges
     ## resulting from import()
@@ -262,7 +265,7 @@ read_annotation_from_rdata <- function(filename) {
 #' @export
 read_additional_gene_info <- function(filename, gff_format = "GFF3",
                                       geneFeatureType = "gene", ...) {
-    req_ns("S4Vectors")
+    req_ns("S4Vectors", "rtracklayer")
     df <- tryCatch({
         gff <- tryCatch({
             read_RDS_or_RDA(filename, "GRanges")

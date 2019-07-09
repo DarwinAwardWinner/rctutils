@@ -5,7 +5,8 @@
 \title{Parallelized version of \code{\link[limma:selectModel]{limma::selectModel()}}}
 \usage{
 selectModelParallel(y, designlist, criterion = "aic", df.prior = 0,
-  s2.prior = NULL, s2.true = NULL, ..., BPPARAM = BiocParallel::bpparam())
+  s2.prior = NULL, s2.true = NULL, ...,
+  BPPARAM = BiocParallel::bpparam())
 }
 \arguments{
 \item{y, designlist, criterion, df.prior, s2.prior, s2.true, ...}{These

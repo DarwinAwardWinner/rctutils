@@ -4,8 +4,8 @@
 \alias{promote_common_mcols}
 \title{Promote common mcols from the GRanges inside a GRangesList}
 \usage{
-promote_common_mcols(grl, delete_from_source = FALSE, blacklist = c("type",
-  "Parent"))
+promote_common_mcols(grl, delete_from_source = FALSE,
+  blacklist = c("type", "Parent"))
 }
 \arguments{
 \item{grl}{A GRangesList}
@@ -37,6 +37,7 @@ GRangesList object itself.
 }
 \examples{
 
+library(GenomicRanges)
 gr <- GRanges("chr1", IRanges(start = (1:10) * 100, width = 50),
               GeneID = rep(c("geneA", "geneB"), each=5),
               GeneName = rep(c("Gene A", "Gene B"), each=5),

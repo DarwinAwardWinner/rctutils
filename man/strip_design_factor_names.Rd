@@ -4,7 +4,8 @@
 \alias{strip_design_factor_names}
 \title{Simplify the column names of a simple design matrix}
 \usage{
-strip_design_factor_names(design, prefixes = names(attr(design, "contrasts")))
+strip_design_factor_names(design, prefixes = names(attr(design,
+  "contrasts")))
 }
 \arguments{
 \item{design}{The design matrix whose column names should be

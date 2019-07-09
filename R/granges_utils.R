@@ -176,6 +176,7 @@ get_gene_common_colnames <- function(df, geneids) {
 #'
 #' @examples
 #'
+#' library(GenomicRanges)
 #' gr <- GRanges("chr1", IRanges(start = (1:10) * 100, width = 50),
 #'               GeneID = rep(c("geneA", "geneB"), each=5),
 #'               GeneName = rep(c("Gene A", "Gene B"), each=5),
@@ -217,6 +218,8 @@ promote_common_mcols <- function(grl, delete_from_source = FALSE, blacklist = c(
 #' liftover process to tolerate small indels in the old genome
 #' relative to the new one without breaking up contiguous regions.
 #'
+#' Obviously this is kind of an ugly hack.
+#'
 #' @param x,chain,... These arguments have the same meaning as in
 #'     [rtracklayer::liftOver()].
 #' @param allow.gap Maximum gap size to "fill in". If set to zero,
@@ -257,7 +260,7 @@ liftOver_motifMap <- function(infile, chainfile, outfile, allow.gap = 2, ...) {
     req_ns("rtracklayer")
     gr <- read_motifmap(infile, parse_name = TRUE)
     chain <- rtracklayer::import.chain(chainfile)
-    gr2 <- rtracklayer::liftOverLax(gr, chain, allow.gap = allow.gap, ...)
+    gr2 <- liftOverLax(gr, chain, allow.gap = allow.gap, ...)
     gr2 <- unlist(gr2[lengths(gr2) == 1])
     write_motifmap(gr2, outfile)
 }

@@ -4,8 +4,8 @@
 \alias{estimateDispByGroup}
 \title{Estimate edgeR dispersions separately for each group}
 \usage{
-estimateDispByGroup(dge, group = as.factor(dge$samples$group), batch, ...,
-  BPPARAM = BiocParallel::bpparam())
+estimateDispByGroup(dge, group = as.factor(dge$samples$group), batch,
+  ..., BPPARAM = BiocParallel::bpparam())
 }
 \arguments{
 \item{dge}{A DGEList object.}

@@ -28,16 +28,28 @@ loaded. Hence, if another pacakge uses BiocParallel or foreach
 internally, (e.g. \code{\link[GenomicAlignments:summarizeOverlaps]{GenomicAlignments::summarizeOverlaps()}}),
 this would not trigger the hook.}
 }
+\description{
+This function ensures that all parallel functions of the
+BiocParallel and foreach packages will use the selected future.
+This includes functions like \code{\link[foreach:foreach]{foreach::foreach()}} with \code{\%dopar\%},
+\code{\link[BiocParallel:bplapply]{BiocParallel::bplapply()}}, and [\code{\link[plyr:llply]{plyr::llply()}}].
+}
 \examples{
 
+# Load and set up the futures package
+library(future)
+# We use non-parallel execution strategies just for example
+# purposes.
+plan("sequential")
+
 # Set up BiocParallel and foreach to use futures, keeping the
-# existing future execution strategy.
+# currently selected future execution strategy.
 use_futures()
 
-# Same, but switch to the multicore strategy.
-use_futures("multisession")
+# Same, but switch to the a different execution strategy.
+use_futures("transparent")
 
-# Same, but pass additional options to the multicore strategy.
-use_futures("multisession", workers = 2)
+# Same, but pass additional options to the strategy.
+use_futures("transparent", local = TRUE)
 
 }
