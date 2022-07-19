@@ -20,9 +20,15 @@ plot_pval_hist <- function(pvals, nbins = 100, ptn = limma::propTrueNull) {
     req_ns("limma")
     if (is.function(ptn)) {
         ptn <- ptn(pvals)
+        ## Support qvalue::pi0est
+        if (is.list(ptn) && "pi0" %in% names(ptn)) {
+            ptn <- ptn$pi0
+        }
     }
-    assert_that(is_scalar_double(ptn))
-    assert_that(ptn >= 0, ptn <= 1)
+    assert_that(
+        is_scalar_double(ptn),
+        ptn >= 0, ptn <= 1
+    )
     df <- data.frame(p = pvals)
     linedf <- data.frame(y = c(1, ptn), Line = c("Uniform", "Est. Null") %>% factor(levels = unique(.)))
     ggplot(df) + aes_(x = ~p) +
