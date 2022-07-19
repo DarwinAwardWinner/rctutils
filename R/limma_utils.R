@@ -285,6 +285,15 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
                                          initial.correlation = 0,
                                          maxiter = 5, tol = 1e-6, verbose = TRUE, ...) {
     req_ns("limma", "glue")
+    if (verbose) {
+        tryCatch(
+            req_ns("toOrdinal"),
+            error = function(...) {
+                warning("Disabling verbose mode (toOrdinal pacakge not available)")
+                verbose <<- FALSE
+            }
+        )
+    }
     assert_that(maxiter >= 1)
     assert_that(is.finite(maxiter))
 
@@ -308,13 +317,13 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
     dupcor <- dupCor.fun(elist, design, block = block, trim = trim)
     iter.num <- iter.num + 1
     if (verbose) {
-        message(glue::glue("Duplicate correlation after {toOrdinal(iter.num)} iteration: {dupcor$consensus.correlation}"))
+        message(glue::glue("Duplicate correlation after {toOrdinal::toOrdinal(iter.num)} iteration: {dupcor$consensus.correlation}"))
     }
     while (iter.num < maxiter) {
         if (!is.null(tol) && is.finite(tol)) {
             if (abs(dupcor$consensus.correlation - prev.cor) <= tol) {
                 if (verbose) {
-                    message(glue::glue("Stopping after {toOrdinal(iter.num)} iteration because tolerance threshold was reached."))
+                    message(glue::glue("Stopping after {toOrdinal::toOrdinal(iter.num)} iteration because tolerance threshold was reached."))
                 }
                 break
             }
@@ -324,7 +333,7 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
         dupcor <- dupCor.fun(elist, design, block = block, trim = trim)
         iter.num <- iter.num + 1
         if (verbose) {
-            message(glue::glue("Duplicate correlation after toOrdinal(iter.num) iteration: dupcor$consensus.correlation"))
+            message(glue::glue("Duplicate correlation after {toOrdinal::toOrdinal(iter.num)} iteration: {dupcor$consensus.correlation}"))
         }
     }
     elist <- voom.fun(counts, design = design, plot = plot, block = block, correlation = dupcor$consensus.correlation, ...)
