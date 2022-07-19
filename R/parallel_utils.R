@@ -1,103 +1,106 @@
 ## https://github.com/HenrikBengtsson/future/issues/162
 ## https://github.com/DarwinAwardWinner/future/blob/6a000af1e9ea41674c85a5476cf5e8c6c9e75d80/R/use_futures.R
 
-#' Set up foreach and BiocParallel to use futures
-#'
-#' This function ensures that all parallel functions of the
-#' BiocParallel and foreach packages will use the selected future.
-#' This includes functions like [foreach::foreach()] with `%dopar%`,
-#' [BiocParallel::bplapply()], and [[plyr::llply()]].
-#'
-#' @param strategy,... If provided, these are passed directly to
-#'     [future::plan()]. If `strategy` is not provided,
-#'     `future::plan()` is not called at all, leaving the current
-#'     execution strategy unchanged and ignoring any additional
-#'     arguments. This is useful if you have already called
-#'     `future::plan()` and you just want to set up other parallel
-#'     packages to use futures.
-#' @param quiet If FALSE (the default), indicate what is being done.
-#'     If TRUE, do not issue any messages.
-#'
-#' Note that this forces loading of the BiocParallel and foreach
-#' packages. Ideally, this function would only set up a hook to run
-#' the appropriate setup code after these packages are loaded, thus
-#' saving the setup time if they are never loaded. However, this does
-#' not appear to be possible. The available "on load" hook mechanism
-#' seems to only trigger when a package is attached, not when it is
-#' loaded. Hence, if another pacakge uses BiocParallel or foreach
-#' internally, (e.g. [GenomicAlignments::summarizeOverlaps()]),
-#' this would not trigger the hook.
-#'
-#' @examples
-#'
-#' # Load and set up the futures package
-#' library(future)
-#' # We use non-parallel execution strategies just for example
-#' # purposes.
-#' plan("sequential")
-#'
-#' # Set up BiocParallel and foreach to use futures, keeping the
-#' # currently selected future execution strategy.
-#' use_futures()
-#'
-#' # Same, but switch to the a different execution strategy.
-#' use_futures("transparent")
-#'
-#' # Same, but pass additional options to the strategy.
-#' use_futures("transparent", local = TRUE)
-#'
-#' @export
-use_futures <- function(strategy, ..., quiet = FALSE) {
-    req_ns("future")
-    if (quiet) {
-        message <- identity
-    }
-    if (!missing(strategy)) {
-        message("Setting up new future execution strategy.")
-        future::plan(strategy, ...)
-    } else {
-        message("Using existing future execution strategy.")
-    }
-    use_futures_for_foreach(quiet = quiet)
-    use_futures_for_BiocParallel(quiet = quiet)
-}
+## This is disabled since the future package has changed a good bit
+## since it was written. It will need a rewrite.
 
-use_futures_for_foreach <- function(quiet = FALSE) {
-    if (quiet) {
-        message <- identity
-    }
-    if (requireNamespace("foreach", quietly = TRUE)) {
-        if (requireNamespace("doFuture", quietly = TRUE)) {
-            doFuture::registerDoFuture()
-            message("Foreach will now use the doFuture backend.")
-        } else {
-            warning("Install the doFuture package to allow foreach to use futures for parallel operation.")
-        }
-    } else {
-        message("Not setting up foreach to use futures because it is not installed.")
-    }
-    NULL
-}
+## #' Set up foreach and BiocParallel to use futures
+## #'
+## #' This function ensures that all parallel functions of the
+## #' BiocParallel and foreach packages will use the selected future.
+## #' This includes functions like [foreach::foreach()] with `%dopar%`,
+## #' [BiocParallel::bplapply()], and [[plyr::llply()]].
+## #'
+## #' @param strategy,... If provided, these are passed directly to
+## #'     [future::plan()]. If `strategy` is not provided,
+## #'     `future::plan()` is not called at all, leaving the current
+## #'     execution strategy unchanged and ignoring any additional
+## #'     arguments. This is useful if you have already called
+## #'     `future::plan()` and you just want to set up other parallel
+## #'     packages to use futures.
+## #' @param quiet If FALSE (the default), indicate what is being done.
+## #'     If TRUE, do not issue any messages.
+## #'
+## #' Note that this forces loading of the BiocParallel and foreach
+## #' packages. Ideally, this function would only set up a hook to run
+## #' the appropriate setup code after these packages are loaded, thus
+## #' saving the setup time if they are never loaded. However, this does
+## #' not appear to be possible. The available "on load" hook mechanism
+## #' seems to only trigger when a package is attached, not when it is
+## #' loaded. Hence, if another pacakge uses BiocParallel or foreach
+## #' internally, (e.g. [GenomicAlignments::summarizeOverlaps()]),
+## #' this would not trigger the hook.
+## #'
+## #' @examples
+## #'
+## #' # Load and set up the futures package
+## #' library(future)
+## #' # We use non-parallel execution strategies just for example
+## #' # purposes.
+## #' plan("sequential")
+## #'
+## #' # Set up BiocParallel and foreach to use futures, keeping the
+## #' # currently selected future execution strategy.
+## #' use_futures()
+## #'
+## #' # Same, but switch to a different execution strategy.
+## #' use_futures("sequential")
+## #'
+## #' # Same, but pass additional options to the strategy.
+## #' # use_futures("transparent", local = TRUE)
+## #'
+## #' @export
+## use_futures <- function(strategy, ..., quiet = FALSE) {
+##     req_ns("future")
+##     if (quiet) {
+##         message <- identity
+##     }
+##     if (!missing(strategy)) {
+##         message("Setting up new future execution strategy.")
+##         future::plan(strategy, ...)
+##     } else {
+##         message("Using existing future execution strategy.")
+##     }
+##     use_futures_for_foreach(quiet = quiet)
+##     use_futures_for_BiocParallel(quiet = quiet)
+## }
 
-use_futures_for_BiocParallel <- function(quiet = FALSE, via_foreach = FALSE) {
-    if (!via_foreach && !requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
-        warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation.")
-    }
-    if (requireNamespace("BiocParallel", quietly = TRUE)) {
-        if (via_foreach) {
-            suppressMessages(use_futures_for_foreach(quiet = TRUE))
-            BiocParallel::register(BiocParallel::DoparParam())
-            message("BiocParallel will now use the DoparParam (i.e. foreach) backend, which should in turn use the doFuture backend.")
-        } else if (requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
-            BiocParallel::register(BiocParallel.FutureParam::FutureParam())
-            message("BiocParallel will now use the FutureParam backend")
-        } else {
-            warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation.")
-        }
-    } else {
-        message("Not setting up BiocParallel to use futures because it is not installed.")
-    }
-}
+## use_futures_for_foreach <- function(quiet = FALSE) {
+##     if (quiet) {
+##         message <- identity
+##     }
+##     if (requireNamespace("foreach", quietly = TRUE)) {
+##         if (requireNamespace("doFuture", quietly = TRUE)) {
+##             doFuture::registerDoFuture()
+##             message("Foreach will now use the doFuture backend.")
+##         } else {
+##             warning("Install the doFuture package to allow foreach to use futures for parallel operation.")
+##         }
+##     } else {
+##         message("Not setting up foreach to use futures because it is not installed.")
+##     }
+##     NULL
+## }
+
+## use_futures_for_BiocParallel <- function(quiet = FALSE, via_foreach = FALSE) {
+##     if (!via_foreach && !requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
+##         warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation.")
+##     }
+##     if (requireNamespace("BiocParallel", quietly = TRUE)) {
+##         if (via_foreach) {
+##             suppressMessages(use_futures_for_foreach(quiet = TRUE))
+##             BiocParallel::register(BiocParallel::DoparParam())
+##             message("BiocParallel will now use the DoparParam (i.e. foreach) backend, which should in turn use the doFuture backend.")
+##         } else if (requireNamespace("BiocParallel.FutureParam", quietly = TRUE)) {
+##             BiocParallel::register(BiocParallel.FutureParam::FutureParam())
+##             message("BiocParallel will now use the FutureParam backend")
+##         } else {
+##             warning("Install the BiocParallel.FutureParam package to allow BiocParallel to use futures for parallel operation.")
+##         }
+##     } else {
+##         message("Not setting up BiocParallel to use futures because it is not installed.")
+##     }
+## }
 
 #' Parallelized version of [limma::selectModel()]
 #'
