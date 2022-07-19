@@ -5,6 +5,7 @@
 #' estimated proportion of true null hypotheses for reference.
 #'
 #' @param pvals A vector of p-values
+#' @param nbins Number of bins in the histogram
 #' @param ptn Estimated proportion of true null hypotheses. If not
 #'     provided, it will be estimated using [limma::propTrueNull()].
 #'     This can also be a function that takes one argument (the vector
@@ -15,7 +16,7 @@
 #' @importFrom rlang is_scalar_double
 #' @importFrom glue glue
 #' @export
-plot_pval_hist <- function(pvals, ptn = limma::propTrueNull) {
+plot_pval_hist <- function(pvals, nbins = 100, ptn = limma::propTrueNull) {
     req_ns("limma")
     if (is.function(ptn)) {
         ptn <- ptn(pvals)
@@ -25,7 +26,7 @@ plot_pval_hist <- function(pvals, ptn = limma::propTrueNull) {
     df <- data.frame(p = pvals)
     linedf <- data.frame(y = c(1, ptn), Line = c("Uniform", "Est. Null") %>% factor(levels = unique(.)))
     ggplot(df) + aes_(x = ~p) +
-        geom_histogram(aes_(y = ~..density..), binwidth = 0.01, boundary = 0) +
+        geom_histogram(aes_(y = ~..density..), binwidth = 1/nbins, boundary = 0) +
         geom_hline(aes_(yintercept = ~y, color = ~Line),
                    data = linedf, alpha = 0.5, show.legend = TRUE) +
         scale_color_manual(name = "Ref. Line", values = c("blue", "red")) +

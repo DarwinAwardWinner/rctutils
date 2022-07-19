@@ -4,10 +4,12 @@
 \alias{plot_pval_hist}
 \title{Create an annotatied p-value histogram plot}
 \usage{
-plot_pval_hist(pvals, ptn = limma::propTrueNull)
+plot_pval_hist(pvals, nbins = 100, ptn = limma::propTrueNull)
 }
 \arguments{
 \item{pvals}{A vector of p-values}
+
+\item{nbins}{Number of bins in the histogram}
 
 \item{ptn}{Estimated proportion of true null hypotheses. If not
 provided, it will be estimated using \code{\link[limma:propTrueNull]{limma::propTrueNull()}}.
