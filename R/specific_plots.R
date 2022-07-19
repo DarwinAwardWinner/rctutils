@@ -13,6 +13,7 @@
 #' @return a ggplot object
 #'
 #' @importFrom rlang is_scalar_double
+#' @importFrom glue glue
 #' @export
 plot_pval_hist <- function(pvals, ptn = limma::propTrueNull) {
     req_ns("limma")
@@ -28,7 +29,11 @@ plot_pval_hist <- function(pvals, ptn = limma::propTrueNull) {
         geom_hline(aes_(yintercept = ~y, color = ~Line),
                    data = linedf, alpha = 0.5, show.legend = TRUE) +
         scale_color_manual(name = "Ref. Line", values = c("blue", "red")) +
-        xlim(0,1) + ggtitle(glue("P-value distribution (Est. {format(100 * (1-ptn), digits = 3)}% signif.)")) +
+        xlim(0,1) +
+        ggtitle(
+            "P-value distribution",
+            subtitle = glue("(Est. {format(100 * (1-ptn), digits = 3)}% non-null.)")
+        ) +
         expand_limits(y = c(0, 1.25)) +
         xlab("p-value") + ylab("Relative frequency") +
         theme(legend.position = c(0.95, 0.95),
