@@ -202,7 +202,7 @@ print_var_vector <- function(v) {
 #' @return A list of futures, whose values will be the result of
 #'     evaluating each of `expressions`.
 #'
-#' @seealso [rlang::eval_tidy()], [rlang::quo()], [rlang::as_quosure()], [future::values()]
+#' @seealso [rlang::eval_tidy()], [rlang::quo()], [rlang::as_quosure()], [future::value()]
 #'
 #' @examples
 #'
@@ -212,7 +212,7 @@ print_var_vector <- function(v) {
 #'
 #' flist <- make_futures_(expressions)
 #' flist
-#' values(flist)
+#' value(flist)
 #'
 #' # Same result without futures
 #' lapply(expressions, eval_tidy)
@@ -244,7 +244,7 @@ make_futures_ <- function(expressions, .future.args = list()) {
 #' library(future)
 #' flist <- make_futures(a = 1+1, b = 2+2)
 #' flist
-#' values(flist)
+#' value(flist)
 #'
 #' @importFrom rlang enquos
 #' @export
