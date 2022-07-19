@@ -16,6 +16,6 @@ See \code{\link[Rsubread:featureCounts]{Rsubread::featureCounts()}}.
 This is a helper function for \code{featureCountsParallel()}.
 }
 \details{
-This redirects the output to \code{/dev/null}, so it assumes a UNIX-like
+This redirects the output to \verb{/dev/null}, so it assumes a UNIX-like
 system.
 }

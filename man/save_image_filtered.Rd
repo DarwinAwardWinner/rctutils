@@ -4,8 +4,14 @@
 \alias{save_image_filtered}
 \title{Variant of \code{save.image()} that allows excluding specific names}
 \usage{
-save_image_filtered(file = ".RData", version = NULL, ascii = FALSE,
-  compress = !ascii, safe = TRUE, exclude = NULL)
+save_image_filtered(
+  file = ".RData",
+  version = NULL,
+  ascii = FALSE,
+  compress = !ascii,
+  safe = TRUE,
+  exclude = NULL
+)
 }
 \arguments{
 \item{file, version, ascii, compress, safe}{These arguments have the

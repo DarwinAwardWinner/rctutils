@@ -25,6 +25,6 @@ each one will yield the value of that expression.
 library(future)
 flist <- make_futures(a = 1+1, b = 2+2)
 flist
-values(flist)
+value(flist)
 
 }

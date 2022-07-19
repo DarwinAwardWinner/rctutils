@@ -20,7 +20,7 @@ and "TF_name".
 }
 \description{
 Even though this function reads a BED file,
-\code{\link[rtracklayer:import.bed]{rtracklayer::import.bed()}} is not suitable because it chokes on
+\code{\link[rtracklayer:BEDFile-class]{rtracklayer::import.bed()}} is not suitable because it chokes on
 spaces in fields, which MotifMap contains. Hence the need for a
 separate function.
 }

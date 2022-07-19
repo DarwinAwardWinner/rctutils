@@ -4,8 +4,14 @@
 \alias{save_RDS_or_RDA}
 \title{Save a single object to am RDS or RDA file}
 \usage{
-save_RDS_or_RDA(object, file, ascii = FALSE, version = NULL,
-  compress = TRUE, savetype)
+save_RDS_or_RDA(
+  object,
+  file,
+  ascii = FALSE,
+  version = NULL,
+  compress = TRUE,
+  savetype
+)
 }
 \arguments{
 \item{object}{R object to serialize.}

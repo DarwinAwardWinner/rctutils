@@ -7,7 +7,7 @@
 eBayes_auto_proportion(..., prop.method = "lfdr")
 }
 \arguments{
-\item{...}{All other arguments are passed to \code{\link[limma:eBayes]{limma::eBayes()}}.}
+\item{...}{All other arguments are passed to \code{\link[limma:ebayes]{limma::eBayes()}}.}
 
 \item{prop.method}{The method by which to calculate the proportion
 of true null hypotheses (i.e. non-differentially expressed
@@ -17,10 +17,10 @@ a vector of p-values and returns a single value between 0 and
 1. This argument can only be passed by name.}
 }
 \value{
-See \code{\link[limma:eBayes]{limma::eBayes()}}.
+See \code{\link[limma:ebayes]{limma::eBayes()}}.
 }
 \description{
-Limma's \code{\link[limma:eBayes]{limma::eBayes()}} function can calculate log-odds scores
+Limma's \code{\link[limma:ebayes]{limma::eBayes()}} function can calculate log-odds scores
 (a.k.a. B statistics), which depend on an estimated proportion of
 differentially expressed genes that the user specifies \emph{a priori}.
 Limma also provides methods for calculating this proportion via

@@ -4,13 +4,12 @@
 \alias{readsToFragmentMidpoints}
 \title{Compute the midpoints of a collection of read fragments}
 \usage{
-readsToFragmentMidpoints(reads, fraglen,
-  extend_fragment_upstream = FALSE)
+readsToFragmentMidpoints(reads, fraglen, extend_fragment_upstream = FALSE)
 }
 \arguments{
-\item{reads}{A \link[GenomicAlignments:GAlignments]{GenomicAlignments::GAlignments},
-\link[GenomicAlignments:GAlignmentPairs]{GenomicAlignments::GAlignmentPairs}, or
-\link[GenomicAlignments:GAlignmentsList]{GenomicAlignments::GAlignmentsList} object representing a set
+\item{reads}{A \link[GenomicAlignments:GAlignments-class]{GenomicAlignments::GAlignments},
+\link[GenomicAlignments:GAlignmentPairs-class]{GenomicAlignments::GAlignmentPairs}, or
+\link[GenomicAlignments:GAlignmentsList-class]{GenomicAlignments::GAlignmentsList} object representing a set
 of reads or read pairs.}
 
 \item{fraglen}{The estimated fragment length. This is only required

@@ -4,8 +4,12 @@
 \alias{windowCountsParallel}
 \title{Parallel version of \code{csaw::windowCounts()}}
 \usage{
-windowCountsParallel(bam.files, ..., filter = 10,
-  BPPARAM = BiocParallel::bpparam())
+windowCountsParallel(
+  bam.files,
+  ...,
+  filter = 10,
+  BPPARAM = BiocParallel::bpparam()
+)
 }
 \arguments{
 \item{bam.files, filter}{These arguments have the same meaning

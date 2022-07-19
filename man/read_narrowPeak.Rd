@@ -16,7 +16,7 @@ A GRanges object containing the ranges from \code{file}.
 }
 \description{
 NarrowPeak is a sub-format of the BED file format used as the
-output format of some peak callers. \code{\link[rtracklayer:import.bed]{rtracklayer::import.bed()}}
+output format of some peak callers. \code{\link[rtracklayer:BEDFile-class]{rtracklayer::import.bed()}}
 often throws an error when reading these files, so a separate
 function is needed.
 }

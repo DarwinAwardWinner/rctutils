@@ -4,8 +4,11 @@
 \alias{promote_common_mcols}
 \title{Promote common mcols from the GRanges inside a GRangesList}
 \usage{
-promote_common_mcols(grl, delete_from_source = FALSE,
-  blacklist = c("type", "Parent"))
+promote_common_mcols(
+  grl,
+  delete_from_source = FALSE,
+  blacklist = c("type", "Parent")
+)
 }
 \arguments{
 \item{grl}{A GRangesList}

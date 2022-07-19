@@ -4,11 +4,22 @@
 \alias{voomWithQualityWeightsAndOffset}
 \title{Implementation of \code{limma::voomWithQualityWeights()} that uses an offset matrix}
 \usage{
-voomWithQualityWeightsAndOffset(counts, design = NULL, offset,
-  normalize.method = "none", plot = FALSE, span = 0.5,
-  var.design = NULL, method = "genebygene", maxiter = 50,
-  tol = 1e-10, trace = FALSE, replace.weights = TRUE, col = NULL,
-  ...)
+voomWithQualityWeightsAndOffset(
+  counts,
+  design = NULL,
+  offset,
+  normalize.method = "none",
+  plot = FALSE,
+  span = 0.5,
+  var.design = NULL,
+  method = "genebygene",
+  maxiter = 50,
+  tol = 1e-10,
+  trace = FALSE,
+  replace.weights = TRUE,
+  col = NULL,
+  ...
+)
 }
 \arguments{
 \item{counts, design, normalize.method, span, plot, var.design, method, maxiter, tol, trace, replace.weights, col, ...}{These arguments have the same meaning as in
@@ -38,5 +49,5 @@ This is a combination of \code{\link[limma:voomWithQualityWeights]{limma::voomWi
 
 }
 \seealso{
-\code{\link[edgeR:getOffset]{edgeR::getOffset()}}
+\code{\link[edgeR:getCounts]{edgeR::getOffset()}}
 }

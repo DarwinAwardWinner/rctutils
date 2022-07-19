@@ -10,7 +10,7 @@ Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 6.1.1
+RoxygenNote: 7.2.0
 Roxygen: list(markdown = TRUE)
 # https: //github.com/r-lib/devtools/issues/700#issuecomment-235127291
 biocViews: ~

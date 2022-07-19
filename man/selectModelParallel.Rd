@@ -2,26 +2,33 @@
 % Please edit documentation in R/parallel_utils.R
 \name{selectModelParallel}
 \alias{selectModelParallel}
-\title{Parallelized version of \code{\link[limma:selectModel]{limma::selectModel()}}}
+\title{Parallelized version of \code{\link[limma:selectmodel]{limma::selectModel()}}}
 \usage{
-selectModelParallel(y, designlist, criterion = "aic", df.prior = 0,
-  s2.prior = NULL, s2.true = NULL, ...,
-  BPPARAM = BiocParallel::bpparam())
+selectModelParallel(
+  y,
+  designlist,
+  criterion = "aic",
+  df.prior = 0,
+  s2.prior = NULL,
+  s2.true = NULL,
+  ...,
+  BPPARAM = BiocParallel::bpparam()
+)
 }
 \arguments{
 \item{y, designlist, criterion, df.prior, s2.prior, s2.true, ...}{These
 arguments all have the same meaning as in
-\code{\link[limma:selectModel]{limma::selectModel()}}.}
+\code{\link[limma:selectmodel]{limma::selectModel()}}.}
 
 \item{BPPARAM}{A BiocParallelParam instance that determines how to
 parallelize the operation}
 }
 \value{
-See \code{\link[limma:selectModel]{limma::selectModel()}}.
+See \code{\link[limma:selectmodel]{limma::selectModel()}}.
 }
 \description{
-Parallelized version of \code{\link[limma:selectModel]{limma::selectModel()}}
+Parallelized version of \code{\link[limma:selectmodel]{limma::selectModel()}}
 }
 \seealso{
-\code{\link[limma:selectModel]{limma::selectModel()}}, \code{\link[BiocParallel:bplapply]{BiocParallel::bplapply()}}
+\code{\link[limma:selectmodel]{limma::selectModel()}}, \code{\link[BiocParallel:bplapply]{BiocParallel::bplapply()}}
 }

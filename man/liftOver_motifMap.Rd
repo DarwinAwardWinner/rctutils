@@ -10,7 +10,7 @@ liftOver_motifMap(infile, chainfile, outfile, allow.gap = 2, ...)
 \item{infile}{The input file to read with \code{read_motifmap()}.}
 
 \item{chainfile}{The chain file to use for the liftover process, to
-be read with \code{\link[rtracklayer:import.chain]{rtracklayer::import.chain()}}.}
+be read with \code{\link[rtracklayer:Chain-class]{rtracklayer::import.chain()}}.}
 
 \item{outfile}{The output file to write with \code{write_motifmap()}.}
 

@@ -9,7 +9,7 @@ make_futures_(expressions, .future.args = list())
 \arguments{
 \item{expressions}{The list of unevaluated expressions for which to
 construct futures. Each element can be anything that
-\code{\link[rlang:as_quosure]{rlang::as_quosure()}} will accept.}
+\code{\link[rlang:new_quosure]{rlang::as_quosure()}} will accept.}
 
 \item{.future.args}{Additional arguments to pass to
 \code{\link[future:future]{future::future()}}.}
@@ -35,12 +35,12 @@ expressions <- list(a = quo(1+1), b = quo(2+2))
 
 flist <- make_futures_(expressions)
 flist
-values(flist)
+value(flist)
 
 # Same result without futures
 lapply(expressions, eval_tidy)
 
 }
 \seealso{
-\code{\link[rlang:eval_tidy]{rlang::eval_tidy()}}, \code{\link[rlang:quo]{rlang::quo()}}, \code{\link[rlang:as_quosure]{rlang::as_quosure()}}, \code{\link[future:values]{future::values()}}
+\code{\link[rlang:eval_tidy]{rlang::eval_tidy()}}, \code{\link[rlang:defusing-advanced]{rlang::quo()}}, \code{\link[rlang:new_quosure]{rlang::as_quosure()}}, \code{\link[future:value]{future::value()}}
 }

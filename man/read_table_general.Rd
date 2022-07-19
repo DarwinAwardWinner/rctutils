@@ -4,8 +4,12 @@
 \alias{read_table_general}
 \title{General function for reading a table from any table-like file}
 \usage{
-read_table_general(filename, read.table.args = NULL,
-  read.xlsx.args = NULL, dataframe.class = "data.frame")
+read_table_general(
+  filename,
+  read.table.args = NULL,
+  read.xlsx.args = NULL,
+  dataframe.class = "data.frame"
+)
 }
 \description{
 General function for reading a table from any table-like file

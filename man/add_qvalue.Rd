@@ -7,7 +7,7 @@
 add_qvalue(ttab, ...)
 }
 \arguments{
-\item{ttab}{A table of results produced by \code{\link[limma:topTable]{limma::topTable()}},
+\item{ttab}{A table of results produced by \code{\link[limma:toptable]{limma::topTable()}},
 \code{\link[edgeR:topTags]{edgeR::topTags()}}, \code{\link[DESeq2:results]{DESeq2::results()}}, or any table with a
 p-value column in it.}
 

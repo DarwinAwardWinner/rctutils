@@ -42,5 +42,5 @@ counts, the offset must be supplied manually.
 
 }
 \seealso{
-\code{\link[edgeR:getOffset]{edgeR::getOffset()}}, \code{\link[edgeR:scaleOffset]{edgeR::scaleOffset()}}, \code{\link[edgeR:cpm]{edgeR::cpm()}}
+\code{\link[edgeR:getCounts]{edgeR::getOffset()}}, \code{\link[edgeR:scaleOffset]{edgeR::scaleOffset()}}, \code{\link[edgeR:cpm]{edgeR::cpm()}}
 }

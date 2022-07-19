@@ -7,7 +7,7 @@
 add_bfdr(ttab)
 }
 \arguments{
-\item{ttab}{A data frame returned by \code{\link[limma:topTable]{limma::topTable()}} with
+\item{ttab}{A data frame returned by \code{\link[limma:toptable]{limma::topTable()}} with
 \code{n=Inf} containing B-statistics.}
 }
 \value{
@@ -30,5 +30,5 @@ and add them as columns named "PP" and "BFDR" respectively.
 
 }
 \seealso{
-\code{\link[limma:topTable]{limma::topTable()}}.
+\code{\link[limma:toptable]{limma::topTable()}}.
 }

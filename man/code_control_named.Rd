@@ -19,7 +19,7 @@ descriptive column names.
 }
 \description{
 This function is a drop-in replacement for
-\code{\link[codingMatrices:code_control]{codingMatrices::code_control()}}, except that when generating a
+\code{\link[codingMatrices:Codings]{codingMatrices::code_control()}}, except that when generating a
 contrast matrix, it gives column names of the form "A.vs.B" instead
 of "B-A".
 }
@@ -32,5 +32,5 @@ code_control_named(4)
 
 }
 \seealso{
-\code{\link[codingMatrices:code_control]{codingMatrices::code_control()}}
+\code{\link[codingMatrices:Codings]{codingMatrices::code_control()}}
 }

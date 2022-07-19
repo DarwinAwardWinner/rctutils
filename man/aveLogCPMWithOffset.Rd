@@ -32,5 +32,5 @@ offset must be supplied manually.
 
 }
 \seealso{
-\code{\link[edgeR:getOffset]{edgeR::getOffset()}}
+\code{\link[edgeR:getCounts]{edgeR::getOffset()}}
 }

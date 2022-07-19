@@ -4,16 +4,26 @@
 \alias{voomWithDuplicateCorrelation}
 \title{Alternate \code{limma::duplicateCorrelation()} and \code{limma::voom()} until convergence}
 \usage{
-voomWithDuplicateCorrelation(counts, design = NULL, plot = FALSE,
-  block = NULL, trim = 0.15, voom.fun = voomWithOffset,
-  dupCor.fun = limma::duplicateCorrelation, initial.correlation = 0,
-  maxiter = 5, tol = 1e-06, verbose = TRUE, ...)
+voomWithDuplicateCorrelation(
+  counts,
+  design = NULL,
+  plot = FALSE,
+  block = NULL,
+  trim = 0.15,
+  voom.fun = voomWithOffset,
+  dupCor.fun = limma::duplicateCorrelation,
+  initial.correlation = 0,
+  maxiter = 5,
+  tol = 1e-06,
+  verbose = TRUE,
+  ...
+)
 }
 \arguments{
 \item{counts, design, plot, ...}{These are passed to \code{\link[limma:voom]{limma::voom()}}.}
 
 \item{block, trim}{These are passed to
-\code{\link[limma:duplicateCorrelation]{limma::duplicateCorrelation()}}.}
+\code{\link[limma:dupcor]{limma::duplicateCorrelation()}}.}
 
 \item{voom.fun}{Function to use in place of \code{limma::voom()}. For
 example, you could use \code{limma::voomWithQualityWeights}.
@@ -63,7 +73,7 @@ run, so it seems stable in practice.
 }
 \description{
 This function runs \code{\link[limma:voom]{limma::voom()}} and
-\code{\link[limma:duplicateCorrelation]{limma::duplicateCorrelation()}} repeatedly until two consecutive
+\code{\link[limma:dupcor]{limma::duplicateCorrelation()}} repeatedly until two consecutive
 runs yield the same correlation value (within \code{tol} of each other),
 indicating that the iteration has converged.
 }

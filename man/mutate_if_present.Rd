@@ -18,6 +18,6 @@ Note that columns required to be present need not be involved in the mutations.
 }
 \seealso{
 \code{\link[dplyr:mutate]{dplyr::mutate()}}. Not to be confused with
-\code{\link[dplyr:mutate_if]{dplyr::mutate_if()}}, which mutates columns that match a
+\code{\link[dplyr:mutate_all]{dplyr::mutate_if()}}, which mutates columns that match a
 specific filter criteria.
 }

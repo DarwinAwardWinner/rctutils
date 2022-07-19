@@ -4,9 +4,16 @@
 \alias{voomWithOffset}
 \title{Implementation of \code{limma::voom()} that uses an offset matrix}
 \usage{
-voomWithOffset(counts, design = NULL, offset,
-  normalize.method = "none", span = 0.5, plot = FALSE,
-  save.plot = FALSE, ...)
+voomWithOffset(
+  counts,
+  design = NULL,
+  offset,
+  normalize.method = "none",
+  span = 0.5,
+  plot = FALSE,
+  save.plot = FALSE,
+  ...
+)
 }
 \arguments{
 \item{counts, design, normalize.method, span, plot, save.plot, ...}{These arguments have the same meaning as in \code{limma::voom()}.}
@@ -36,5 +43,5 @@ an offset matrix can be produced from the effective gene lengths.
 
 }
 \seealso{
-\code{\link[edgeR:getOffset]{edgeR::getOffset()}}
+\code{\link[edgeR:getCounts]{edgeR::getOffset()}}
 }

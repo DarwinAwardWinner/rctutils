@@ -23,5 +23,5 @@ Compute Bayesian FDR values from limma's B-statistics
 
 }
 \seealso{
-\code{\link[limma:topTable]{limma::topTable()}}.
+\code{\link[limma:toptable]{limma::topTable()}}.
 }

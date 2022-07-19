@@ -4,8 +4,13 @@
 \alias{ggplotBCV}
 \title{ggplot version of \code{edgeR::plotBCV()}.}
 \usage{
-ggplotBCV(y, xlab = "Average log CPM",
-  ylab = "Biological coefficient of variation", rawdisp = NULL, ...)
+ggplotBCV(
+  y,
+  xlab = "Average log CPM",
+  ylab = "Biological coefficient of variation",
+  rawdisp = NULL,
+  ...
+)
 }
 \arguments{
 \item{y}{A DGEList, or a data frame of the kind returned by
