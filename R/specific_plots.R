@@ -39,7 +39,7 @@ plot_pval_hist <- function(pvals, nbins = 100, ptn = limma::propTrueNull) {
         xlim(0,1) +
         ggtitle(
             "P-value distribution",
-            subtitle = glue("(Est. {format(100 * (1-ptn), digits = 3)}% non-null.)")
+            subtitle = glue("(Est. {format(100 * (1-ptn), digits = 3)}% non-null)")
         ) +
         expand_limits(y = c(0, 1.25)) +
         xlab("p-value") + ylab("Relative frequency") +
