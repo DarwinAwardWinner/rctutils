@@ -54,4 +54,5 @@ Suggests:
     GenomicFeatures,
     rtracklayer,
     BiocParallel,
+    codetools,
     DESeq2
