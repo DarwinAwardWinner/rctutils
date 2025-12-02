@@ -23,8 +23,10 @@ cairo_pdf_onefile <- function(..., onefile = TRUE) {
 rasterpdf <- function(pdffile, outfile = pdffile, resolution = 600) {
     tempf <- tempfile(pattern = "raster", fileext = ".pdf")
     on.exit(unlink(tempf))
-    exitcode <- system2("convert", args = c("-density", resolution, pdffile, tempf),
-        stdout = FALSE, stderr = FALSE)
+    exitcode <- system2("convert",
+        args = c("-density", resolution, pdffile, tempf),
+        stdout = FALSE, stderr = FALSE
+    )
     assert_that(exitcode == 0)
     assert_that(file.exists(tempf))
     suppressWarnings(file.rename(tempf, outfile))
@@ -55,7 +57,7 @@ with_dev <- function(dev, code, closedev) {
     }
     assert_that(is_dev(new.device) || new.device == 1)
     if (missing(closedev)) {
-         closedev <- new.device != orig.device
+        closedev <- new.device != orig.device
     }
     on.exit({
         if (closedev) {

@@ -1,6 +1,6 @@
 #' Shortcut for the usual "requireNamespace" dance
 #'
-#' This shortens the boilerplate required to use functios from a
+#' This shortens the boilerplate required to use functions from a
 #' suggested package.
 #'
 #' @param ... Packages to require
@@ -24,6 +24,9 @@ utils::globalVariables(".")
 
 ## Tell check not to worry about rex internal functions
 globalVariables(c("one_or_more", "space", "zero_or_more", "capture", "maybe", "digit", "%if_prev_is%", "%if_next_isnt%", "or"))
+
+# TODO: Migrate these and all other imports to whatever
+# usethis::use_import_from() uses.
 
 #' Common imports
 #'

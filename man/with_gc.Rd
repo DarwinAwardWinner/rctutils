@@ -29,11 +29,11 @@ simply slow down your code.
 \examples{
 
 with_gc({
-  # Create a "large" object (this one is not actually large because
-  # examples need to be kept small)
-  large_object <- 1:5000
-  # Return only a small piece of the object.
-  large_object[5]
+    # Create a "large" object (this one is not actually large because
+    # examples need to be kept small)
+    large_object <- 1:5000
+    # Return only a small piece of the object.
+    large_object[5]
 })
 # large_object has now been garbage-collected
 

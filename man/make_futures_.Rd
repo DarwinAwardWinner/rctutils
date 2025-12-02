@@ -31,7 +31,7 @@ uses non-standard evaluation.
 
 library(future)
 library(rlang)
-expressions <- list(a = quo(1+1), b = quo(2+2))
+expressions <- list(a = quo(1 + 1), b = quo(2 + 2))
 
 flist <- make_futures_(expressions)
 flist

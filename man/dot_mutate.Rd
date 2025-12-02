@@ -27,7 +27,10 @@ interpolating expressions on the left-hand-side of an assignment
 operation: https://github.com/r-lib/rlang/issues/212.
 }
 \description{
-Evaluate an arbitrary mutating expression in a magrittr pipe
+This function exists to facilitate assignment to parts of an object
+in the middle of a magrittr pipeline. Normally this is disruptive,
+since assignment returns the value that was assigned, rather than
+the whole object.
 }
 \examples{
 
@@ -35,12 +38,17 @@ library(magrittr)
 
 # Returns the entire list, not just a single element
 list(a = 1, b = 2, c = 3) \%>\%
-  dot_mutate(.$d <- 4) \%>\%
-  dot_mutate({ .$e <- 5; .$f <- 6})
+    dot_mutate(.$d <- 4) \%>\%
+    dot_mutate({
+        .$e <- 5
+        .$f <- 6
+    })
 
 # Compare:
 list(a = 1, b = 2, c = 3) \%>\%
-  {.$d <- 4} \%>\%
-  print
+    {
+        .$d <- 4
+    } \%>\%
+    print()
 
 }

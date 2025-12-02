@@ -23,11 +23,15 @@ si2f <- function(string, unit = "") {
     if (length(string) == 0) {
         return(numeric(0))
     }
-    sifactor <- c(1e-24, 1e-21, 1e-18, 1e-15, 1e-12, 1e-09, 1e-06,
-                  0.001, 1, 1000, 1e+06, 1e+09, 1e+12, 1e+15, 1e+18, 1e+21,
-                  1e+24)
-    pre <- c("y", "z", "a", "f", "p", "n", "u", "m",
-             "", "k", "M", "G", "T", "P", "E", "Z", "Y")
+    sifactor <- c(
+        1e-24, 1e-21, 1e-18, 1e-15, 1e-12, 1e-09, 1e-06,
+        0.001, 1, 1000, 1e+06, 1e+09, 1e+12, 1e+15, 1e+18, 1e+21,
+        1e+24
+    )
+    pre <- c(
+        "y", "z", "a", "f", "p", "n", "u", "m",
+        "", "k", "M", "G", "T", "P", "E", "Z", "Y"
+    )
 
     rx <- rex::rex(
         ## Leading whitespace
@@ -58,7 +62,6 @@ si2f <- function(string, unit = "") {
 
         ## Capture SI prefix
         capture(maybe(one_of(pre))),
-
         unit,
 
         ## Trailing whitespace
@@ -67,8 +70,8 @@ si2f <- function(string, unit = "") {
     )
 
     m <- str_match(string, rx)
-    base <- as.numeric(m[,2])
-    p <- m[,3]
+    base <- as.numeric(m[, 2])
+    p <- m[, 3]
     fac <- sifactor[match(p, pre)]
     base * fac
 }
@@ -76,18 +79,20 @@ si2f <- function(string, unit = "") {
 # This is needed because sitools::f2si(0) is broken.
 
 #' @importFrom glue glue
-f2si_internal <- function (number, unit = "")
-{
-    sifactor <- c(-Inf, 1e-24, 1e-21, 1e-18, 1e-15, 1e-12, 1e-09, 1e-06,
+f2si_internal <- function(number, unit = "") {
+    sifactor <- c(
+        -Inf, 1e-24, 1e-21, 1e-18, 1e-15, 1e-12, 1e-09, 1e-06,
         0.001, 1, 1000, 1e+06, 1e+09, 1e+12, 1e+15, 1e+18, 1e+21,
-        1e+24)
-    pre <- c("", "y", "z", "a", "f", "p", "n", "u", "m",
-             "", "k", "M", "G", "T", "P", "E", "Z", "Y")
+        1e+24
+    )
+    pre <- c(
+        "", "y", "z", "a", "f", "p", "n", "u", "m",
+        "", "k", "M", "G", "T", "P", "E", "Z", "Y"
+    )
     ix <- findInterval(abs(number), sifactor)
     if (length(ix) > 0) {
         sistring <- glue("{number/sifactor[ix]} {pre[ix]}{unit}") %>% str_trim("right")
-    }
-    else {
+    } else {
         sistring <- as.character(number)
     }
     return(sistring)

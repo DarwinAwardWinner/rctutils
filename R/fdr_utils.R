@@ -19,12 +19,16 @@ get_pval_colname <- function(ttab) {
     }
     ## Match case-insensitively, but return the name in its original
     ## case.
-    pcol <- match(c("p.value", "pvalue", "pval", "p", "p value"),
-        tolower(cnames)) %>%
-        na.omit %>% .[1]
+    pcol <- match(
+        c("p.value", "pvalue", "pval", "p", "p value"),
+        tolower(cnames)
+    ) %>%
+        na.omit() %>%
+        .[1]
     pcolname <- cnames[pcol]
-    if (length(pcolname) != 1)
+    if (length(pcolname) != 1) {
         stop("Could not determine p-value column name")
+    }
     return(pcolname)
 }
 
@@ -48,20 +52,23 @@ get_pval_colname <- function(ttab) {
 #'
 #' @examples
 #'
-#' #TODO steal from topTable
+#' # TODO steal from topTable
 #'
 #' @export
 add_qvalue <- function(ttab, ...) {
     req_ns("qvalue")
-    tryCatch({
-        P <- ttab[[get_pval_colname(ttab)]]
-        qobj <- qvalue::qvalue(P, ...)
-        ttab$QValue <- qobj$qvalues
-        ttab$LocFDR <- qobj$lfdr
-        attr(ttab, "qvalue") <- qobj
-    }, error = function(e) {
-        warning(str_c("Failed to compute q-values: ", e$message))
-    })
+    tryCatch(
+        {
+            P <- ttab[[get_pval_colname(ttab)]]
+            qobj <- qvalue::qvalue(P, ...)
+            ttab$QValue <- qobj$qvalues
+            ttab$LocFDR <- qobj$lfdr
+            attr(ttab, "qvalue") <- qobj
+        },
+        error = function(e) {
+            warning(str_c("Failed to compute q-values: ", e$message))
+        }
+    )
     ttab
 }
 
@@ -83,12 +90,12 @@ bfdr <- function(B) {
     o <- order(B, decreasing = TRUE)
     ro <- order(o)
     B <- B[o]
-    PP <- exp(B)/(1+exp(B))
+    PP <- exp(B) / (1 + exp(B))
     # Computing FDR from from 1-PP gives better numerical precision
     # for the most significant genes (large B-values)
-    oneMinusPP <- 1/(1+exp(B))
+    oneMinusPP <- 1 / (1 + exp(B))
     BayesFDR <- cummean(oneMinusPP)
-    data.frame(B, PP, BayesFDR)[ro,]
+    data.frame(B, PP, BayesFDR)[ro, ]
 }
 
 #' Add Bayesian FDR values to a limma top table

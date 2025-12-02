@@ -31,8 +31,10 @@ aveLogCPMWithOffset <- function(y, ...) {
 aveLogCPMWithOffset.default <- function(y, offset = NULL, prior.count = 2,
                                         dispersion = NULL, weights = NULL, ...) {
     req_ns("edgeR")
-    edgeR::aveLogCPM(y, lib.size = NULL, offset = offset, prior.count = prior.count,
-                     dispersion = dispersion, weights = weights, ...)
+    edgeR::aveLogCPM(y,
+        lib.size = NULL, offset = offset, prior.count = prior.count,
+        dispersion = dispersion, weights = weights, ...
+    )
 }
 
 #' @export
@@ -44,8 +46,10 @@ aveLogCPMWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR:
     }
     offsetMat <- offset
     aveLogCPMWithOffset(
-        y$counts, offset = offsetMat, prior.count = prior.count,
-        dispersion = dispersion, weights = y$weights, ...)
+        y$counts,
+        offset = offsetMat, prior.count = prior.count,
+        dispersion = dispersion, weights = y$weights, ...
+    )
 }
 
 #' Version of `edgeR::cpm()` that uses offsets
@@ -90,16 +94,20 @@ cpmWithOffset.default <- function(y, offset, log = FALSE, prior.count = 0.25, ..
     if (preserve.mean) {
         offset <- edgeR::scaleOffset(y, offset)
     }
-    edgeR::cpm(y, lib.size = exp(offset), log = log,
-               prior.count = prior.count, ...)
+    edgeR::cpm(y,
+        lib.size = exp(offset), log = log,
+        prior.count = prior.count, ...
+    )
 }
 
 #' @export
 cpmWithOffset.DGEList <- function(y, offset = edgeR::expandAsMatrix(edgeR::getOffset(y), dim(y)),
                                   log = FALSE, prior.count = 0.25, ..., preserve.mean = TRUE) {
     req_ns("edgeR")
-    cpmWithOffset(y$counts, offset, log = log,
-                  prior.count = prior.count, preserve.mean = preserve.mean, ...)
+    cpmWithOffset(y$counts, offset,
+        log = log,
+        prior.count = prior.count, preserve.mean = preserve.mean, ...
+    )
 }
 
 #' Estimate edgeR dispersions separately for each group
@@ -134,17 +142,18 @@ estimateDispByGroup <- function(dge, group = as.factor(dge$samples$group), batch
     colnames(batch) %>% make.names(unique = TRUE)
     igroup <- seq_len(ncol(dge)) %>% split(group)
     BiocParallel::bplapply(igroup, function(i) {
-        group.dge <- dge[,i]
-        group.batch <- droplevels(batch[i,, drop = FALSE])
-        group.batch <- group.batch[sapply(group.batch, . %>% unique %>% length %>%
-                                                       is_greater_than(1))]
+        group.dge <- dge[, i]
+        group.batch <- droplevels(batch[i, , drop = FALSE])
+        group.batch <- group.batch[sapply(group.batch, . %>% unique() %>% length() %>%
+            is_greater_than(1))]
         group.vars <- names(group.batch)
-        if (length(group.vars) == 0)
+        if (length(group.vars) == 0) {
             group.vars <- "1"
+        }
         group.batch.formula <- as.formula(str_c("~", str_c(group.vars, collapse = "+")))
         des <- model.matrix(group.batch.formula, group.batch)
         edgeR::estimateDisp(group.dge, des, ...)
-    }, BPPARAM=BPPARAM)
+    }, BPPARAM = BPPARAM)
 }
 
 #' Get a table of genewise BCV values from a DGEList
@@ -189,8 +198,8 @@ getBCVTable <- function(y, design, ..., rawdisp) {
         design <- y$design
     }
     # Estimate dispersions now if they are not already present
-    if (! all(c("common.dispersion", "trended.dispersion", "tagwise.dispersion") %in%
-                  names(y))) {
+    if (!all(c("common.dispersion", "trended.dispersion", "tagwise.dispersion") %in%
+        names(y))) {
         if (is.null(design) && !design.passed) {
             warning("Estimating dispersions with no design matrix")
         }
@@ -217,8 +226,10 @@ getBCVTable <- function(y, design, ..., rawdisp) {
         y.raw <- rawdisp
     } else {
         # Assume anything else is a numeric vector of raw dispersions
-        assert_that(is.numeric(rawdisp),
-            length(rawdisp) == nrow(y))
+        assert_that(
+            is.numeric(rawdisp),
+            length(rawdisp) == nrow(y)
+        )
         y.raw <- y
         y.raw$tagwise.dispersion <- rawdisp
         y.raw$prior.df <- y.raw$prior.n <- rep(0, length(rawdisp))
@@ -227,12 +238,13 @@ getBCVTable <- function(y, design, ..., rawdisp) {
     y %<>% as.list
     disptable <- data.frame(
         logCPM = y$AveLogCPM,
-        CommonBCV = y$common.dispersion %>% sqrt,
-        TrendBCV = y$trended.dispersion %>% sqrt,
+        CommonBCV = y$common.dispersion %>% sqrt(),
+        TrendBCV = y$trended.dispersion %>% sqrt(),
         PriorDF = y$prior.df,
-        eBayesBCV = y$tagwise.dispersion %>% sqrt)
+        eBayesBCV = y$tagwise.dispersion %>% sqrt()
+    )
     if (!is.null(y.raw)) {
-        disptable$RawBCV <- y.raw$tagwise.dispersion %>% sqrt
+        disptable$RawBCV <- y.raw$tagwise.dispersion %>% sqrt()
     }
     return(disptable)
 }

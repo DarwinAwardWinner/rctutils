@@ -40,6 +40,6 @@ happens, and error will be thrown.
 }
 \examples{
 
-#TODO Steal from eBayes
+# TODO Steal from eBayes
 
 }

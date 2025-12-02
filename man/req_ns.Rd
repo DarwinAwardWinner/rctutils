@@ -13,6 +13,6 @@ req_ns(..., caller = as.character(sys.call(-1)[1]))
 used to create an appropriate error message.}
 }
 \description{
-This shortens the boilerplate required to use functios from a
+This shortens the boilerplate required to use functions from a
 suggested package.
 }

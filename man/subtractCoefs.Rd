@@ -32,6 +32,6 @@ columns of that design matrix represent batch effects.
 }
 \examples{
 
-#TODO: Copy from removeBatchEffect
+# TODO: Copy from removeBatchEffect
 
 }

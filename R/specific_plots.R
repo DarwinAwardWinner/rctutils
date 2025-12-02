@@ -31,20 +31,25 @@ plot_pval_hist <- function(pvals, nbins = 100, ptn = limma::propTrueNull) {
     )
     df <- data.frame(p = pvals)
     linedf <- data.frame(y = c(1, ptn), Line = c("Uniform", "Est. Null") %>% factor(levels = unique(.)))
-    ggplot(df) + aes_(x = ~p) +
-        geom_histogram(aes_(y = ~..density..), binwidth = 1/nbins, boundary = 0) +
+    ggplot(df) +
+        aes_(x = ~p) +
+        geom_histogram(aes_(y = ~..density..), binwidth = 1 / nbins, boundary = 0) +
         geom_hline(aes_(yintercept = ~y, color = ~Line),
-                   data = linedf, alpha = 0.5, show.legend = TRUE) +
+            data = linedf, alpha = 0.5, show.legend = TRUE
+        ) +
         scale_color_manual(name = "Ref. Line", values = c("blue", "red")) +
-        xlim(0,1) +
+        xlim(0, 1) +
         ggtitle(
             "P-value distribution",
             subtitle = glue("(Est. {format(100 * (1-ptn), digits = 3)}% non-null)")
         ) +
         expand_limits(y = c(0, 1.25)) +
-        xlab("p-value") + ylab("Relative frequency") +
-        theme(legend.position = c(0.95, 0.95),
-              legend.justification = c(1,1))
+        xlab("p-value") +
+        ylab("Relative frequency") +
+        theme(
+            legend.position = c(0.95, 0.95),
+            legend.justification = c(1, 1)
+        )
 }
 
 #' Variant of `GGally::ggduo()` with separate arguments for  `dataX` and `dataY`
@@ -92,9 +97,9 @@ ggplotBCV <- function(y, xlab = "Average log CPM", ylab = "Biological coefficien
         select_(~logCPM, ~TrendBCV, ~CommonBCV) %>%
         ## TODO: Replace with tidyr::gather
         reshape2::melt(id.vars = "logCPM", variable.name = "DispType", value.name = "BCV") %>%
-        mutate_(DispType = ~str_replace(DispType, "BCV$", "")) %>%
+        mutate_(DispType = ~ str_replace(DispType, "BCV$", "")) %>%
         group_by_(~DispType) %>%
-        do_(~{
+        do_(~ {
             approx(x = .$logCPM, y = .$BCV, n = npoints[.$DispType[1]]) %>%
                 data.frame(logCPM = .$x, BCV = .$y)
         })
@@ -125,22 +130,36 @@ getNormLineData <- function(dgelists, s1, s2) {
     assert_that(length(dgelists) >= 1)
     assert_that(rlang::is_dictionaryish(dgelists))
     dgelists %>%
-        sapply(. %>% {.$samples$norm.factors} %>% log2 %>% {.[s2] - .[s1]}) %>%
-        data.frame(NormFactor=., NormType=names(dgelists))
+        sapply(. %>%
+            {
+                .$samples$norm.factors
+            } %>% log2() %>%
+            {
+                .[s2] - .[s1]
+            }) %>%
+        data.frame(NormFactor = ., NormType = names(dgelists))
 }
 
 # Get a curve representing the loess-based normaliation implied by the offsets
 # of two samples in a DGEList object. N is the number of points to interpolate the curve at.
 #' @export
-getOffsetNormCurveData <- function(dge, s1, s2, n=1000) {
+getOffsetNormCurveData <- function(dge, s1, s2, n = 1000) {
     req_ns("edgeR")
     assert_that(is.numeric(dge$offset))
-    a <- edgeR::aveLogCPM(dge, dispersion=0.05, prior.count=0.5)
+    a <- edgeR::aveLogCPM(dge, dispersion = 0.05, prior.count = 0.5)
     # Need to subtract the library size difference out of the offset
-    raw.offset <- dge$offset %>% {.[,s2] - .[,s1]} %>% divide_by(log(2))
-    lib.size.offset <- dge$samples$lib.size %>% {.[s2] / .[s1]} %>% log2
-    x <- data.frame(A=a, Offset=raw.offset - lib.size.offset)
+    raw.offset <- dge$offset %>%
+        {
+            .[, s2] - .[, s1]
+        } %>%
+        divide_by(log(2))
+    lib.size.offset <- dge$samples$lib.size %>%
+        {
+            .[s2] / .[s1]
+        } %>%
+        log2()
+    x <- data.frame(A = a, Offset = raw.offset - lib.size.offset)
     f <- approxfun(x$A, x$Offset)
-    data.frame(A=seq(from=min(x$A), to=max(x$A), length.out = n)) %>%
-        mutate(M=f(A))
+    data.frame(A = seq(from = min(x$A), to = max(x$A), length.out = n)) %>%
+        mutate(M = f(.data$A))
 }

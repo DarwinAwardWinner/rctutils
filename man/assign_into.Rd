@@ -30,7 +30,10 @@ interpolating expressions on the left-hand-side of an assignment
 operation: https://github.com/r-lib/rlang/issues/212.
 }
 \description{
-Assign into complex sub-expressions and return the whole object
+This function exists to facilitate assignment to parts of an object
+in the middle of a magrittr pipeline. Normally this is disruptive,
+since assignment returns the value that was assigned, rather than
+the whole object.
 }
 \examples{
 
@@ -44,7 +47,9 @@ list(a = 1, b = 2, c = 3) \%>\% assign_into(.$x, 5)
 # a pipeline. Imagine that x is a list of SummarizedExperiment
 # objects, and for some reason one of the values in one of the
 # assays in one of the objects is wrong and needs to be modified.
-x \%>\% assign_into(assays(.[[1]])$counts[3,5], 45) \%>\% ...
+x \%>\%
+    assign_into(assays(.[[1]])$counts[3, 5], 45) \%>\%
+    ...()
 }
 
 }

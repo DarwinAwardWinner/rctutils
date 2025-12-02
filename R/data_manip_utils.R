@@ -15,7 +15,11 @@
 #' @seealso [rlang::is_empty()], which only checks for zero length.
 #' @export
 is_valueless <- function(x, empty_values = NA) {
-    x %>% unlist %>% na.omit %>% length %>% equals(0)
+    x %>%
+        unlist() %>%
+        na.omit() %>%
+        length() %>%
+        equals(0)
 }
 
 #' Add numbered colnames with a common prefix.
@@ -86,7 +90,7 @@ auto_factorize_columns <- function(df) {
 #' argument is always interpreted as `object`.
 #'
 #' @examples
-#' #TODO
+#' # TODO
 #'
 #' @seealso [S4Vectors::mcols()], [is_valueless()]
 #' @export
@@ -126,7 +130,7 @@ cleanup_mcols <- function(object, mcols_df = S4Vectors::mcols(object)) {
 #' code_control_named(4)
 #'
 #' @export
-code_control_named <- function (n, contrasts = TRUE, sparse = FALSE, sep=".vs.") {
+code_control_named <- function(n, contrasts = TRUE, sparse = FALSE, sep = ".vs.") {
     req_ns("codingMatrices")
     if (is_scalar_double(n)) {
         levels <- seq_len(n)
@@ -263,7 +267,10 @@ parse_bp <- function(size) {
 #' @export
 format_bp <- function(x) {
     req_ns("rex")
-    x %>% round %>% f2si_internal("bp") %>% str_replace_all(rex::rex(one_or_more(space)), "")
+    x %>%
+        round() %>%
+        f2si_internal("bp") %>%
+        str_replace_all(rex::rex(one_or_more(space)), "")
 }
 
 #' Perform mutations only if specific column names are present
@@ -311,8 +318,8 @@ mutate_if_present <- function(.data, names, ...) {
 #' grepl(quotemeta(s), s, perl = TRUE)
 #'
 #' @export
-quotemeta <- function (string) {
-  str_replace_all(string, "(\\W)", "\\\\\\1")
+quotemeta <- function(string) {
+    str_replace_all(string, "(\\W)", "\\\\\\1")
 }
 
 #' Relevel many factor columns in a data frame at once
@@ -379,7 +386,7 @@ relevel_columns <- function(df, ...) {
 #' @export
 sprintf_single_value <- function(fmt, value) {
     ## Max function arguments is 100
-    arglist = c(list(fmt = fmt), rep(list(value), 99))
+    arglist <- c(list(fmt = fmt), rep(list(value), 99))
     do.call(sprintf, arglist)
 }
 
@@ -414,7 +421,7 @@ sprintf_single_value <- function(fmt, value) {
 #' @examples
 #'
 #' targets <- data.frame(group = letters[1:2], batch = LETTERS[1:5], x = rnorm(10))
-#' design <- model.matrix(~0 + group + x + batch, targets)
+#' design <- model.matrix(~ 0 + group + x + batch, targets)
 #' colnames(design)
 #' design2 <- strip_design_factor_names(design)
 #' colnames(design2)

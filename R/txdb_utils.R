@@ -2,14 +2,17 @@
 #'
 #' @export
 get_txdb <- function(txdbname) {
-    tryCatch({
-        return(get(txdbname, loadNamespace(txdbname)))
-        ## pos <- str_c("package:", txdbname)
-        ## get(txdbname, pos)
-    }, error = function(...) {
-        req_ns("AnnotationDbi")
-        AnnotationDbi::loadDb(txdbname)
-    })
+    tryCatch(
+        {
+            return(get(txdbname, loadNamespace(txdbname)))
+            ## pos <- str_c("package:", txdbname)
+            ## get(txdbname, pos)
+        },
+        error = function(...) {
+            req_ns("AnnotationDbi")
+            AnnotationDbi::loadDb(txdbname)
+        }
+    )
 }
 
 #' Generate a tx2gene table from a TxDb

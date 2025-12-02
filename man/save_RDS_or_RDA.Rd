@@ -27,7 +27,7 @@ use \code{save()} or \code{saveRDS()} based on the file extension.}
 \description{
 If the output file name ends in ".rda" or ".rdata" (with any
 capitalization), the file will be saved using \code{\link[=save]{save()}}. Otherwise,
-it will be saved using \code{\link[=saveRDS]{saveRDS()}}.
+it will be saved using \code{\link[BiocGenerics:saveRDS]{BiocGenerics::saveRDS()}}.
 }
 \examples{
 

@@ -34,7 +34,8 @@ readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream = 
                 ## shrink longer reads
                 GenomicRanges::resize(
                     width = pmax(fraglen, GenomicRanges::width(.)),
-                    fix = ifelse(extend_fragment_upstream, "end", "start"))
+                    fix = ifelse(extend_fragment_upstream, "end", "start")
+                )
         } else {
             single.frags <- GenomicRanges::GRanges()
         }
@@ -49,7 +50,8 @@ readsToFragmentMidpoints <- function(reads, fraglen, extend_fragment_upstream = 
             ## longer reads
             GenomicRanges::resize(
                 width = pmax(fraglen, GenomicRanges::width(.)),
-                fix = ifelse(extend_fragment_upstream, "end", "start"))
+                fix = ifelse(extend_fragment_upstream, "end", "start")
+            )
     } else {
         warning(glue("Unknown reads type: {class(reads)}. Attempting to coerce to GRanges."))
         reads %<>% as("GRanges")
@@ -88,11 +90,12 @@ gff_to_grl <- function(gr, exonFeatureType = "exon", geneIdAttr = "gene_id", gen
     exon.gr <- gr[gr$type %in% exonFeatureType]
     exon.gr %<>% cleanup_mcols
     grl <- split(exon.gr, as.character(S4Vectors::mcols(exon.gr)[[geneIdAttr]])) %>%
-        promote_common_mcols
+        promote_common_mcols()
     if (!is.null(geneFeatureType)) {
         gene.meta <- gr[gr$type %in% geneFeatureType] %>%
-            S4Vectors::mcols %>% cleanup_mcols(mcols_df = .) %>%
-            .[match(names(grl), .[[geneIdAttr]]),]
+            S4Vectors::mcols %>%
+            cleanup_mcols(mcols_df = .) %>%
+            .[match(names(grl), .[[geneIdAttr]]), ]
         for (i in names(gene.meta)) {
             if (i %in% names(S4Vectors::mcols(grl))) {
                 value <- ifelse(is.na(gene.meta[[i]]), S4Vectors::mcols(grl)[[i]], gene.meta[[i]])
@@ -111,11 +114,13 @@ gff_to_grl <- function(gr, exonFeatureType = "exon", geneIdAttr = "gene_id", gen
 grl_to_saf <- function(grl) {
     req_ns("GenomicRanges")
     gr <- unlist(grl)
-    data.frame(Chr = as.vector(GenomicRanges::seqnames(gr)),
-               Start = GenomicRanges::start(gr),
-               End = GenomicRanges::end(gr),
-               Strand = as.vector(GenomicRanges::strand(gr)),
-               GeneID = rep(names(grl), lengths(grl)))
+    data.frame(
+        Chr = as.vector(GenomicRanges::seqnames(gr)),
+        Start = GenomicRanges::start(gr),
+        End = GenomicRanges::end(gr),
+        Strand = as.vector(GenomicRanges::strand(gr)),
+        GeneID = rep(names(grl), lengths(grl))
+    )
 }
 
 ## Get column names that are always the same for all elements of a
@@ -137,7 +142,7 @@ get_gene_common_colnames <- function(df, geneids) {
         return(names(df))
     }
     ## Forget list columns
-    df <- df[sapply(df, . %>% lengths %>% max) == 1]
+    df <- df[sapply(df, . %>% lengths() %>% max()) == 1]
     ## Forget empty columns
     df <- df[!sapply(df, is_valueless)]
     if (ncol(df) < 1) {
@@ -146,7 +151,7 @@ get_gene_common_colnames <- function(df, geneids) {
     ## Convert to Rle
     df <- S4Vectors::DataFrame(lapply(df, function(x) S4Vectors::Rle(unlist(x))))
     geneids <- S4Vectors::Rle(geneids)
-    genecols <- sapply(df, . %>% split(geneids) %>% as("List") %>% (S4Vectors::runLength) %>% lengths %>% max %>% is_weakly_less_than(1))
+    genecols <- sapply(df, . %>% split(geneids) %>% as("List") %>% (S4Vectors::runLength) %>% lengths() %>% max() %>% is_weakly_less_than(1))
     names(which(genecols))
 }
 
@@ -178,9 +183,10 @@ get_gene_common_colnames <- function(df, geneids) {
 #'
 #' library(GenomicRanges)
 #' gr <- GRanges("chr1", IRanges(start = (1:10) * 100, width = 50),
-#'               GeneID = rep(c("geneA", "geneB"), each=5),
-#'               GeneName = rep(c("Gene A", "Gene B"), each=5),
-#'               ExonID = rep(1:5, 2))
+#'     GeneID = rep(c("geneA", "geneB"), each = 5),
+#'     GeneName = rep(c("Gene A", "Gene B"), each = 5),
+#'     ExonID = rep(1:5, 2)
+#' )
 #' grl <- split(gr, gr$GeneID)
 #' # All the mcols are still in the underlying GRanges, with none in
 #' # the GRangesList.
@@ -202,7 +208,7 @@ promote_common_mcols <- function(grl, delete_from_source = FALSE, blacklist = c(
     req_ns("S4Vectors", "GenomicRanges")
     colnames.to.promote <- get_gene_common_colnames(S4Vectors::mcols(unlist(grl)), rep(names(grl), lengths(grl))) %>%
         setdiff(blacklist)
-    promoted.df <- S4Vectors::mcols(unlist(grl))[cumsum(lengths(grl)),colnames.to.promote, drop = FALSE]
+    promoted.df <- S4Vectors::mcols(unlist(grl))[cumsum(lengths(grl)), colnames.to.promote, drop = FALSE]
     if (delete_from_source) {
         S4Vectors::mcols(grl@unlistData) %<>%
             .[setdiff(names(.), colnames.to.promote)]
@@ -233,7 +239,9 @@ liftOverLax <- function(x, chain, ..., allow.gap = 0) {
     if (allow.gap > 0) {
         gapped <- which(lengths(newx) > 1)
         newx.gapped.reduced <- GenomicRanges::reduce(
-            newx[gapped], min.gapwidth = allow.gap + 1, with.revmap = TRUE)
+            newx[gapped],
+            min.gapwidth = allow.gap + 1, with.revmap = TRUE
+        )
         S4Vectors::mcols(newx.gapped.reduced@unlistData) <-
             rep(S4Vectors::mcols(x[gapped]), lengths(newx.gapped.reduced))
         newx[gapped] <- newx.gapped.reduced

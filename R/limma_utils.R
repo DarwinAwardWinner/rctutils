@@ -20,14 +20,14 @@
 #'
 #' @examples
 #'
-#' #TODO: Copy from removeBatchEffect
+#' # TODO: Copy from removeBatchEffect
 #'
 #' @export
 subtractCoefs <- function(x, design, coefsToSubtract, ...) {
     req_ns("limma")
     assert_that(!anyDuplicated(colnames(design)))
-    subtract.design <- design[,coefsToSubtract]
-    keep.design <- design[,setdiff(colnames(design), colnames(subtract.design))]
+    subtract.design <- design[, coefsToSubtract]
+    keep.design <- design[, setdiff(colnames(design), colnames(subtract.design))]
     limma::removeBatchEffect(x, design = keep.design, covariates = subtract.design, ...)
 }
 
@@ -60,100 +60,108 @@ subtractCoefs <- function(x, design, coefsToSubtract, ...) {
 #'
 #' @export
 voomWithOffset <-
-    function (counts, design = NULL, offset, normalize.method = "none",
-              span = 0.5, plot = FALSE, save.plot = FALSE, ...)
-{
-    ## TODO: Port over new save.plot option
+    function(counts, design = NULL, offset, normalize.method = "none",
+             span = 0.5, plot = FALSE, save.plot = FALSE, ...) {
+        ## TODO: Port over new save.plot option
 
 
-    ## TODO: Rewrite not to require a DGEList
-    req_ns("limma", "edgeR", "BiocGenerics", "Biobase")
-    out <- list()
-    if (is(counts, "DGEList")) {
-        out$genes <- counts$genes
-        out$targets <- counts$samples
-        if (is.null(design) && diff(range(as.numeric(counts$sample$group))) >
-            0)
-            design <- model.matrix(~group, data = counts$samples)
-        if (missing(offset)) {
-            offset <- edgeR::expandAsMatrix(edgeR::getOffset(counts), dim(counts))
+        ## TODO: Rewrite not to require a DGEList
+        req_ns("limma", "edgeR", "BiocGenerics", "Biobase")
+        out <- list()
+        if (is(counts, "DGEList")) {
+            out$genes <- counts$genes
+            out$targets <- counts$samples
+            if (is.null(design) && diff(range(as.numeric(counts$sample$group))) >
+                0) {
+                design <- model.matrix(~group, data = counts$samples)
+            }
+            if (missing(offset)) {
+                offset <- edgeR::expandAsMatrix(edgeR::getOffset(counts), dim(counts))
+            }
+            counts <- counts$counts
+        } else {
+            isExpressionSet <- suppressPackageStartupMessages(is(
+                counts,
+                "ExpressionSet"
+            ))
+            if (isExpressionSet) {
+                if (length(Biobase::fData(counts))) {
+                    out$genes <- Biobase::fData(counts)
+                }
+                if (length(Biobase::pData(counts))) {
+                    out$targets <- Biobase::pData(counts)
+                }
+                counts <- Biobase::exprs(counts)
+            } else {
+                counts <- as.matrix(counts)
+            }
         }
-        counts <- counts$counts
-    }
-    else {
-        isExpressionSet <- suppressPackageStartupMessages(is(counts,
-            "ExpressionSet"))
-        if (isExpressionSet) {
-            if (length(Biobase::fData(counts)))
-                out$genes <- Biobase::fData(counts)
-            if (length(Biobase::pData(counts)))
-                out$targets <- Biobase::pData(counts)
-            counts <- Biobase::exprs(counts)
+        n <- nrow(counts)
+        if (n < 2L) {
+            stop("Need at least two genes to fit a mean-variance trend")
         }
-        else {
-            counts <- as.matrix(counts)
+        if (is.null(design)) {
+            design <- matrix(1, ncol(counts), 1)
+            rownames(design) <- colnames(counts)
+            colnames(design) <- "GrandMean"
         }
-    }
-    n <- nrow(counts)
-    if (n < 2L)
-        stop("Need at least two genes to fit a mean-variance trend")
-    if (is.null(design)) {
-        design <- matrix(1, ncol(counts), 1)
-        rownames(design) <- colnames(counts)
-        colnames(design) <- "GrandMean"
-    }
 
-    effective.lib.size <- exp(offset)
+        effective.lib.size <- exp(offset)
 
-    y <- log2((counts + 0.5)/(effective.lib.size + 1) * 1e+06)
-    y <- limma::normalizeBetweenArrays(y, method = normalize.method)
-    fit <- limma::lmFit(y, design, ...)
-    if (is.null(fit$Amean))
-        fit$Amean <- BiocGenerics::rowMeans(y, na.rm = TRUE)
-    sx <- fit$Amean + mean(log2(effective.lib.size + 1)) - log2(1e+06)
-    sy <- sqrt(fit$sigma)
-    allzero <- rowSums(counts) == 0
-    if (any(allzero)) {
-        sx <- sx[!allzero]
-        sy <- sy[!allzero]
+        y <- log2((counts + 0.5) / (effective.lib.size + 1) * 1e+06)
+        y <- limma::normalizeBetweenArrays(y, method = normalize.method)
+        fit <- limma::lmFit(y, design, ...)
+        if (is.null(fit$Amean)) {
+            fit$Amean <- rowMeans(y, na.rm = TRUE)
+        }
+        sx <- fit$Amean + mean(log2(effective.lib.size + 1)) - log2(1e+06)
+        sy <- sqrt(fit$sigma)
+        allzero <- rowSums(counts) == 0
+        if (any(allzero)) {
+            sx <- sx[!allzero]
+            sy <- sy[!allzero]
+        }
+        l <- lowess(sx, sy, f = span)
+        if (plot) {
+            plot(sx, sy,
+                xlab = "log2( count size + 0.5 )", ylab = "Sqrt( standard deviation )",
+                pch = 16, cex = 0.25
+            )
+            title("voom: Mean-variance trend")
+            lines(l, col = "red")
+        }
+        f <- approxfun(l, rule = 2)
+        if (fit$rank < ncol(design)) {
+            j <- fit$pivot[1:fit$rank]
+            fitted.values <- fit$coef[, j, drop = FALSE] %*%
+                t(fit$design[, j, drop = FALSE])
+        } else {
+            fitted.values <- fit$coef %*% t(fit$design)
+        }
+        fitted.cpm <- 2^fitted.values
+        # fitted.count <- 1e-06 * t(t(fitted.cpm) * (lib.size + 1))
+        fitted.count <- 1e-06 * fitted.cpm * (effective.lib.size + 1)
+        fitted.logcount <- log2(fitted.count)
+        w <- 1 / f(fitted.logcount)^4
+        dim(w) <- dim(fitted.logcount)
+        out$E <- y
+        out$weights <- w
+        out$design <- design
+        out$effective.lib.size <- effective.lib.size
+        if (is.null(out$targets)) {
+            out$targets <- data.frame(lib.size = exp(colMeans(offset)))
+        } else {
+            out$targets$lib.size <- exp(colMeans(offset))
+        }
+        if (save.plot) {
+            out$voom.xy <- list(
+                x = sx, y = sy, xlab = "log2( count size + 0.5 )",
+                ylab = "Sqrt( standard deviation )"
+            )
+            out$voom.line <- l
+        }
+        new("EList", out)
     }
-    l <- lowess(sx, sy, f = span)
-    if (plot) {
-        plot(sx, sy, xlab = "log2( count size + 0.5 )", ylab = "Sqrt( standard deviation )",
-            pch = 16, cex = 0.25)
-        title("voom: Mean-variance trend")
-        lines(l, col = "red")
-    }
-    f <- approxfun(l, rule = 2)
-    if (fit$rank < ncol(design)) {
-        j <- fit$pivot[1:fit$rank]
-        fitted.values <- fit$coef[, j, drop = FALSE] %*%
-            t(fit$design[, j, drop = FALSE])
-    } else {
-        fitted.values <- fit$coef %*% t(fit$design)
-    }
-    fitted.cpm <- 2^fitted.values
-    # fitted.count <- 1e-06 * t(t(fitted.cpm) * (lib.size + 1))
-    fitted.count <- 1e-06 * fitted.cpm * (effective.lib.size + 1)
-    fitted.logcount <- log2(fitted.count)
-    w <- 1/f(fitted.logcount)^4
-    dim(w) <- dim(fitted.logcount)
-    out$E <- y
-    out$weights <- w
-    out$design <- design
-    out$effective.lib.size <- effective.lib.size
-    if (is.null(out$targets)) {
-        out$targets <- data.frame(lib.size = exp(BiocGenerics::colMeans(offset)))
-    } else {
-        out$targets$lib.size <- exp(BiocGenerics::colMeans(offset))
-    }
-    if (save.plot) {
-        out$voom.xy <- list(x = sx, y = sy, xlab = "log2( count size + 0.5 )",
-            ylab = "Sqrt( standard deviation )")
-        out$voom.line <- l
-    }
-    new("EList", out)
-}
 
 # TODO: Combine help text for all voom-related functions into one page
 
@@ -187,43 +195,52 @@ voomWithOffset <-
 #'
 #' @export
 voomWithQualityWeightsAndOffset <-
-    function (counts, design = NULL, offset, normalize.method = "none",
-              plot = FALSE, span = 0.5, var.design = NULL, method = "genebygene",
-              maxiter = 50, tol = 1e-10, trace = FALSE, replace.weights = TRUE,
-              col = NULL, ...)
-{
-    req_ns("limma", "edgeR", "BiocGenerics")
-    if (missing(offset) && is(counts, "DGEList")) {
-        offset <- edgeR::expandAsMatrix(edgeR::getOffset(counts), dim(counts))
+    function(counts, design = NULL, offset, normalize.method = "none",
+             plot = FALSE, span = 0.5, var.design = NULL, method = "genebygene",
+             maxiter = 50, tol = 1e-10, trace = FALSE, replace.weights = TRUE,
+             col = NULL, ...) {
+        req_ns("limma", "edgeR", "BiocGenerics")
+        if (missing(offset) && is(counts, "DGEList")) {
+            offset <- edgeR::expandAsMatrix(edgeR::getOffset(counts), dim(counts))
+        }
+        if (plot) {
+            oldpar <- par(mfrow = c(1, 2))
+            on.exit(par(oldpar))
+        }
+        v <- voomWithOffset(counts,
+            design = design, offset = offset, normalize.method = normalize.method,
+            plot = FALSE, span = span, ...
+        )
+        aw <- limma::arrayWeights(v,
+            design = design, method = method, maxiter = maxiter,
+            tol = tol, var.design = var.design
+        )
+        v <- voomWithOffset(counts,
+            design = design, weights = aw, offset = offset,
+            normalize.method = normalize.method, plot = plot, span = span,
+            ...
+        )
+        aw <- limma::arrayWeights(v,
+            design = design, method = method, maxiter = maxiter,
+            tol = tol, trace = trace, var.design = var.design
+        )
+        wts <- limma::asMatrixWeights(aw, dim(v)) * v$weights
+        attr(wts, "arrayweights") <- NULL
+        if (plot) {
+            barplot(aw,
+                names = 1:length(aw), main = "Sample-specific weights",
+                ylab = "Weight", xlab = "Sample", col = col
+            )
+            abline(h = 1, col = 2, lty = 2)
+        }
+        if (replace.weights) {
+            v$weights <- wts
+            v$sample.weights <- aw
+            return(v)
+        } else {
+            return(wts)
+        }
     }
-    if (plot) {
-        oldpar <- par(mfrow = c(1, 2))
-        on.exit(par(oldpar))
-    }
-    v <- voomWithOffset(counts, design = design, offset = offset, normalize.method = normalize.method,
-        plot = FALSE, span = span, ...)
-    aw <- limma::arrayWeights(v, design = design, method = method, maxiter = maxiter,
-        tol = tol, var.design = var.design)
-    v <- voomWithOffset(counts, design = design, weights = aw, offset = offset,
-        normalize.method = normalize.method, plot = plot, span = span,
-        ...)
-    aw <- limma::arrayWeights(v, design = design, method = method, maxiter = maxiter,
-        tol = tol, trace = trace, var.design = var.design)
-    wts <- limma::asMatrixWeights(aw, dim(v)) * v$weights
-    attr(wts, "arrayweights") <- NULL
-    if (plot) {
-        barplot(aw, names = 1:length(aw), main = "Sample-specific weights",
-            ylab = "Weight", xlab = "Sample", col = col)
-        abline(h = 1, col = 2, lty = 2)
-    }
-    if (replace.weights) {
-        v$weights <- wts
-        v$sample.weights <- aw
-        return(v)
-    } else {
-        return(wts)
-    }
-}
 
 #' Alternate `limma::duplicateCorrelation()` and `limma::voom()` until convergence
 #'
@@ -374,7 +391,7 @@ voomWithDuplicateCorrelation <- function(counts, design = NULL, plot = FALSE, bl
 #'
 #' @examples
 #'
-#' #TODO Steal from eBayes
+#' # TODO Steal from eBayes
 #'
 #' @export
 eBayes_auto_proportion <- function(..., prop.method = "lfdr") {
@@ -385,8 +402,8 @@ eBayes_auto_proportion <- function(..., prop.method = "lfdr") {
     } else {
         ptn <- limma::propTrueNull(eb$p.value, method = prop.method)
     }
-    assert_that(ptn > 0,ptn < 1)
-    limma::eBayes(..., proportion = 1-ptn)
+    assert_that(ptn > 0, ptn < 1)
+    limma::eBayes(..., proportion = 1 - ptn)
 }
 
 #' Get a table of MDS values, with proper column names.
@@ -410,7 +427,7 @@ eBayes_auto_proportion <- function(..., prop.method = "lfdr") {
 #' @export
 get_mds <- function(x, k, ...) {
     req_ns("limma")
-    dmat <- limma::plotMDS(x, ..., plot = FALSE)$distance.matrix %>% as.dist
+    dmat <- limma::plotMDS(x, ..., plot = FALSE)$distance.matrix %>% as.dist()
     max_k <- attr(dmat, "Size") - 1
     if (missing(k)) {
         k <- attr(dmat, "Size") - 1

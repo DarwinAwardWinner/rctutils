@@ -9,9 +9,10 @@ power_trans <- function(pow) {
     name <- glue("^{pow}")
     scales::trans_new(
         name,
-        transform = function(x) x ^ pow,
-        inverse = function(x) x ^ (1/pow),
-        domain = c(0,Inf))
+        transform = function(x) x^pow,
+        inverse = function(x) x^(1 / pow),
+        domain = c(0, Inf)
+    )
 }
 
 #' @importFrom glue glue
@@ -23,7 +24,8 @@ clamp_trans <- function(lower_threshold = 0, upper_threshold = 1) {
         name,
         transform = function(x) pmin(upper_threshold, pmax(lower_threshold, x)),
         # transform is only invertible for part of the range
-        inverse = identity)
+        inverse = identity
+    )
 }
 
 #' @export
@@ -34,13 +36,14 @@ neglog_trans <- function(base = exp(1)) {
     scales::trans_new(
         paste0("negativelog-", format(base)), trans, inv,
         scales::log_breaks(base = base),
-        domain = c(1e-100, Inf))
+        domain = c(1e-100, Inf)
+    )
 }
 
 #' @export
 discrete_gradient <- function(n) {
     req_ns("scales")
-    scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7")(seq(0,1, length.out = n))
+    scales::seq_gradient_pal(low = "#132B43", high = "#56B1F7")(seq(0, 1, length.out = n))
 }
 
 # Always returns a list of ggplot objects. Flattens nested lists,

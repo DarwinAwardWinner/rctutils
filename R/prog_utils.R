@@ -23,8 +23,6 @@ tsmsg <- function(...) {
 
 #' Assign into complex sub-expressions and return the whole object
 #'
-#' @noMd
-#'
 #' This function exists to facilitate assignment to parts of an object
 #' in the middle of a magrittr pipeline. Normally this is disruptive,
 #' since assignment returns the value that was assigned, rather than
@@ -60,23 +58,28 @@ tsmsg <- function(...) {
 #' # a pipeline. Imagine that x is a list of SummarizedExperiment
 #' # objects, and for some reason one of the values in one of the
 #' # assays in one of the objects is wrong and needs to be modified.
-#' x %>% assign_into(assays(.[[1]])$counts[3,5], 45) %>% ...
+#' x %>%
+#'     assign_into(assays(.[[1]])$counts[3, 5], 45) %>%
+#'     ...()
 #' }
 #'
 #' @seealso \code{\%\>\%} from the magrittr package.
 #'
 #' @export
+#' @noMd
 assign_into <- function(x, expr, value) {
     req_ns("lazyeval")
     ## Required because `f_interp` doesn't seem to like `::`
     uq <- lazyeval::uq
     expr <- lazyeval::lazy(expr)$expr
-    lazyeval::f_eval(lazyeval::f_interp(~( x %>% { uq(expr) <- uq(value); . })))
+    lazyeval::f_eval(lazyeval::f_interp(~ (x %>%
+        {
+            uq(expr) <- uq(value)
+            .
+        })))
 }
 
 #' Evaluate an arbitrary mutating expression in a magrittr pipe
-#'
-#' @noMd
 #'
 #' This function exists to facilitate assignment to parts of an object
 #' in the middle of a magrittr pipeline. Normally this is disruptive,
@@ -105,21 +108,31 @@ assign_into <- function(x, expr, value) {
 #'
 #' # Returns the entire list, not just a single element
 #' list(a = 1, b = 2, c = 3) %>%
-#'   dot_mutate(.$d <- 4) %>%
-#'   dot_mutate({ .$e <- 5; .$f <- 6})
+#'     dot_mutate(.$d <- 4) %>%
+#'     dot_mutate({
+#'         .$e <- 5
+#'         .$f <- 6
+#'     })
 #'
 #' # Compare:
 #' list(a = 1, b = 2, c = 3) %>%
-#'   {.$d <- 4} %>%
-#'   print
+#'     {
+#'         .$d <- 4
+#'     } %>%
+#'     print()
 #'
 #' @export
+#' @noMd
 dot_mutate <- function(x, expr) {
     req_ns("lazyeval")
     ## Required because `f_interp` doesn't seem to like `::`
     uq <- lazyeval::uq
     expr <- lazyeval::lazy(expr)$expr
-    lazyeval::f_eval(lazyeval::f_interp(~( x %>% { uq(expr); . })))
+    lazyeval::f_eval(lazyeval::f_interp(~ (x %>%
+        {
+            uq(expr)
+            .
+        })))
 }
 
 #' Evaluate an expression and then collect garbage.
@@ -143,11 +156,11 @@ dot_mutate <- function(x, expr) {
 #' @examples
 #'
 #' with_gc({
-#'   # Create a "large" object (this one is not actually large because
-#'   # examples need to be kept small)
-#'   large_object <- 1:5000
-#'   # Return only a small piece of the object.
-#'   large_object[5]
+#'     # Create a "large" object (this one is not actually large because
+#'     # examples need to be kept small)
+#'     large_object <- 1:5000
+#'     # Return only a small piece of the object.
+#'     large_object[5]
 #' })
 #' # large_object has now been garbage-collected
 #'
@@ -208,7 +221,7 @@ print_var_vector <- function(v) {
 #'
 #' library(future)
 #' library(rlang)
-#' expressions <- list(a = quo(1+1), b = quo(2+2))
+#' expressions <- list(a = quo(1 + 1), b = quo(2 + 2))
 #'
 #' flist <- make_futures_(expressions)
 #' flist
@@ -217,15 +230,22 @@ print_var_vector <- function(v) {
 #' # Same result without futures
 #' lapply(expressions, eval_tidy)
 #'
-#' @importFrom rlang eval_tidy quo as_quosure as_list
+#' @importFrom rlang eval_tidy quo as_quosures quo_get_expr
 #' @export
 make_futures_ <- function(expressions, .future.args = list()) {
-    .future.args <- as_list(.future.args)
-    if (! "lazy" %in% names(.future.args)) {
+    .future.args <- as.list(.future.args)
+    if (!"lazy" %in% names(.future.args)) {
         .future.args$lazy <- TRUE
     }
     req_ns("future")
-    lapply(expressions, . %>% as_quosure %>% {quo(future::future(!!., !!!.future.args))} %>% eval_tidy)
+    expr_quosures <- as_quosures(expressions)
+    lapply(expr_quosures, function(quosure) {
+        eval_tidy(quo(future::future(
+            expr = !!quo_get_expr(quosure),
+            envir = !!attr(quosure, ".Environment"),
+            !!!.future.args
+        )))
+    })
 }
 
 #' Construct futures for several expressions
@@ -242,7 +262,7 @@ make_futures_ <- function(expressions, .future.args = list()) {
 #' @examples
 #'
 #' library(future)
-#' flist <- make_futures(a = 1+1, b = 2+2)
+#' flist <- make_futures(a = 1 + 1, b = 2 + 2)
 #' flist
 #' value(flist)
 #'

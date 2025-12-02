@@ -20,45 +20,55 @@
 #'
 #' @export
 save_image_filtered <-
-    function (file = ".RData", version = NULL, ascii = FALSE,
-              compress = !ascii, safe = TRUE, exclude = NULL)
-{
-    if (!is.character(file) || file == "")
-        stop("'file' must be non-empty string")
-    opts <- getOption("save.image.defaults")
-    if (is.null(opts))
-        opts <- getOption("save.defaults")
-    if (missing(safe) && !is.null(opts$safe))
-        safe <- opts$safe
-    if (missing(ascii) && !is.null(opts$ascii))
-        ascii <- opts$ascii
-    if (missing(compress) && !is.null(opts$compress))
-        compress <- opts$compress
-    if (missing(version))
-        version <- opts$version
-    if (safe) {
-        outfile <- paste0(file, "Tmp")
-        i <- 0
-        while (file.exists(outfile)) {
-            i <- i + 1
-            outfile <- paste0(file, "Tmp", i)
+    function(file = ".RData", version = NULL, ascii = FALSE,
+             compress = !ascii, safe = TRUE, exclude = NULL) {
+        if (!is.character(file) || file == "") {
+            stop("'file' must be non-empty string")
         }
-    }
-    else outfile <- file
-    on.exit(file.remove(outfile))
-    vars.to.save <- setdiff(names(.GlobalEnv), exclude)
-    save(list = vars.to.save, file = outfile, version = version,
-         ascii = ascii, compress = compress, envir = .GlobalEnv,
-         precheck = FALSE)
-    if (safe) {
-        if (!file.rename(outfile, file)) {
-            on.exit()
-            stop(gettextf("image could not be renamed and is left in %s",
-                          outfile), domain = NA)
+        opts <- getOption("save.image.defaults")
+        if (is.null(opts)) {
+            opts <- getOption("save.defaults")
         }
+        if (missing(safe) && !is.null(opts$safe)) {
+            safe <- opts$safe
+        }
+        if (missing(ascii) && !is.null(opts$ascii)) {
+            ascii <- opts$ascii
+        }
+        if (missing(compress) && !is.null(opts$compress)) {
+            compress <- opts$compress
+        }
+        if (missing(version)) {
+            version <- opts$version
+        }
+        if (safe) {
+            outfile <- paste0(file, "Tmp")
+            i <- 0
+            while (file.exists(outfile)) {
+                i <- i + 1
+                outfile <- paste0(file, "Tmp", i)
+            }
+        } else {
+            outfile <- file
+        }
+        on.exit(file.remove(outfile))
+        vars.to.save <- setdiff(names(.GlobalEnv), exclude)
+        save(
+            list = vars.to.save, file = outfile, version = version,
+            ascii = ascii, compress = compress, envir = .GlobalEnv,
+            precheck = FALSE
+        )
+        if (safe) {
+            if (!file.rename(outfile, file)) {
+                on.exit()
+                stop(gettextf(
+                    "image could not be renamed and is left in %s",
+                    outfile
+                ), domain = NA)
+            }
+        }
+        on.exit()
     }
-    on.exit()
-}
 
 #' Load an R data file into a new environment
 #'
@@ -83,7 +93,7 @@ save_image_filtered <-
 #' y <- 3
 #' datafile <- tempfile(fileext = ".rda")
 #' save(file = datafile, list = c("x", "y"))
-#' rm(x,y)
+#' rm(x, y)
 #' loaded_vars <- load_in_new_env(datafile)
 #' as.list(loaded_vars)
 #'
@@ -192,11 +202,14 @@ read_single_object_from_rda <- function(filename) {
 #' @importFrom glue glue
 #' @export
 read_RDS_or_RDA <- function(filename, expected.class = "ANY") {
-    object <- suppressWarnings(tryCatch({
-        readRDS(filename)
-    }, error = function(...) {
-        read_single_object_from_rda(filename)
-    }))
+    object <- suppressWarnings(tryCatch(
+        {
+            readRDS(filename)
+        },
+        error = function(...) {
+            read_single_object_from_rda(filename)
+        }
+    ))
     if (is.function(expected.class)) {
         object <- do.call(expected.class, list(object))
     } else if (!is(object, expected.class)) {
@@ -204,7 +217,8 @@ read_RDS_or_RDA <- function(filename, expected.class = "ANY") {
         ## "[CLASS]").
         coerce_func <- tryCatch(
             get(glue("as.{expected.class}")),
-            error = function(...) . %>% as(expected.class))
+            error = function(...) . %>% as(expected.class)
+        )
         object <- coerce_func(object)
     }
     return(object)
@@ -251,7 +265,7 @@ save_RDS_or_RDA <- function(object, file, ascii = FALSE, version = NULL,
     savetype <- match_arg(savetype, choices = c("rda", "rds"))
     if (savetype == "rda") {
         save(list = "object", file = file, ascii = ascii, version = version, compress = compress)
-    } else{
+    } else {
         saveRDS(object = object, file = file, ascii = ascii, version = version, compress = compress)
     }
 }
