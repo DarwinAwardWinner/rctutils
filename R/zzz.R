@@ -7,6 +7,8 @@
 #' @param caller The name of the function this was called from. Only
 #'     used to create an appropriate error message.
 req_ns <- function(..., caller = as.character(sys.call(-1)[1])) {
+    # TODO use `rlang::is_installed("fs")` or `rlang::check_installed("fs")` to
+    # test if packages are installed.
     for (pkg in unlist(list(...))) {
         if (!requireNamespace(pkg, quietly = TRUE)) {
             if (length(caller) != 1 || is.na(caller)) {
