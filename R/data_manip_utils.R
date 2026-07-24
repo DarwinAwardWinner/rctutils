@@ -436,3 +436,35 @@ strip_design_factor_names <- function(design, prefixes = names(attr(design, "con
     }
     design
 }
+
+# Shortcut function for grouping by a set of variables and then finding
+# duplicates
+
+#' Find groups with more than 1 row in them.
+#'
+#' This function is meant for finding unexpected exceptions to uniqueness
+#' constraints on a set of columns.
+#'
+#' @param .data
+#' @param ... Specification of column-names, the combination of which is
+#'   expected to be unique. Specified as in [dplyr::group_by()].
+#'
+#' @returns The subset of the original data frame, filtered to only rows in
+#'   groups containing 2 or more rows, sorted by the grouping columns.
+#' @export
+#'
+#' @examples
+#' mydf <- data.frame(
+#'     unique_id = rep(letters[1:3], c(1, 1, 3)),
+#'     value = 1:5
+#' )
+#' # Uh-oh, this "unique" ID isn't unique
+#' print(mydf)
+#' # Find the ID values that aren't unique
+#' find_multi_value_groups(mydf, unique_id)
+find_multi_value_groups <- function(.data, ...) {
+    .data %>%
+        group_by(...) %>%
+        filter(n() > 1) %>%
+        arrange(...)
+}
