@@ -1,4 +1,3 @@
-# -*- mode: yaml; yaml-indent-offset: 4 -*-
 Package: rctutils
 Type: Package
 Title: Utility functions by Ryan C. Thompson
@@ -10,9 +9,6 @@ Depends: R (>= 3.5.0)
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-RoxygenNote: 7.3.3
-Roxygen: list(markdown = TRUE)
-# https: //github.com/r-lib/devtools/issues/700#issuecomment-235127291
 biocViews: ~
 Imports:
     assertthat,
@@ -23,7 +19,11 @@ Imports:
     withr,
     methods,
     ggplot2,
-    rlang
+    rlang,
+    graphics,
+    grDevices,
+    stats,
+    utils
 Suggests:
     roxygen2,
     codingMatrices,
@@ -56,3 +56,5 @@ Suggests:
     BiocParallel,
     codetools,
     DESeq2
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 8.0.0

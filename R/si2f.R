@@ -78,7 +78,6 @@ si2f <- function(string, unit = "") {
 
 # This is needed because sitools::f2si(0) is broken.
 
-#' @importFrom glue glue
 f2si_internal <- function(number, unit = "") {
     sifactor <- c(
         -Inf, 1e-24, 1e-21, 1e-18, 1e-15, 1e-12, 1e-09, 1e-06,

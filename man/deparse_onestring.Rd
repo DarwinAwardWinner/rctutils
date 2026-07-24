@@ -27,6 +27,6 @@ a single string, rather than a character vector of lines of text.
 x <- seq(100)[-50]
 length(deparse(x))
 length(deparse_onestring(x))
-identical(x, eval(parse(text=deparse_onestring(x))))
+identical(x, eval(parse(text = deparse_onestring(x))))
 
 }

@@ -43,5 +43,5 @@ an offset matrix can be produced from the effective gene lengths.
 
 }
 \seealso{
-\code{\link[edgeR:getCounts]{edgeR::getOffset()}}
+\code{\link[edgeR:getOffset]{edgeR::getOffset()}}
 }

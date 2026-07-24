@@ -199,7 +199,6 @@ read_single_object_from_rda <- function(filename) {
 #'
 #' @seealso [readRDS()], [read_single_object_from_rda()], [as()]
 #'
-#' @importFrom glue glue
 #' @export
 read_RDS_or_RDA <- function(filename, expected.class = "ANY") {
     object <- suppressWarnings(tryCatch(
@@ -228,7 +227,7 @@ read_RDS_or_RDA <- function(filename, expected.class = "ANY") {
 #'
 #' If the output file name ends in ".rda" or ".rdata" (with any
 #' capitalization), the file will be saved using [save()]. Otherwise,
-#' it will be saved using [saveRDS()].
+#' it will be saved using [base::saveRDS()].
 #'
 #' @param object R object to serialize.
 #' @param file A file name or connection object to save to.

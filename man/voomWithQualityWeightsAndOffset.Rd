@@ -49,5 +49,5 @@ This is a combination of \code{\link[limma:voomWithQualityWeights]{limma::voomWi
 
 }
 \seealso{
-\code{\link[edgeR:getCounts]{edgeR::getOffset()}}
+\code{\link[edgeR:getOffset]{edgeR::getOffset()}}
 }

@@ -36,7 +36,6 @@ is_valueless <- function(x, empty_values = NA) {
 #'
 #' # TODO: PCA example
 #'
-#' @importFrom glue glue
 #' @export
 add_numbered_colnames <- function(x, prefix = "C") {
     x %>% set_colnames(glue("{prefix}{num}", num = seq(from = 1, length.out = ncol(x))))
@@ -342,7 +341,6 @@ quotemeta <- function(string) {
 #' x2 <- relevel_columns(x, a = c("b", "a"), b = list("B", "A", after = 2))
 #' sapply(x2, levels)
 #'
-#' @importFrom rlang is_named
 #' @export
 relevel_columns <- function(df, ...) {
     req_ns("forcats", "rlang")

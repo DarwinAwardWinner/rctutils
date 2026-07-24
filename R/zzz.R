@@ -36,14 +36,10 @@ globalVariables(c("one_or_more", "space", "zero_or_more", "capture", "maybe", "d
 #' individual function that uses these common functions is too
 #' tedious, so I've just added them all here.
 #'
-#' @importFrom grDevices cairo_pdf dev.cur dev.list dev.off dev.set png
-#' @importFrom graphics abline barplot lines par title
-#' @importFrom methods as is new
-#' @importFrom stats approx approxfun as.dist as.formula cmdscale end lowess model.matrix na.omit start
-#' @importFrom utils read.csv read.table write.table
+#' TODO Convert these to import_from if possible. Also eliminate magrittr?
+#'
 #' @import magrittr
 #' @import dplyr
 #' @import stringr
 #' @import ggplot2
-#' @importFrom assertthat assert_that
 "_PACKAGE"

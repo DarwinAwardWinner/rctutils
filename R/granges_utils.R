@@ -182,7 +182,8 @@ get_gene_common_colnames <- function(df, geneids) {
 #' @examples
 #'
 #' library(GenomicRanges)
-#' gr <- GRanges("chr1", IRanges(start = (1:10) * 100, width = 50),
+#' gr <- GRanges(
+#'     "chr1", IRanges(start = (1:10) * 100, width = 50),
 #'     GeneID = rep(c("geneA", "geneB"), each = 5),
 #'     GeneName = rep(c("Gene A", "Gene B"), each = 5),
 #'     ExonID = rep(1:5, 2)

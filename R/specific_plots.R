@@ -13,8 +13,6 @@
 #'     hypotheses, which should be a single number between 0 and 1.
 #' @return a ggplot object
 #'
-#' @importFrom rlang is_scalar_double
-#' @importFrom glue glue
 #' @export
 plot_pval_hist <- function(pvals, nbins = 100, ptn = limma::propTrueNull) {
     req_ns("limma")

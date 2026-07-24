@@ -10,7 +10,6 @@
 #' @param onefile,... All arguments are passed to
 #'     [grDevices::cairo_pdf()].
 #'
-#' @importFrom grDevices cairo_pdf
 #' @export
 cairo_pdf_onefile <- function(..., onefile = TRUE) {
     cairo_pdf(..., onefile = onefile)
@@ -39,7 +38,6 @@ rasterpdf <- function(pdffile, outfile = pdffile, resolution = 600) {
 
 ## Returns TRUE if x refers to the device number of a currently active
 ## graphics device.
-#' @importFrom rlang is_scalar_integer
 #' @export
 is_dev <- function(x) {
     is_scalar_integer(x) && x %in% dev.list()

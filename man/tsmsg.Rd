@@ -9,7 +9,7 @@ tsmsg(...)
 \arguments{
 \item{...}{All arguments are passed directly to \code{message}.
 
-The time stamp is generated using \code{\link[=date]{date()}}. If you need anything
+The time stamp is generated using \code{\link[base:date]{base::date()}}. If you need anything
 more complicated than this, it's probably easier to abondon this
 function and just use \code{date()} and \code{message()} to manually add the
 timestamp in the format you want.}
@@ -24,5 +24,5 @@ tsmsg("Hello world")
 
 }
 \seealso{
-\code{\link[=message]{message()}}, \code{\link[=date]{date()}}
+\code{\link[=message]{message()}}, \code{\link[base:date]{base::date()}}
 }

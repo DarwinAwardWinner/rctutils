@@ -2,7 +2,6 @@
 
 # Utilities for ggplot2 corrdinate transformation
 
-#' @importFrom glue glue
 #' @export
 power_trans <- function(pow) {
     req_ns("scales")
@@ -15,7 +14,6 @@ power_trans <- function(pow) {
     )
 }
 
-#' @importFrom glue glue
 #' @export
 clamp_trans <- function(lower_threshold = 0, upper_threshold = 1) {
     req_ns("scales")

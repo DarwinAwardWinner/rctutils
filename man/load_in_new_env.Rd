@@ -34,7 +34,7 @@ x <- 5
 y <- 3
 datafile <- tempfile(fileext = ".rda")
 save(file = datafile, list = c("x", "y"))
-rm(x,y)
+rm(x, y)
 loaded_vars <- load_in_new_env(datafile)
 as.list(loaded_vars)
 

@@ -5,7 +5,7 @@
 #'
 #' @param ... All arguments are passed directly to `message`.
 #'
-#' The time stamp is generated using [date()]. If you need anything
+#' The time stamp is generated using [base::date()]. If you need anything
 #' more complicated than this, it's probably easier to abondon this
 #' function and just use `date()` and `message()` to manually add the
 #' timestamp in the format you want.
@@ -14,7 +14,7 @@
 #'
 #' tsmsg("Hello world")
 #'
-#' @seealso [message()], [date()]
+#' @seealso [message()], [base::date()]
 #'
 #' @export
 tsmsg <- function(...) {
@@ -187,7 +187,6 @@ with_gc <- function(expr, ...) {
 #' x <- list(verbose = TRUE, infile = "a.txt", outfile = "b.txt", ncores = 8)
 #' print_var_vector(x)
 #'
-#' @importFrom rlang is_named
 #' @export
 print_var_vector <- function(v) {
     assert_that(is_named(v))
@@ -230,7 +229,6 @@ print_var_vector <- function(v) {
 #' # Same result without futures
 #' lapply(expressions, eval_tidy)
 #'
-#' @importFrom rlang eval_tidy quo as_quosures quo_get_expr
 #' @export
 make_futures_ <- function(expressions, .future.args = list()) {
     .future.args <- as.list(.future.args)
@@ -266,7 +264,6 @@ make_futures_ <- function(expressions, .future.args = list()) {
 #' flist
 #' value(flist)
 #'
-#' @importFrom rlang enquos
 #' @export
 make_futures <- function(..., .future.args = list()) {
     make_futures_(enquos(...), .future.args)

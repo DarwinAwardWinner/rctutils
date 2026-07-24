@@ -56,7 +56,6 @@ deparse_onestring <- function(...) {
 #' match_arg(color, choices, ignore.case = TRUE)
 #' try(match_arg(color, choices))
 #'
-#' @importFrom glue glue
 #' @export
 match_arg <- function(arg, choices, several.ok = FALSE, arg_name = substitute(arg), ignore.case = FALSE) {
     if (missing(choices)) {

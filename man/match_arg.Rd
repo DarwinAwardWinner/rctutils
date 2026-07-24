@@ -19,8 +19,10 @@ match_arg(
 \item{choices}{a character vector of candidate values, often missing, see
     \sQuote{Details}.}
 
-\item{several.ok}{logical specifying if \code{arg} should be allowed
-    to have more than one element.}
+\item{several.ok}{either a \code{\link[base]{logical}} specifying if \code{arg}
+    should be allowed to have more than one element or a string, starting
+    with \code{"all"} meaning that \code{arg} may have more than one
+    element \emph{all} of which must match \code{choices}.}
 
 \item{arg_name}{The name of the argument. Normally you do not need
 to specify this yourself, as it is detected automatically.

@@ -23,7 +23,7 @@ voomWithDuplicateCorrelation(
 \item{counts, design, plot, ...}{These are passed to \code{\link[limma:voom]{limma::voom()}}.}
 
 \item{block, trim}{These are passed to
-\code{\link[limma:dupcor]{limma::duplicateCorrelation()}}.}
+\code{\link[limma:duplicateCorrelation]{limma::duplicateCorrelation()}}.}
 
 \item{voom.fun}{Function to use in place of \code{limma::voom()}. For
 example, you could use \code{limma::voomWithQualityWeights}.
@@ -73,7 +73,7 @@ run, so it seems stable in practice.
 }
 \description{
 This function runs \code{\link[limma:voom]{limma::voom()}} and
-\code{\link[limma:dupcor]{limma::duplicateCorrelation()}} repeatedly until two consecutive
+\code{\link[limma:duplicateCorrelation]{limma::duplicateCorrelation()}} repeatedly until two consecutive
 runs yield the same correlation value (within \code{tol} of each other),
 indicating that the iteration has converged.
 }
