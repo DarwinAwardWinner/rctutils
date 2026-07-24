@@ -445,7 +445,7 @@ strip_design_factor_names <- function(design, prefixes = names(attr(design, "con
 #' This function is meant for finding unexpected exceptions to uniqueness
 #' constraints on a set of columns.
 #'
-#' @param .data
+#' @param .data A data frame.
 #' @param ... Specification of column-names, the combination of which is
 #'   expected to be unique. Specified as in [dplyr::group_by()].
 #'

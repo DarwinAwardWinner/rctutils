@@ -7,6 +7,8 @@
 find_multi_value_groups(.data, ...)
 }
 \arguments{
+\item{.data}{A data frame.}
+
 \item{...}{Specification of column-names, the combination of which is
 expected to be unique. Specified as in \code{\link[dplyr:group_by]{dplyr::group_by()}}.}
 }
