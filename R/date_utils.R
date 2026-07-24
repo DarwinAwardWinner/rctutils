@@ -4,8 +4,11 @@
 
 #' Convert all-midnight POSIXt to Date
 #'
-#' Dates in databases are often stored as date-time objects with all the time
-#' values set to midnight (i.e. 00:00:00.0).
+#' Dates in databases are often stored as date-time objects (POSIXt in R
+#' parlance) with all the time values set to midnight (i.e. 00:00:00.0). This
+#' function detects this case and converts them back to just Dates. Date-time
+#' objects containing at least one non-midnight time are assumed to be genuine
+#' date-times and are returned unmodified.
 #'
 #' @param x A POSIXt vector.
 #' @param force If TRUE, then forcibly convert `x` to a Date even if its times
@@ -13,8 +16,8 @@
 #'   check, so it mayu be useful if you already know that all times are
 #'   midnight.
 #' @param eps_seconds "Fudge factor" for detecting midnight. As long as every
-#'   date-time is within this many seconds of midnight, it is considered
-#'   equivalent to midnight.
+#'   date-time is no more than this many seconds after midnight, it is
+#'   considered equivalent to midnight.
 #'
 #' @returns Either a Date vector if the vector was converted, or the original
 #'   vector if not.
@@ -47,10 +50,15 @@ datetime_to_date <- function(x, force = FALSE, eps_seconds = 1) {
             # We're not going to try to round 23:59:59 to the next day's
             # midnight, because that would change the date. So technically this
             # is "seconds after midnight".
+            x_non_missing <- na.omit(x)
+            if (length(x_non_missing) == 0) {
+                warning("Empty POSIXt object")
+                return(x)
+            }
             secs_from_midnight <-
-                lubridate::hour(x) * 3600 +
-                lubridate::minute(x) * 60 +
-                lubridate::second(x)
+                lubridate::hour(x_non_missing) * 3600 +
+                lubridate::minute(x_non_missing) * 60 +
+                lubridate::second(x_non_missing)
             if (max(secs_from_midnight, na.rm = TRUE) <= eps_seconds) {
                 return(as.Date(x))
             } else {

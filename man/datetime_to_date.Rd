@@ -15,16 +15,19 @@ check, so it mayu be useful if you already know that all times are
 midnight.}
 
 \item{eps_seconds}{"Fudge factor" for detecting midnight. As long as every
-date-time is within this many seconds of midnight, it is considered
-equivalent to midnight.}
+date-time is no more than this many seconds after midnight, it is
+considered equivalent to midnight.}
 }
 \value{
 Either a Date vector if the vector was converted, or the original
 vector if not.
 }
 \description{
-Dates in databases are often stored as date-time objects with all the time
-values set to midnight (i.e. 00:00:00.0).
+Dates in databases are often stored as date-time objects (POSIXt in R
+parlance) with all the time values set to midnight (i.e. 00:00:00.0). This
+function detects this case and converts them back to just Dates. Date-time
+objects containing at least one non-midnight time are assumed to be genuine
+date-times and are returned unmodified.
 }
 \examples{
 library(lubridate)
